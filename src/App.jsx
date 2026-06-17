@@ -84,14 +84,13 @@ const translations = {
     languageLabel: 'RU',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey: подписки на нейросервисы',
-    hero: `Выберите товар и подайте заявку на покупку. Для оформления напишите @${sellerUsername}.`,
+    hero: 'Выберите товар и подайте заявку на покупку.',
     selectPlan: 'Выбрать тариф',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     orderTitle: 'Ваш заказ',
     name: 'Имя',
     namePlaceholder: 'Как к вам обращаться',
     telegramPlaceholder: '@username или ссылка',
-    orderHint: `Для заказа напишите продавцу: @${sellerUsername}.`,
     buyButton: 'Подать заявку на покупку',
     hint: `Для покупки отпишите продавцу: @${sellerUsername}.`,
     success: 'Заявка отправлена. В течение 5 минут с вами свяжется менеджер, ожидайте.',
@@ -119,14 +118,13 @@ const translations = {
     languageLabel: 'EN',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey: AI service subscriptions',
-    hero: `Choose a product and submit a purchase request. To order, message @${sellerUsername}.`,
+    hero: 'Choose a product and submit a purchase request.',
     selectPlan: 'Select plan',
     guarantee: 'Full guarantee and replacement if any issues arise.',
     orderTitle: 'Your order',
     name: 'Name',
     namePlaceholder: 'How should we call you',
     telegramPlaceholder: '@username or link',
-    orderHint: `To order, message the seller: @${sellerUsername}.`,
     buyButton: 'Submit purchase request',
     hint: `To buy, message the seller: @${sellerUsername}.`,
     success: 'Request sent. A manager will contact you within 5 minutes, please wait.',
@@ -154,14 +152,13 @@ const translations = {
     languageLabel: '中文',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey：AI 服务订阅',
-    hero: `选择商品并提交购买申请。下单请联系 @${sellerUsername}。`,
+    hero: '选择商品并提交购买申请。',
     selectPlan: '选择套餐',
     guarantee: '提供完整保障，如遇问题可更换商品。',
     orderTitle: '你的订单',
     name: '姓名',
     namePlaceholder: '如何称呼你',
     telegramPlaceholder: '@用户名或链接',
-    orderHint: `下单请联系卖家：@${sellerUsername}。`,
     buyButton: '提交购买申请',
     hint: `购买请联系卖家：@${sellerUsername}。`,
     success: '申请已提交。经理将在 5 分钟内联系你，请稍候。',
@@ -276,9 +273,6 @@ function OrderForm({ product, customer, onChange, onPay, text, actionRef }) {
         {text.buyButton}
       </button>
 
-      <p className="hint">
-        {text.orderHint}
-      </p>
     </section>
   )
 }
