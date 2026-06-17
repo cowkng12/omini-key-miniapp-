@@ -1,8 +1,11 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Markup, Telegraf } from 'telegraf'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
 const port = Number(process.env.PORT || 3001)
 const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
@@ -72,6 +75,12 @@ app.post('/api/orders', async (request, response) => {
   }
 
   response.status(201).json({ order })
+})
+
+app.use(express.static(path.join(__dirname, 'dist')))
+
+app.get(/.*/, (request, response) => {
+  response.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
 let bot = null
