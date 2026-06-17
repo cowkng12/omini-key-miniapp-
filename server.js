@@ -16,8 +16,14 @@ const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 const products = {
   'claude-pro': { title: 'Claude Pro', price: 12 },
   'claude-max': { title: 'Claude Max', price: 75 },
+  'perplexity-pro': { title: 'Perplexity Pro', price: 12 },
   'cursor-pro': { title: 'Cursor Pro', price: 10 },
   'cursor-ultra': { title: 'Cursor Ultra', price: 24 },
+  'midjourney-basic': { title: 'Midjourney Basic', price: 10 },
+  'runway-standard': { title: 'Runway Standard', price: 15 },
+  'elevenlabs-starter': { title: 'ElevenLabs Starter', price: 5 },
+  'notion-ai': { title: 'Notion AI Plus', price: 10 },
+  'poe-subscription': { title: 'Poe Subscription', price: 20 },
 }
 
 const orders = []
@@ -95,7 +101,7 @@ if (botToken) {
 
   bot.start(async (context) => {
     await context.reply(
-      'Магазин Claude и Cursor готов. Открой mini app и выбери тариф.',
+      'Магазин OmniKey готов. Открой mini app и выбери подписку.',
       keyboard,
     )
   })

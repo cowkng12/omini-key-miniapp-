@@ -19,6 +19,14 @@ const products = [
     badge: 'Премиум',
   },
   {
+    id: 'perplexity-pro',
+    brand: 'Perplexity',
+    plan: 'Pro',
+    price: 12,
+    description: 'Поиск, ресерч и быстрые ответы с источниками.',
+    badge: 'Ресерч',
+  },
+  {
     id: 'cursor-pro',
     brand: 'Cursor',
     plan: 'Pro',
@@ -33,6 +41,46 @@ const products = [
     price: 24,
     description: 'Расширенный вариант для тех, кому нужен запас по лимитам.',
     badge: 'Расширенный',
+  },
+  {
+    id: 'midjourney-basic',
+    brand: 'Midjourney',
+    plan: 'Basic',
+    price: 10,
+    description: 'Генерация изображений для контента, дизайна и идей.',
+    badge: 'Креатив',
+  },
+  {
+    id: 'runway-standard',
+    brand: 'Runway',
+    plan: 'Standard',
+    price: 15,
+    description: 'AI-видео, монтаж и генерация коротких роликов.',
+    badge: 'Видео',
+  },
+  {
+    id: 'elevenlabs-starter',
+    brand: 'ElevenLabs',
+    plan: 'Starter',
+    price: 5,
+    description: 'Озвучка, голоса и генерация речи для проектов.',
+    badge: 'Голос',
+  },
+  {
+    id: 'notion-ai',
+    brand: 'Notion AI',
+    plan: 'Plus',
+    price: 10,
+    description: 'AI-помощник для заметок, документов и рабочих баз.',
+    badge: 'Работа',
+  },
+  {
+    id: 'poe-subscription',
+    brand: 'Poe',
+    plan: 'Subscription',
+    price: 20,
+    description: 'Доступ к разным AI-моделям в одном интерфейсе.',
+    badge: 'Мульти AI',
   },
 ]
 
@@ -188,9 +236,9 @@ function App() {
     <main className="page-shell">
       <section className="hero-block">
         <p className="eyebrow">Telegram Mini App</p>
-        <h1>Claude и Cursor в одном storefront</h1>
+        <h1>OmniKey: подписки на нейросервисы</h1>
         <p className="hero-copy">
-          MVP-витрина для продаж внутри Telegram: выбираешь тариф, оставляешь контакт и пишешь продавцу для покупки.
+          Выбирайте нужный AI-сервис, оставляйте контакт и пишите продавцу @{sellerUsername} для покупки.
         </p>
       </section>
 
