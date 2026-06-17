@@ -153,6 +153,13 @@
   line-height: 1;
 }
 
+.product-promo {
+  margin: 8px 0 10px;
+  color: #8ec5ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .product-description {
   margin: 12px 0 16px;
   color: #aab1cf;

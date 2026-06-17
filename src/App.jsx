@@ -87,6 +87,10 @@ const translations = {
     hero: 'Выберите товар и подайте заявку на покупку.',
     selectPlan: 'Выбрать тариф',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
+    promos: {
+      'claude-pro': 'Акция: 2 аккаунта — $18',
+      'cursor-pro': 'Акция: 2 аккаунта — $18',
+    },
     orderTitle: 'Ваш заказ',
     name: 'Имя',
     namePlaceholder: 'Как к вам обращаться',
@@ -121,6 +125,10 @@ const translations = {
     hero: 'Choose a product and submit a purchase request.',
     selectPlan: 'Select plan',
     guarantee: 'Full guarantee and replacement if any issues arise.',
+    promos: {
+      'claude-pro': 'Deal: 2 accounts — $18',
+      'cursor-pro': 'Deal: 2 accounts — $18',
+    },
     orderTitle: 'Your order',
     name: 'Name',
     namePlaceholder: 'How should we call you',
@@ -155,6 +163,10 @@ const translations = {
     hero: '选择商品并提交购买申请。',
     selectPlan: '选择套餐',
     guarantee: '提供完整保障，如遇问题可更换商品。',
+    promos: {
+      'claude-pro': '活动：2 个账号 — $18',
+      'cursor-pro': '活动：2 个账号 — $18',
+    },
     orderTitle: '你的订单',
     name: '姓名',
     namePlaceholder: '如何称呼你',
@@ -220,6 +232,7 @@ function currentTelegramUser() {
 
 function ProductCard({ product, onSelect, active, text, selectPlan }) {
   const [badge, description] = text.productText[product.id]
+  const promo = text.promos?.[product.id]
 
   return (
     <button
@@ -233,6 +246,7 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
         <span className="product-plan">{product.plan}</span>
       </div>
       <strong className="product-price">{formatPrice(product.price)}</strong>
+      {promo ? <p className="product-promo">{promo}</p> : null}
       <p className="product-description">{description}</p>
       <p className="product-guarantee">{text.guarantee}</p>
       <span className="product-action">{selectPlan}</span>
