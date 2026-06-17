@@ -1,7 +1,24 @@
 .page-shell {
+  position: relative;
   max-width: 1380px;
   margin: 0 auto;
   padding: 24px 18px 36px;
+}
+
+.language-toggle {
+  position: fixed;
+  top: 86px;
+  right: 18px;
+  z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(13, 18, 36, 0.88);
+  color: #dce4ff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
 }
 
 .hero-block {
@@ -216,6 +233,11 @@
 @media (max-width: 640px) {
   .page-shell {
     padding: 20px 14px 32px;
+  }
+
+  .language-toggle {
+    top: 84px;
+    right: 12px;
   }
 
   .catalog-grid {

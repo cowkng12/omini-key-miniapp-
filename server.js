@@ -95,8 +95,10 @@ if (botToken) {
   bot = new Telegraf(botToken)
 
   const keyboard = Markup.inlineKeyboard([
-    [Markup.button.webApp('Открыть магазин', webAppUrl)],
-    [Markup.button.url('Написать продавцу', sellerUrl)],
+    [Markup.button.webApp('Открыть магазин 🛒', webAppUrl)],
+    [Markup.button.callback('Поддержка 🛟', 'support'), Markup.button.callback('Руководство 📘', 'guide')],
+    [Markup.button.callback('Мои покупки 🧾', 'orders')],
+    [Markup.button.callback('Русский 🇷🇺', 'lang_ru'), Markup.button.callback('English 🇬🇧', 'lang_en'), Markup.button.callback('中文 🇨🇳', 'lang_zh')],
   ])
 
   bot.start(async (context) => {
@@ -108,6 +110,36 @@ if (botToken) {
 
   bot.command('shop', async (context) => {
     await context.reply('Открываю магазин.', keyboard)
+  })
+
+  bot.action('support', async (context) => {
+    await context.answerCbQuery()
+    await context.reply(`Поддержка: напишите продавцу ${sellerUrl.replace('https://t.me/', '@')}`)
+  })
+
+  bot.action('guide', async (context) => {
+    await context.answerCbQuery()
+    await context.reply([
+      'Как купить подписку:',
+      '1. Нажмите "Открыть магазин 🛒".',
+      '2. Выберите нужный AI-сервис и тариф.',
+      '3. Оставьте имя и контакт для связи.',
+      '4. Нажмите "Написать для покупки".',
+      '5. Напишите продавцу и завершите оплату.',
+    ].join('\n'))
+  })
+
+  bot.action('orders', async (context) => {
+    await context.answerCbQuery()
+    await context.reply('Раздел "Мои покупки" скоро появится. Пока по заказам пишите в поддержку.')
+  })
+
+  bot.action(/lang_(ru|en|zh)/, async (context) => {
+    const labels = { ru: 'Русский', en: 'English', zh: '中文' }
+    const language = context.match[1]
+
+    await context.answerCbQuery(`Язык: ${labels[language]}`)
+    await context.reply(`Язык бота выбран: ${labels[language]}. В mini app язык переключается кнопкой справа сверху.`)
   })
 
   bot.launch()
