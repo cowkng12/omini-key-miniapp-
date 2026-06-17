@@ -4,60 +4,70 @@ import './App.css'
 const products = [
   {
     id: 'claude-pro',
+    group: 'Claude',
     brand: 'Claude',
     plan: 'Pro',
     price: 12,
   },
   {
     id: 'claude-max',
+    group: 'Claude',
     brand: 'Claude',
     plan: 'Max',
     price: 75,
   },
   {
     id: 'perplexity-pro',
+    group: 'Perplexity',
     brand: 'Perplexity',
     plan: 'Pro',
     price: 12,
   },
   {
     id: 'cursor-pro',
+    group: 'Cursor',
     brand: 'Cursor',
     plan: 'Pro',
     price: 10,
   },
   {
     id: 'cursor-ultra',
+    group: 'Cursor',
     brand: 'Cursor',
     plan: 'Ultra',
     price: 24,
   },
   {
     id: 'midjourney-basic',
+    group: 'Midjourney',
     brand: 'Midjourney',
     plan: 'Basic',
     price: 10,
   },
   {
     id: 'runway-standard',
+    group: 'Runway',
     brand: 'Runway',
     plan: 'Standard',
     price: 15,
   },
   {
     id: 'elevenlabs-starter',
+    group: 'ElevenLabs',
     brand: 'ElevenLabs',
     plan: 'Starter',
     price: 5,
   },
   {
     id: 'notion-ai',
+    group: 'Notion AI',
     brand: 'Notion AI',
     plan: 'Plus',
     price: 10,
   },
   {
     id: 'poe-subscription',
+    group: 'Poe',
     brand: 'Poe',
     plan: 'Subscription',
     price: 20,
@@ -67,6 +77,7 @@ const products = [
 const defaultApiBase = 'http://localhost:3001'
 const sellerUsername = 'metifrysell'
 const languages = ['ru', 'en', 'zh']
+const productGroups = ['Все', 'Claude', 'Cursor', 'Perplexity', 'Midjourney', 'Runway', 'ElevenLabs', 'Notion AI', 'Poe']
 
 const translations = {
   ru: {
@@ -82,9 +93,15 @@ const translations = {
     contact: 'Контакт',
     contactPlaceholder: 'Telegram, WhatsApp или номер',
     buyButton: 'Написать для покупки',
-    hint: `Для покупки напишите продавцу: @${sellerUsername}.`,
+    hint: `Для покупки отпишите продавцу: @${sellerUsername}.`,
     success: `Заявка отправлена. Для покупки напишите @${sellerUsername}.`,
     error: 'Не удалось отправить заявку. Проверь backend и попробуй снова.',
+    allGroup: 'Все',
+    tabs: { catalog: 'Каталог', orders: 'Заказы', balance: 'Баланс' },
+    ordersTitle: 'Мои покупки',
+    ordersText: 'История покупок скоро появится. По текущим заказам пишите продавцу.',
+    balanceTitle: 'Баланс',
+    balanceText: 'Баланс и бонусы появятся в следующем обновлении.',
     productText: {
       'claude-pro': ['Хит старта', 'Быстрый старт для повседневной работы, учебы и текста.'],
       'claude-max': ['Премиум', 'Максимальный тариф для активной ежедневной нагрузки.'],
@@ -114,6 +131,12 @@ const translations = {
     hint: `To buy, message the seller: @${sellerUsername}.`,
     success: `Request sent. To buy, message @${sellerUsername}.`,
     error: 'Could not send the request. Check backend and try again.',
+    allGroup: 'All',
+    tabs: { catalog: 'Catalog', orders: 'Orders', balance: 'Balance' },
+    ordersTitle: 'My purchases',
+    ordersText: 'Purchase history is coming soon. For current orders, message the seller.',
+    balanceTitle: 'Balance',
+    balanceText: 'Balance and bonuses will appear in the next update.',
     productText: {
       'claude-pro': ['Starter hit', 'Fast start for daily work, study and writing.'],
       'claude-max': ['Premium', 'Maximum plan for heavy daily usage.'],
@@ -143,6 +166,12 @@ const translations = {
     hint: `购买请联系卖家：@${sellerUsername}。`,
     success: `请求已发送。购买请联系 @${sellerUsername}。`,
     error: '请求发送失败。请检查后端并重试。',
+    allGroup: '全部',
+    tabs: { catalog: '目录', orders: '订单', balance: '余额' },
+    ordersTitle: '我的购买',
+    ordersText: '购买记录即将上线。如需查询当前订单，请联系卖家。',
+    balanceTitle: '余额',
+    balanceText: '余额和奖励将在下一次更新中上线。',
     productText: {
       'claude-pro': ['入门热门', '适合日常工作、学习和写作的快速入门。'],
       'claude-max': ['高级', '适合高频日常使用的最高套餐。'],
@@ -272,7 +301,12 @@ function App() {
   })
   const [statusText, setStatusText] = useState('')
   const [language, setLanguage] = useState('ru')
+  const [activeTab, setActiveTab] = useState('catalog')
+  const [activeGroup, setActiveGroup] = useState('Все')
   const text = translations[language]
+  const visibleProducts = activeGroup === 'Все'
+    ? products
+    : products.filter((product) => product.group === activeGroup)
 
   const handleChange = (field, value) => {
     setCustomer((current) => ({ ...current, [field]: value }))
@@ -323,30 +357,66 @@ function App() {
         <p className="hero-copy">{text.hero}</p>
       </section>
 
-      <section className="catalog-layout">
-        <div className="catalog-grid">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onSelect={setSelectedProduct}
-              active={selectedProduct.id === product.id}
-              text={text}
-              selectPlan={text.selectPlan}
-            />
-          ))}
-        </div>
+      {activeTab === 'catalog' ? (
+        <>
+          <nav className="group-tabs" aria-label="AI service groups">
+            {productGroups.map((group) => (
+              <button
+                key={group}
+                type="button"
+                className={`group-tab${activeGroup === group ? ' active' : ''}`}
+                onClick={() => setActiveGroup(group)}
+              >
+                {group === 'Все' ? text.allGroup : group}
+              </button>
+            ))}
+          </nav>
 
-        <OrderForm
-          product={selectedProduct}
-          customer={customer}
-          onChange={handleChange}
-          onPay={handlePay}
-          text={text}
-        />
-      </section>
+          <section className="catalog-layout">
+            <div className="catalog-grid">
+              {visibleProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onSelect={setSelectedProduct}
+                  active={selectedProduct.id === product.id}
+                  text={text}
+                  selectPlan={text.selectPlan}
+                />
+              ))}
+            </div>
+
+            <OrderForm
+              product={selectedProduct}
+              customer={customer}
+              onChange={handleChange}
+              onPay={handlePay}
+              text={text}
+            />
+          </section>
+        </>
+      ) : (
+        <section className="empty-panel">
+          <p className="eyebrow">OmniKey</p>
+          <h2>{activeTab === 'orders' ? text.ordersTitle : text.balanceTitle}</h2>
+          <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
+        </section>
+      )}
 
       {statusText ? <p className="status-banner">{statusText}</p> : null}
+
+      <nav className="bottom-tabs" aria-label="Mini app tabs">
+        {Object.entries(text.tabs).map(([tab, label]) => (
+          <button
+            key={tab}
+            type="button"
+            className={activeTab === tab ? 'active' : ''}
+            onClick={() => setActiveTab(tab)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
     </main>
   )
 }
