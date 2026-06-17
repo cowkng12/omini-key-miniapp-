@@ -11,7 +11,7 @@ const port = Number(process.env.PORT || 3001)
 const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
 const adminChatId = process.env.ADMIN_CHAT_ID?.trim()
 const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
-const sendPaymentUrl = process.env.SEND_PAYMENT_URL?.trim() || 'https://t.me/send'
+const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 
 const products = {
   'claude-pro': { title: 'Claude Pro', price: 12 },
@@ -26,7 +26,7 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/api/config', (request, response) => {
-  response.json({ sendPaymentUrl, products })
+  response.json({ sellerUrl, products })
 })
 
 app.get('/api/orders', (request, response) => {
@@ -90,7 +90,7 @@ if (botToken) {
 
   const keyboard = Markup.inlineKeyboard([
     [Markup.button.webApp('Открыть магазин', webAppUrl)],
-    [Markup.button.url('Открыть @send', sendPaymentUrl)],
+    [Markup.button.url('Написать продавцу', sellerUrl)],
   ])
 
   bot.start(async (context) => {

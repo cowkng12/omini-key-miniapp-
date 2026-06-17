@@ -36,8 +36,8 @@ const products = [
   },
 ]
 
-const defaultSendUrl = 'https://t.me/send'
 const defaultApiBase = 'http://localhost:3001'
+const sellerUsername = 'metifrysell'
 
 function formatPrice(price) {
   return `$${price}`
@@ -63,10 +63,9 @@ function openTelegramLink(url) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-function openSendPayment(product, customer) {
-  const configured = import.meta.env.VITE_SEND_PAYMENT_URL?.trim() || defaultSendUrl
+function openSellerChat(product, customer) {
+  const configured = import.meta.env.VITE_SELLER_URL?.trim() || `https://t.me/${sellerUsername}`
   const target = new URL(configured)
-  target.searchParams.set('startapp', `${product.id}`)
   target.searchParams.set('text', buildMessage(product, customer))
   openTelegramLink(target.toString())
 }
@@ -133,11 +132,11 @@ function OrderForm({ product, customer, onChange, onPay }) {
       </label>
 
       <button type="button" className="pay-button" onClick={onPay}>
-        Оплатить через @send
+        Написать для покупки
       </button>
 
       <p className="hint">
-        Кнопка открывает Telegram и переводит пользователя к оплате по ссылке, которую можно заменить через `VITE_SEND_PAYMENT_URL`.
+        Для покупки напишите продавцу: @{sellerUsername}.
       </p>
     </section>
   )
@@ -177,8 +176,8 @@ function App() {
         return response.json()
       })
       .then(() => {
-        setStatusText('Заявка отправлена. Открываю оплату через @send.')
-        openSendPayment(selectedProduct, customer)
+        setStatusText(`Заявка отправлена. Для покупки напишите @${sellerUsername}.`)
+        openSellerChat(selectedProduct, customer)
       })
       .catch(() => {
         setStatusText('Не удалось отправить заявку. Проверь backend и попробуй снова.')
@@ -191,7 +190,7 @@ function App() {
         <p className="eyebrow">Telegram Mini App</p>
         <h1>Claude и Cursor в одном storefront</h1>
         <p className="hero-copy">
-          MVP-витрина для продаж внутри Telegram: выбираешь тариф, оставляешь контакт и переходишь к оплате через `@send`.
+          MVP-витрина для продаж внутри Telegram: выбираешь тариф, оставляешь контакт и пишешь продавцу для покупки.
         </p>
       </section>
 

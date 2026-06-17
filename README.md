@@ -7,8 +7,8 @@ Telegram Mini App для витрины и продажи тарифов `Claude
 - карточки товаров `Claude Pro`, `Claude Max`, `Cursor Pro`, `Cursor Ultra`;
 - выбор тарифа внутри mini app;
 - форма контактов клиента;
-- кнопка `Оплатить через @send`;
-- возможность заменить ссылку оплаты через `VITE_SEND_PAYMENT_URL`;
+- кнопка для связи с продавцом `@metifrysell`;
+- возможность заменить ссылку продавца через `VITE_SELLER_URL`;
 - backend для заявок;
 - Telegram-бот с кнопкой открытия `Mini App`.
 
@@ -37,12 +37,12 @@ copy .env.example .env
 3. Заполнить `.env`:
 
 ```text
-VITE_SEND_PAYMENT_URL=https://t.me/send
+VITE_SELLER_URL=https://t.me/metifrysell
 VITE_API_BASE_URL=http://localhost:3001
 TELEGRAM_BOT_TOKEN=токен_от_BotFather
 ADMIN_CHAT_ID=ваш_chat_id
 WEB_APP_URL=https://ваш_https_url_miniapp
-SEND_PAYMENT_URL=https://t.me/send
+SELLER_URL=https://t.me/metifrysell
 ```
 
 4. Запустить backend и Telegram-бота:
