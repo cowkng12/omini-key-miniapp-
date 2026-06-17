@@ -118,7 +118,7 @@ const translations = {
     allGroup: 'Все',
     tabs: { catalog: 'Каталог', orders: 'Заказы', balance: 'Баланс' },
     ordersTitle: 'Мои покупки',
-    ordersText: 'История покупок скоро появится. По текущим заказам пишите продавцу.',
+    ordersText: 'История покупок скоро появится. По поданной заявке менеджер свяжется с вами в течение 5 минут.',
     balanceTitle: 'Баланс',
     balanceText: 'Баланс и бонусы появятся в следующем обновлении.',
     productText: {
@@ -160,7 +160,7 @@ const translations = {
     allGroup: 'All',
     tabs: { catalog: 'Catalog', orders: 'Orders', balance: 'Balance' },
     ordersTitle: 'My purchases',
-    ordersText: 'Purchase history is coming soon. For current orders, message the seller.',
+    ordersText: 'Purchase history is coming soon. A manager will contact you within 5 minutes regarding your request.',
     balanceTitle: 'Balance',
     balanceText: 'Balance and bonuses will appear in the next update.',
     productText: {
@@ -202,7 +202,7 @@ const translations = {
     allGroup: '全部',
     tabs: { catalog: '目录', orders: '订单', balance: '余额' },
     ordersTitle: '我的购买',
-    ordersText: '购买记录即将上线。如需查询当前订单，请联系卖家。',
+    ordersText: '购买记录即将上线。提交申请后，经理会在 5 分钟内联系你。',
     balanceTitle: '余额',
     balanceText: '余额和奖励将在下一次更新中上线。',
     productText: {
@@ -243,13 +243,6 @@ function openTelegramLink(url) {
   }
 
   window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-function openSellerChat(product, customer) {
-  const configured = import.meta.env.VITE_SELLER_URL?.trim() || `https://t.me/${sellerUsername}`
-  const target = new URL(configured)
-  target.searchParams.set('text', buildMessage(product, customer))
-  openTelegramLink(target.toString())
 }
 
 function currentTelegramUser() {
@@ -366,7 +359,6 @@ function App() {
       })
       .then(() => {
         setStatusText(text.success)
-        openSellerChat(selectedProduct, customer)
       })
       .catch(() => {
         setStatusText(text.error)
