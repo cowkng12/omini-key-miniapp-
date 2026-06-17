@@ -57,7 +57,6 @@ app.post('/api/orders', async (request, response) => {
     customer: {
       name: (customer.name || '').trim(),
       telegram: (customer.telegram || '').trim(),
-      contact: (customer.contact || '').trim(),
     },
     telegramUser,
     createdAt: new Date().toISOString(),
@@ -73,7 +72,6 @@ app.post('/api/orders', async (request, response) => {
       `Цена: $${order.price}`,
       `Имя: ${order.customer.name || 'Не указано'}`,
       `Telegram: ${order.customer.telegram || 'Не указан'}`,
-      `Контакт: ${order.customer.contact || 'Не указан'}`,
       `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
     ]
 

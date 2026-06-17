@@ -84,14 +84,13 @@ const translations = {
     languageLabel: 'RU',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey: подписки на нейросервисы',
-    hero: `Выбирайте нужный AI-сервис, оставляйте контакт и пишите продавцу @${sellerUsername} для покупки.`,
+    hero: `Доступные цифровые подписки на AI-сервисы в одном месте. Выберите тариф и напишите @${sellerUsername} для заказа.`,
     selectPlan: 'Выбрать тариф',
     orderTitle: 'Ваш заказ',
     name: 'Имя',
     namePlaceholder: 'Как к вам обращаться',
     telegramPlaceholder: '@username или ссылка',
-    contact: 'Контакт',
-    contactPlaceholder: 'Telegram, WhatsApp или номер',
+    orderHint: `Для заказа напишите продавцу: @${sellerUsername}.`,
     buyButton: 'Написать для покупки',
     hint: `Для покупки отпишите продавцу: @${sellerUsername}.`,
     success: `Заявка отправлена. Для покупки напишите @${sellerUsername}.`,
@@ -119,14 +118,13 @@ const translations = {
     languageLabel: 'EN',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey: AI service subscriptions',
-    hero: `Pick an AI service, leave your contact, and message @${sellerUsername} to buy.`,
+    hero: `Affordable digital AI subscriptions in one place. Pick a plan and message @${sellerUsername} to order.`,
     selectPlan: 'Select plan',
     orderTitle: 'Your order',
     name: 'Name',
     namePlaceholder: 'How should we call you',
     telegramPlaceholder: '@username or link',
-    contact: 'Contact',
-    contactPlaceholder: 'Telegram, WhatsApp or phone',
+    orderHint: `To order, message the seller: @${sellerUsername}.`,
     buyButton: 'Message to buy',
     hint: `To buy, message the seller: @${sellerUsername}.`,
     success: `Request sent. To buy, message @${sellerUsername}.`,
@@ -154,14 +152,13 @@ const translations = {
     languageLabel: '中文',
     eyebrow: 'Telegram Mini App',
     title: 'OmniKey：AI 服务订阅',
-    hero: `选择需要的 AI 服务，留下联系方式，并联系 @${sellerUsername} 购买。`,
+    hero: `实惠的数字 AI 订阅集中在这里。选择套餐并联系 @${sellerUsername} 下单。`,
     selectPlan: '选择套餐',
     orderTitle: '你的订单',
     name: '姓名',
     namePlaceholder: '如何称呼你',
     telegramPlaceholder: '@用户名或链接',
-    contact: '联系方式',
-    contactPlaceholder: 'Telegram、WhatsApp 或电话',
+    orderHint: `下单请联系卖家：@${sellerUsername}。`,
     buyButton: '联系购买',
     hint: `购买请联系卖家：@${sellerUsername}。`,
     success: `请求已发送。购买请联系 @${sellerUsername}。`,
@@ -198,7 +195,6 @@ function buildMessage(product, customer) {
     `Цена: ${formatPrice(product.price)}`,
     `Имя: ${customer.name || 'Не указано'}`,
     `Telegram: ${customer.telegram || 'Не указан'}`,
-    `Контакт: ${customer.contact || 'Не указан'}`,
   ].join('\n')
 }
 
@@ -272,21 +268,12 @@ function OrderForm({ product, customer, onChange, onPay, text }) {
         />
       </label>
 
-      <label>
-        <span>{text.contact}</span>
-        <input
-          value={customer.contact}
-          onChange={(event) => onChange('contact', event.target.value)}
-          placeholder={text.contactPlaceholder}
-        />
-      </label>
-
       <button type="button" className="pay-button" onClick={onPay}>
         {text.buyButton}
       </button>
 
       <p className="hint">
-        {text.hint}
+        {text.orderHint}
       </p>
     </section>
   )
@@ -297,7 +284,6 @@ function App() {
   const [customer, setCustomer] = useState({
     name: '',
     telegram: '',
-    contact: '',
   })
   const [statusText, setStatusText] = useState('')
   const [language, setLanguage] = useState('ru')
