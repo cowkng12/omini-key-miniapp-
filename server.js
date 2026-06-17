@@ -113,16 +113,28 @@ if (botToken) {
         '',
         '1. Нажмите "🛍 Открыть каталог".',
         '2. Выберите нужный AI-сервис и тариф.',
-        '3. Оставьте имя и контакт.',
+        '3. Укажите имя и Telegram.',
         '4. Нажмите "Написать для покупки".',
         '5. Напишите продавцу и завершите покупку.',
       ].join('\n'),
       orders: '🏆 Заказы\n\nИстория покупок скоро появится. Пока по заказам пишите в поддержку.',
+      promotions: [
+        '🎁 Акции',
+        '',
+        'В честь открытия OmniKey Store действует специальное предложение:',
+        '',
+        '• Cursor Pro — $10',
+        '• Claude Pro — $10',
+        '• при заказе от 2 подписок каждая позиция — $9',
+        '',
+        'Для оформления выберите тариф в каталоге и напишите продавцу.',
+      ].join('\n'),
       support: `💬 Поддержка\n\nНапишите продавцу: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💎 О нас\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
       shop: '🛍 Открыть каталог',
       guideButton: '🧭 Как купить',
       ordersButton: '🧾 Мои покупки',
+      promotionsButton: '🎁 Акции',
       supportButton: '🛟 Помощь',
       aboutButton: '✨ OmniKey',
       languageButton: '🌐 Сменить язык',
@@ -146,16 +158,28 @@ if (botToken) {
         '',
         '1. Press "🛍 Open catalog".',
         '2. Pick an AI service and plan.',
-        '3. Leave your name and contact.',
+        '3. Enter your name and Telegram.',
         '4. Press "Message to buy".',
         '5. Message the seller and complete the purchase.',
       ].join('\n'),
       orders: '🏆 Orders\n\nPurchase history is coming soon. For now, contact support about your orders.',
+      promotions: [
+        '🎁 Promotions',
+        '',
+        'Special opening offer from OmniKey Store:',
+        '',
+        '• Cursor Pro — $10',
+        '• Claude Pro — $10',
+        '• when ordering 2 or more subscriptions, each item is $9',
+        '',
+        'To order, choose a plan in the catalog and message the seller.',
+      ].join('\n'),
       support: `💬 Support\n\nMessage the seller: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💎 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
       shop: '🛍 Open catalog',
       guideButton: '🧭 How to buy',
       ordersButton: '🧾 My purchases',
+      promotionsButton: '🎁 Deals',
       supportButton: '🛟 Help',
       aboutButton: '✨ OmniKey',
       languageButton: '🌐 Change language',
@@ -179,16 +203,28 @@ if (botToken) {
         '',
         '1. 点击“🛍 打开目录”。',
         '2. 选择 AI 服务和套餐。',
-        '3. 留下姓名和联系方式。',
+        '3. 填写姓名和 Telegram。',
         '4. 点击“联系购买”。',
         '5. 联系卖家并完成购买。',
       ].join('\n'),
       orders: '🏆 订单\n\n购买记录即将上线。目前请联系客服查询订单。',
+      promotions: [
+        '🎁 优惠活动',
+        '',
+        'OmniKey Store 开业优惠：',
+        '',
+        '• Cursor Pro — $10',
+        '• Claude Pro — $10',
+        '• 购买 2 个或以上订阅，每个仅 $9',
+        '',
+        '请选择目录中的套餐并联系卖家下单。',
+      ].join('\n'),
       support: `💬 支持\n\n联系卖家：${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💎 关于我们\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
       shop: '🛍 打开目录',
       guideButton: '🧭 如何购买',
       ordersButton: '🧾 我的购买',
+      promotionsButton: '🎁 优惠',
       supportButton: '🛟 帮助',
       aboutButton: '✨ OmniKey',
       languageButton: '🌐 切换语言',
@@ -206,8 +242,9 @@ if (botToken) {
 
     return Markup.inlineKeyboard([
       [Markup.button.webApp(text.shop, webAppUrl)],
-      [Markup.button.callback(text.guideButton, 'guide'), Markup.button.callback(text.ordersButton, 'orders')],
-      [Markup.button.callback(text.supportButton, 'support'), Markup.button.callback(text.aboutButton, 'about')],
+      [Markup.button.callback(text.guideButton, 'guide'), Markup.button.callback(text.promotionsButton, 'promotions')],
+      [Markup.button.callback(text.ordersButton, 'orders'), Markup.button.callback(text.supportButton, 'support')],
+      [Markup.button.callback(text.aboutButton, 'about')],
       [Markup.button.callback(text.languageButton, 'language')],
     ])
   }
@@ -245,6 +282,11 @@ if (botToken) {
   bot.action('orders', async (context) => {
     await context.answerCbQuery()
     await context.reply(botText[currentLanguage(context)].orders)
+  })
+
+  bot.action('promotions', async (context) => {
+    await context.answerCbQuery()
+    await context.reply(botText[currentLanguage(context)].promotions)
   })
 
   bot.action('about', async (context) => {
