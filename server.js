@@ -321,7 +321,15 @@ if (botToken) {
   })
 
   bot.launch()
-    .then(() => {
+    .then(async () => {
+      await bot.telegram.setChatMenuButton({
+        menu_button: {
+          type: 'web_app',
+          text: 'OminiKey',
+          web_app: { url: webAppUrl },
+        },
+      })
+
       console.log('Telegram bot started')
     })
     .catch((error) => {
