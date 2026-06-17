@@ -15,9 +15,11 @@ const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 
 const products = {
   'claude-pro': { title: 'Claude Pro', price: 12 },
+  'claude-pro-duo': { title: 'Claude Pro 2 Accounts', price: 18 },
   'claude-max': { title: 'Claude Max', price: 75 },
   'perplexity-pro': { title: 'Perplexity Pro', price: 12 },
   'cursor-pro': { title: 'Cursor Pro', price: 10 },
+  'cursor-pro-duo': { title: 'Cursor Pro 2 Accounts', price: 18 },
   'cursor-ultra': { title: 'Cursor Ultra', price: 24 },
   'midjourney-basic': { title: 'Midjourney Basic', price: 10 },
   'runway-standard': { title: 'Runway Standard', price: 15 },

@@ -10,6 +10,13 @@ const products = [
     price: 12,
   },
   {
+    id: 'claude-pro-duo',
+    group: 'Claude',
+    brand: 'Claude',
+    plan: '2 Accounts',
+    price: 18,
+  },
+  {
     id: 'claude-max',
     group: 'Claude',
     brand: 'Claude',
@@ -29,6 +36,13 @@ const products = [
     brand: 'Cursor',
     plan: 'Pro',
     price: 10,
+  },
+  {
+    id: 'cursor-pro-duo',
+    group: 'Cursor',
+    brand: 'Cursor',
+    plan: '2 Accounts',
+    price: 18,
   },
   {
     id: 'cursor-ultra',
@@ -90,6 +104,8 @@ const translations = {
     promos: {
       'claude-pro': 'Акция: 2 аккаунта — $18',
       'cursor-pro': 'Акция: 2 аккаунта — $18',
+      'claude-pro-duo': 'Промо-лот: 2 аккаунта — $18',
+      'cursor-pro-duo': 'Промо-лот: 2 аккаунта — $18',
     },
     orderTitle: 'Ваш заказ',
     name: 'Имя',
@@ -107,9 +123,11 @@ const translations = {
     balanceText: 'Баланс и бонусы появятся в следующем обновлении.',
     productText: {
       'claude-pro': ['Хит старта', 'Быстрый старт для повседневной работы, учебы и текста.'],
+      'claude-pro-duo': ['2 аккаунта', 'Отдельный промо-лот на два аккаунта Claude Pro по спеццене.'],
       'claude-max': ['Премиум', 'Максимальный тариф для активной ежедневной нагрузки.'],
       'perplexity-pro': ['Ресерч', 'Поиск, ресерч и быстрые ответы с источниками.'],
       'cursor-pro': ['Выгодно', 'Удобный вариант для старта и регулярной разработки.'],
+      'cursor-pro-duo': ['2 аккаунта', 'Отдельный промо-лот на два аккаунта Cursor Pro по спеццене.'],
       'cursor-ultra': ['Расширенный', 'Расширенный вариант для тех, кому нужен запас по лимитам.'],
       'midjourney-basic': ['Креатив', 'Генерация изображений для контента, дизайна и идей.'],
       'runway-standard': ['Видео', 'AI-видео, монтаж и генерация коротких роликов.'],
@@ -128,6 +146,8 @@ const translations = {
     promos: {
       'claude-pro': 'Deal: 2 accounts — $18',
       'cursor-pro': 'Deal: 2 accounts — $18',
+      'claude-pro-duo': 'Promo lot: 2 accounts — $18',
+      'cursor-pro-duo': 'Promo lot: 2 accounts — $18',
     },
     orderTitle: 'Your order',
     name: 'Name',
@@ -145,9 +165,11 @@ const translations = {
     balanceText: 'Balance and bonuses will appear in the next update.',
     productText: {
       'claude-pro': ['Starter hit', 'Fast start for daily work, study and writing.'],
+      'claude-pro-duo': ['2 accounts', 'Separate promo lot for two Claude Pro accounts at a special price.'],
       'claude-max': ['Premium', 'Maximum plan for heavy daily usage.'],
       'perplexity-pro': ['Research', 'Search, research and quick answers with sources.'],
       'cursor-pro': ['Value', 'Convenient option for regular development work.'],
+      'cursor-pro-duo': ['2 accounts', 'Separate promo lot for two Cursor Pro accounts at a special price.'],
       'cursor-ultra': ['Extended', 'More limits for active coding sessions.'],
       'midjourney-basic': ['Creative', 'Image generation for content, design and ideas.'],
       'runway-standard': ['Video', 'AI video tools, editing and short clip generation.'],
@@ -166,6 +188,8 @@ const translations = {
     promos: {
       'claude-pro': '活动：2 个账号 — $18',
       'cursor-pro': '活动：2 个账号 — $18',
+      'claude-pro-duo': '优惠商品：2 个账号 — $18',
+      'cursor-pro-duo': '优惠商品：2 个账号 — $18',
     },
     orderTitle: '你的订单',
     name: '姓名',
@@ -183,9 +207,11 @@ const translations = {
     balanceText: '余额和奖励将在下一次更新中上线。',
     productText: {
       'claude-pro': ['入门热门', '适合日常工作、学习和写作的快速入门。'],
+      'claude-pro-duo': ['2 个账号', 'Claude Pro 双账号独立优惠商品，价格更划算。'],
       'claude-max': ['高级', '适合高频日常使用的最高套餐。'],
       'perplexity-pro': ['研究', '带来源的搜索、研究和快速回答。'],
       'cursor-pro': ['划算', '适合日常开发的便捷选择。'],
+      'cursor-pro-duo': ['2 个账号', 'Cursor Pro 双账号独立优惠商品，价格更优惠。'],
       'cursor-ultra': ['扩展', '为活跃编程提供更多额度。'],
       'midjourney-basic': ['创意', '用于内容、设计和灵感的图片生成。'],
       'runway-standard': ['视频', 'AI 视频、剪辑和短片生成工具。'],
