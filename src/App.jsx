@@ -102,8 +102,6 @@ const translations = {
     selectPlan: 'Выбрать тариф',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     promos: {
-      'claude-pro': 'Акция: 2 аккаунта — $18',
-      'cursor-pro': 'Акция: 2 аккаунта — $18',
       'claude-pro-duo': 'Промо-лот: 2 аккаунта — $18',
       'cursor-pro-duo': 'Промо-лот: 2 аккаунта — $18',
     },
@@ -144,8 +142,6 @@ const translations = {
     selectPlan: 'Select plan',
     guarantee: 'Full guarantee and replacement if any issues arise.',
     promos: {
-      'claude-pro': 'Deal: 2 accounts — $18',
-      'cursor-pro': 'Deal: 2 accounts — $18',
       'claude-pro-duo': 'Promo lot: 2 accounts — $18',
       'cursor-pro-duo': 'Promo lot: 2 accounts — $18',
     },
@@ -186,8 +182,6 @@ const translations = {
     selectPlan: '选择套餐',
     guarantee: '提供完整保障，如遇问题可更换商品。',
     promos: {
-      'claude-pro': '活动：2 个账号 — $18',
-      'cursor-pro': '活动：2 个账号 — $18',
       'claude-pro-duo': '优惠商品：2 个账号 — $18',
       'cursor-pro-duo': '优惠商品：2 个账号 — $18',
     },
