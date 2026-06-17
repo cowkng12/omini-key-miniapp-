@@ -243,9 +243,9 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
   )
 }
 
-function OrderForm({ product, customer, onChange, onPay, text, formRef }) {
+function OrderForm({ product, customer, onChange, onPay, text, actionRef }) {
   return (
-    <section className="order-panel" ref={formRef}>
+    <section className="order-panel">
       <div className="order-head">
         <div>
           <p className="eyebrow">{text.orderTitle}</p>
@@ -272,7 +272,7 @@ function OrderForm({ product, customer, onChange, onPay, text, formRef }) {
         />
       </label>
 
-      <button type="button" className="pay-button" onClick={onPay}>
+      <button type="button" className="pay-button" onClick={onPay} ref={actionRef}>
         {text.buyButton}
       </button>
 
@@ -293,7 +293,7 @@ function App() {
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
-  const orderFormRef = useRef(null)
+  const orderActionRef = useRef(null)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
@@ -306,7 +306,7 @@ function App() {
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
     window.setTimeout(() => {
-      orderFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      orderActionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 80)
   }
 
@@ -390,7 +390,7 @@ function App() {
               onChange={handleChange}
               onPay={handlePay}
               text={text}
-              formRef={orderFormRef}
+              actionRef={orderActionRef}
             />
           </section>
         </>
