@@ -82,7 +82,7 @@ const productGroups = ['Все', 'Claude', 'Cursor', 'Perplexity', 'Midjourney',
 const translations = {
   ru: {
     languageLabel: 'RU',
-    eyebrow: 'OminiKey',
+    eyebrow: 'OmniKey',
     title: 'OmniKey: подписки на нейросервисы',
     hero: 'Выберите товар и подайте заявку на покупку.',
     selectPlan: 'Выбрать тариф',
@@ -120,7 +120,7 @@ const translations = {
   },
   en: {
     languageLabel: 'EN',
-    eyebrow: 'OminiKey',
+    eyebrow: 'OmniKey',
     title: 'OmniKey: AI service subscriptions',
     hero: 'Choose a product and submit a purchase request.',
     selectPlan: 'Select plan',
@@ -158,7 +158,7 @@ const translations = {
   },
   zh: {
     languageLabel: '中文',
-    eyebrow: 'OminiKey',
+    eyebrow: 'OmniKey',
     title: 'OmniKey：AI 服务订阅',
     hero: '选择商品并提交购买申请。',
     selectPlan: '选择套餐',
