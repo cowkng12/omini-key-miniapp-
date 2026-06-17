@@ -93,53 +93,176 @@ let bot = null
 
 if (botToken) {
   bot = new Telegraf(botToken)
+  const userLanguages = new Map()
 
-  const keyboard = Markup.inlineKeyboard([
-    [Markup.button.webApp('Открыть магазин 🛒', webAppUrl)],
-    [Markup.button.callback('Поддержка 🛟', 'support'), Markup.button.callback('Руководство 📘', 'guide')],
-    [Markup.button.callback('Мои покупки 🧾', 'orders')],
-    [Markup.button.callback('Русский 🇷🇺', 'lang_ru'), Markup.button.callback('English 🇬🇧', 'lang_en'), Markup.button.callback('中文 🇨🇳', 'lang_zh')],
+  const botText = {
+    ru: {
+      languageSelected: 'Язык выбран: Русский.',
+      welcome: (name) => [
+        `С возвращением, ${name}! 🚀`,
+        '',
+        'Добро пожаловать в OmniKey Store. Мы предлагаем премиум AI подписки по выгодным ценам.',
+        '',
+        '⚡ Мгновенная доставка',
+        '🎯 Безопасные платежи',
+        '🌐 Поддержка 24/7',
+        '',
+        'Нажмите кнопку ниже, чтобы начать!',
+      ].join('\n'),
+      guide: [
+        '📚 Руководство',
+        '',
+        '1. Нажмите "🔥 Запустить магазин".',
+        '2. Выберите нужный AI-сервис и тариф.',
+        '3. Оставьте имя и контакт.',
+        '4. Нажмите "Написать для покупки".',
+        '5. Напишите продавцу и завершите покупку.',
+      ].join('\n'),
+      orders: '🏆 Заказы\n\nИстория покупок скоро появится. Пока по заказам пишите в поддержку.',
+      support: `💬 Поддержка\n\nНапишите продавцу: ${sellerUrl.replace('https://t.me/', '@')}`,
+      about: '💎 О нас\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
+      shop: '🔥 Запустить магазин',
+      guideButton: '📚 Руководство',
+      ordersButton: '🏆 Заказы',
+      supportButton: '💬 Поддержка',
+      aboutButton: '💎 О нас',
+      languageButton: '🌍 Язык',
+    },
+    en: {
+      languageSelected: 'Language selected: English.',
+      welcome: (name) => [
+        `Welcome back, ${name}! 🚀`,
+        '',
+        'Welcome to OmniKey Store. We offer premium AI subscriptions at good prices.',
+        '',
+        '⚡ Instant delivery',
+        '🎯 Safe payments',
+        '🌐 24/7 support',
+        '',
+        'Press a button below to start!',
+      ].join('\n'),
+      guide: [
+        '📚 Guide',
+        '',
+        '1. Press "🔥 Launch store".',
+        '2. Pick an AI service and plan.',
+        '3. Leave your name and contact.',
+        '4. Press "Message to buy".',
+        '5. Message the seller and complete the purchase.',
+      ].join('\n'),
+      orders: '🏆 Orders\n\nPurchase history is coming soon. For now, contact support about your orders.',
+      support: `💬 Support\n\nMessage the seller: ${sellerUrl.replace('https://t.me/', '@')}`,
+      about: '💎 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
+      shop: '🔥 Launch store',
+      guideButton: '📚 Guide',
+      ordersButton: '🏆 Orders',
+      supportButton: '💬 Support',
+      aboutButton: '💎 About',
+      languageButton: '🌍 Language',
+    },
+    zh: {
+      languageSelected: '已选择语言：中文。',
+      welcome: (name) => [
+        `欢迎回来，${name}！🚀`,
+        '',
+        '欢迎来到 OmniKey Store。我们提供高性价比的高级 AI 订阅。',
+        '',
+        '⚡ 即时交付',
+        '🎯 安全支付',
+        '🌐 24/7 支持',
+        '',
+        '点击下方按钮开始！',
+      ].join('\n'),
+      guide: [
+        '📚 指南',
+        '',
+        '1. 点击“🔥 打开商店”。',
+        '2. 选择 AI 服务和套餐。',
+        '3. 留下姓名和联系方式。',
+        '4. 点击“联系购买”。',
+        '5. 联系卖家并完成购买。',
+      ].join('\n'),
+      orders: '🏆 订单\n\n购买记录即将上线。目前请联系客服查询订单。',
+      support: `💬 支持\n\n联系卖家：${sellerUrl.replace('https://t.me/', '@')}`,
+      about: '💎 关于我们\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
+      shop: '🔥 打开商店',
+      guideButton: '📚 指南',
+      ordersButton: '🏆 订单',
+      supportButton: '💬 支持',
+      aboutButton: '💎 关于',
+      languageButton: '🌍 语言',
+    },
+  }
+
+  const languageKeyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('Русский 🇷🇺', 'set_lang_ru')],
+    [Markup.button.callback('English 🇬🇧', 'set_lang_en')],
+    [Markup.button.callback('中文 🇨🇳', 'set_lang_zh')],
   ])
+
+  function mainKeyboard(language) {
+    const text = botText[language]
+
+    return Markup.inlineKeyboard([
+      [Markup.button.webApp(text.shop, webAppUrl)],
+      [Markup.button.callback(text.guideButton, 'guide'), Markup.button.callback(text.ordersButton, 'orders')],
+      [Markup.button.callback(text.supportButton, 'support'), Markup.button.callback(text.aboutButton, 'about')],
+      [Markup.button.callback(text.languageButton, 'language')],
+    ])
+  }
+
+  function currentLanguage(context) {
+    return userLanguages.get(context.from?.id) || 'ru'
+  }
+
+  async function sendMainMenu(context, language) {
+    const name = context.from?.first_name || 'friend'
+    await context.reply(botText[language].welcome(name), mainKeyboard(language))
+  }
 
   bot.start(async (context) => {
     await context.reply(
-      'Магазин OmniKey готов. Открой mini app и выбери подписку.',
-      keyboard,
+      'Выберите язык / Choose language / 选择语言',
+      languageKeyboard,
     )
   })
 
   bot.command('shop', async (context) => {
-    await context.reply('Открываю магазин.', keyboard)
+    await sendMainMenu(context, currentLanguage(context))
   })
 
   bot.action('support', async (context) => {
     await context.answerCbQuery()
-    await context.reply(`Поддержка: напишите продавцу ${sellerUrl.replace('https://t.me/', '@')}`)
+    await context.reply(botText[currentLanguage(context)].support)
   })
 
   bot.action('guide', async (context) => {
     await context.answerCbQuery()
-    await context.reply([
-      'Как купить подписку:',
-      '1. Нажмите "Открыть магазин 🛒".',
-      '2. Выберите нужный AI-сервис и тариф.',
-      '3. Оставьте имя и контакт для связи.',
-      '4. Нажмите "Написать для покупки".',
-      '5. Напишите продавцу и завершите оплату.',
-    ].join('\n'))
+    await context.reply(botText[currentLanguage(context)].guide)
   })
 
   bot.action('orders', async (context) => {
     await context.answerCbQuery()
-    await context.reply('Раздел "Мои покупки" скоро появится. Пока по заказам пишите в поддержку.')
+    await context.reply(botText[currentLanguage(context)].orders)
   })
 
-  bot.action(/lang_(ru|en|zh)/, async (context) => {
-    const labels = { ru: 'Русский', en: 'English', zh: '中文' }
+  bot.action('about', async (context) => {
+    await context.answerCbQuery()
+    await context.reply(botText[currentLanguage(context)].about)
+  })
+
+  bot.action('language', async (context) => {
+    await context.answerCbQuery()
+    await context.reply('Выберите язык / Choose language / 选择语言', languageKeyboard)
+  })
+
+  bot.action(/set_lang_(ru|en|zh)/, async (context) => {
     const language = context.match[1]
 
-    await context.answerCbQuery(`Язык: ${labels[language]}`)
-    await context.reply(`Язык бота выбран: ${labels[language]}. В mini app язык переключается кнопкой справа сверху.`)
+    userLanguages.set(context.from.id, language)
+    await context.answerCbQuery(botText[language].languageSelected)
+    await context.reply(botText[language].languageSelected)
+    await sendMainMenu(context, language)
   })
 
   bot.launch()
