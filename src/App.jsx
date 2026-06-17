@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './App.css'
 
 const products = [
@@ -243,9 +243,9 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
   )
 }
 
-function OrderForm({ product, customer, onChange, onPay, text }) {
+function OrderForm({ product, customer, onChange, onPay, text, formRef }) {
   return (
-    <section className="order-panel">
+    <section className="order-panel" ref={formRef}>
       <div className="order-head">
         <div>
           <p className="eyebrow">{text.orderTitle}</p>
@@ -293,6 +293,7 @@ function App() {
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
+  const orderFormRef = useRef(null)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
@@ -300,6 +301,13 @@ function App() {
 
   const handleChange = (field, value) => {
     setCustomer((current) => ({ ...current, [field]: value }))
+  }
+
+  const handleProductSelect = (product) => {
+    setSelectedProduct(product)
+    window.setTimeout(() => {
+      orderFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
   }
 
   const handlePay = () => {
@@ -368,7 +376,7 @@ function App() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onSelect={setSelectedProduct}
+                  onSelect={handleProductSelect}
                   active={selectedProduct.id === product.id}
                   text={text}
                   selectPlan={text.selectPlan}
@@ -382,6 +390,7 @@ function App() {
               onChange={handleChange}
               onPay={handlePay}
               text={text}
+              formRef={orderFormRef}
             />
           </section>
         </>
