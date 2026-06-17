@@ -159,6 +159,13 @@
   font-size: 14px;
 }
 
+.product-guarantee {
+  margin: -4px 0 14px;
+  color: #8790b4;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .product-action {
   color: #93a0ff;
   font-size: 14px;
@@ -307,6 +314,10 @@
   .order-panel {
     position: static;
   }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -321,7 +332,7 @@
   }
 
   .catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
   }
 
@@ -337,9 +348,21 @@
     font-size: 15px;
   }
 
+  .catalog-layout {
+    gap: 12px;
+  }
+
   .product-card {
     min-height: 156px;
     padding: 12px;
+  }
+
+  .product-description {
+    font-size: 13px;
+  }
+
+  .product-guarantee {
+    font-size: 10px;
   }
 
   .product-price {
@@ -371,7 +394,7 @@
   .bottom-tabs button {
     padding: 10px 8px;
     border-radius: 14px;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .empty-panel {

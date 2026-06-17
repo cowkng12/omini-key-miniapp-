@@ -86,6 +86,7 @@ const translations = {
     title: 'OmniKey: подписки на нейросервисы',
     hero: `Доступные цифровые подписки на AI-сервисы в одном месте. Выберите тариф и напишите @${sellerUsername} для заказа.`,
     selectPlan: 'Выбрать тариф',
+    guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     orderTitle: 'Ваш заказ',
     name: 'Имя',
     namePlaceholder: 'Как к вам обращаться',
@@ -120,6 +121,7 @@ const translations = {
     title: 'OmniKey: AI service subscriptions',
     hero: `Affordable digital AI subscriptions in one place. Pick a plan and message @${sellerUsername} to order.`,
     selectPlan: 'Select plan',
+    guarantee: 'Full guarantee and replacement if any issues arise.',
     orderTitle: 'Your order',
     name: 'Name',
     namePlaceholder: 'How should we call you',
@@ -154,6 +156,7 @@ const translations = {
     title: 'OmniKey：AI 服务订阅',
     hero: `实惠的数字 AI 订阅集中在这里。选择套餐并联系 @${sellerUsername} 下单。`,
     selectPlan: '选择套餐',
+    guarantee: '提供完整保障，如遇问题可更换商品。',
     orderTitle: '你的订单',
     name: '姓名',
     namePlaceholder: '如何称呼你',
@@ -234,6 +237,7 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
       </div>
       <strong className="product-price">{formatPrice(product.price)}</strong>
       <p className="product-description">{description}</p>
+      <p className="product-guarantee">{text.guarantee}</p>
       <span className="product-action">{selectPlan}</span>
     </button>
   )
