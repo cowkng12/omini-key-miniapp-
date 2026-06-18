@@ -14,7 +14,7 @@ const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 
 const products = {
-  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.8 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
   'chatgpt-plus-shared': { title: 'ChatGPT Plus Shared', price: 3 },
   'chatgpt-plus': { title: 'ChatGPT Plus', price: 10 },
