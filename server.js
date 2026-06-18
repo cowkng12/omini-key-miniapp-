@@ -253,13 +253,11 @@ if (botToken) {
     ru: {
       languageSelected: 'Язык выбран: Русский.',
       welcome: (name) => [
-        `Привет, ${name}. Это OmniKey ⚡`,
+        `Добро пожаловать, ${name}. Это OmniKey ⚡`,
         '',
-        'Здесь можно быстро подобрать подписку на AI-сервисы для работы, кода, видео, голоса и ресерча.',
+        'Здесь можно купить подписки и готовые AI-товары для работы, кода, учебы, видео, голоса и ресерча.',
         '',
         'Открой каталог, выбери нужный сервис и тариф, затем оформи заказ прямо в Mini App.',
-        '',
-        'Если нужна помощь с выбором, нажми "Поддержка" — менеджер подскажет подходящий вариант.',
         '',
         'Начни с каталога или открой инструкцию ниже.',
       ].join('\n'),
@@ -301,13 +299,11 @@ if (botToken) {
     en: {
       languageSelected: 'Language selected: English.',
       welcome: (name) => [
-        `Hi, ${name}. This is OmniKey ⚡`,
+        `Welcome, ${name}. This is OmniKey ⚡`,
         '',
-        'Pick AI subscriptions for work, coding, video, voice and research in one Telegram mini store.',
+        'Here you can buy AI subscriptions and ready AI products for work, coding, study, video, voice and research.',
         '',
         'Open the catalog, choose the service and plan, then place your order inside the Mini App.',
-        '',
-        'If you need help choosing, press "Support" and a manager will suggest the right option.',
         '',
         'Start with the catalog or open the buying guide.',
       ].join('\n'),
@@ -349,13 +345,11 @@ if (botToken) {
     zh: {
       languageSelected: '已选择语言：中文。',
       welcome: (name) => [
-        `你好，${name}。这里是 OmniKey ⚡`,
+        `欢迎，${name}。这里是 OmniKey ⚡`,
         '',
-        '在 Telegram 里快速选择适合工作、编程、视频、语音和研究的 AI 订阅。',
+        '这里可以购买适合工作、编程、学习、视频、语音和研究的 AI 订阅和现成 AI 商品。',
         '',
         '打开目录，选择需要的服务和套餐，然后直接在 Mini App 内下单。',
-        '',
-        '如果需要帮助选择，请点击“支持”，经理会帮你推荐合适的选项。',
         '',
         '可以先打开目录，或查看购买说明。',
       ].join('\n'),
