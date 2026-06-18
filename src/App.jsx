@@ -225,7 +225,7 @@ const sellerUsername = 'metifrysell'
 const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
-const topupAmounts = Array.from({ length: 20 }, (_, index) => (index + 1) * 5)
+const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 
 const translations = {
   ru: {

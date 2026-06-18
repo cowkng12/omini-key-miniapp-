@@ -53,7 +53,7 @@ const products = {
 const orders = []
 const topups = []
 const balances = new Map()
-const topupAmounts = Array.from({ length: 20 }, (_, index) => (index + 1) * 5)
+const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 
 async function createCryptoInvoice({ id, amount, description }) {
   if (!cryptoPayToken) {
