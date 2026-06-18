@@ -251,7 +251,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey: подписки на нейросервисы',
     hero: 'Выберите товар и подайте заявку на покупку.',
-    selectPlan: 'Оплатить через Crypto Bot',
+    selectPlan: 'Выбрать тариф',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     promos: {
       'claude-pro-duo': 'Промо-лот: 2 аккаунта Pro — $18',
@@ -276,6 +276,10 @@ const translations = {
     topUpButton: 'Оплатить',
     topUpSuccess: 'Успешно, в течении 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
+    paymentTitle: 'К оплате',
+    paymentMethods: 'Способы оплаты',
+    cryptoBotMethod: 'Crypto Bot',
+    payProductButton: 'Оплатить',
     productPaymentError: 'Не удалось создать оплату товара. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
@@ -316,7 +320,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey: AI service subscriptions',
     hero: 'Choose a product and submit a purchase request.',
-    selectPlan: 'Pay via Crypto Bot',
+    selectPlan: 'Select plan',
     guarantee: 'Full guarantee and replacement if any issues arise.',
     promos: {
       'claude-pro-duo': 'Promo lot: 2 Accounts Pro — $18',
@@ -341,6 +345,10 @@ const translations = {
     topUpButton: 'Pay',
     topUpSuccess: 'Success. A manager will message you within 10 minutes to deliver the product. Please wait.',
     topUpError: 'Could not create a payment link. Try again later.',
+    paymentTitle: 'To pay',
+    paymentMethods: 'Payment methods',
+    cryptoBotMethod: 'Crypto Bot',
+    payProductButton: 'Pay',
     productPaymentError: 'Could not create product payment. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
@@ -381,7 +389,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey：AI 服务订阅',
     hero: '选择商品并提交购买申请。',
-    selectPlan: '通过 Crypto Bot 支付',
+    selectPlan: '选择套餐',
     guarantee: '提供完整保障，如遇问题可更换商品。',
     promos: {
       'claude-pro-duo': '优惠商品：2 个 Pro 账号 — $18',
@@ -406,6 +414,10 @@ const translations = {
     topUpButton: '支付',
     topUpSuccess: '支付成功。经理会在 10 分钟内联系你并发放商品，请稍候。',
     topUpError: '无法创建付款链接。请稍后再试。',
+    paymentTitle: '应付金额',
+    paymentMethods: '支付方式',
+    cryptoBotMethod: 'Crypto Bot',
+    payProductButton: '支付',
     productPaymentError: '无法创建商品付款。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
@@ -495,7 +507,7 @@ function ProductCard({ product, onSelect, active, text }) {
         <p className="product-guarantee">{text.guarantee}</p>
       </div>
       <strong className="product-price">{formatPrice(product.price)}</strong>
-      <span className="product-action">{text.selectPlan} · {formatPrice(product.price)}</span>
+      <span className="product-action">{text.selectPlan}</span>
     </button>
   )
 }
@@ -541,7 +553,9 @@ function App() {
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
     setProductPaymentStatus('')
+  }
 
+  const handleProductPayment = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
 
     fetch(`${apiBase}/api/orders`, {
@@ -550,7 +564,7 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        productId: product.id,
+        productId: selectedProduct.id,
         telegramUser: currentTelegramUser(),
       }),
     })
@@ -654,7 +668,20 @@ function App() {
                 />
               ))}
             </div>
-            {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
+            <aside className="product-payment-panel">
+              <div>
+                <span>{text.paymentTitle}</span>
+                <strong>{formatPrice(selectedProduct.price)}</strong>
+              </div>
+              <div>
+                <span>{text.paymentMethods}</span>
+                <strong>{text.cryptoBotMethod}</strong>
+              </div>
+              <button type="button" onClick={handleProductPayment}>
+                {text.payProductButton} {formatPrice(selectedProduct.price)}
+              </button>
+              {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
+            </aside>
 
           </section>
         </>

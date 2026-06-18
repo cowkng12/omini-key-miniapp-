@@ -251,6 +251,40 @@
   font-size: 14px;
 }
 
+.product-payment-panel {
+  margin-top: 14px;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 22px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(35, 14, 16, 0.98) 0%, rgba(15, 9, 11, 0.98) 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+}
+
+.product-payment-panel div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  color: #b7c0d4;
+}
+
+.product-payment-panel strong {
+  color: #fff7ed;
+}
+
+.product-payment-panel button {
+  width: 100%;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 @media (min-width: 901px) {
   .product-card {
     grid-template-columns: 72px minmax(0, 1fr) 116px 124px;
