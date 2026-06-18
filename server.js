@@ -111,7 +111,7 @@ if (botToken) {
         'Начни с каталога или открой инструкцию ниже.',
       ].join('\n'),
       guide: [
-        '📚 Руководство',
+        '📘 Как купить',
         '',
         '1. Нажмите "🛍 Открыть каталог".',
         '2. Выберите нужный AI-сервис и тариф.',
@@ -119,7 +119,7 @@ if (botToken) {
         '4. Нажмите "Подать заявку на покупку".',
         '5. В течение 5 минут с вами свяжется менеджер для подтверждения заказа.',
       ].join('\n'),
-      orders: '🏆 Заказы\n\nИстория покупок скоро появится. По поданной заявке менеджер свяжется с вами в течение 5 минут.',
+      orders: '🏆 Заказы\n\nПока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
       promotions: [
         '🎁 Акции',
         '',
@@ -135,7 +135,7 @@ if (botToken) {
         '',
         'Для заказа выберите нужный товар в каталоге и подайте заявку.',
       ].join('\n'),
-      support: `🛠 Поддержка\n\nНапишите продавцу: ${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
       shop: '🛍 Открыть каталог',
       guideButton: '📘 Как купить',
@@ -143,7 +143,7 @@ if (botToken) {
       promotionsButton: '🎁 Акции',
       supportButton: '🛠 Поддержка',
       aboutButton: '💠 OmniKey',
-      languageButton: '🔤 Сменить язык',
+      languageButton: '🌍 Сменить язык',
     },
     en: {
       languageSelected: 'Language selected: English.',
@@ -160,7 +160,7 @@ if (botToken) {
         'Start with the catalog or open the buying guide.',
       ].join('\n'),
       guide: [
-        '📚 Guide',
+        '📘 How to buy',
         '',
         '1. Press "🛍 Open catalog".',
         '2. Pick an AI service and plan.',
@@ -168,7 +168,7 @@ if (botToken) {
         '4. Press "Submit purchase request".',
         '5. A manager will contact you within 5 minutes to confirm the order.',
       ].join('\n'),
-      orders: '🏆 Orders\n\nPurchase history is coming soon. A manager will contact you within 5 minutes regarding your request.',
+      orders: '🏆 Orders\n\nYou do not have any orders yet. Open the catalog to place one.',
       promotions: [
         '🎁 Promotions',
         '',
@@ -184,7 +184,7 @@ if (botToken) {
         '',
         'To order, choose the required product in the catalog and submit a request.',
       ].join('\n'),
-      support: `🛠 Support\n\nMessage the seller: ${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
       shop: '🛍 Open catalog',
       guideButton: '📘 How to buy',
@@ -192,7 +192,7 @@ if (botToken) {
       promotionsButton: '🎁 Deals',
       supportButton: '🛠 Support',
       aboutButton: '💠 OmniKey',
-      languageButton: '🔤 Change language',
+      languageButton: '🌍 Change language',
     },
     zh: {
       languageSelected: '已选择语言：中文。',
@@ -209,7 +209,7 @@ if (botToken) {
         '可以先打开目录，或查看购买说明。',
       ].join('\n'),
       guide: [
-        '📚 指南',
+        '📘 如何购买',
         '',
         '1. 点击“🛍 打开目录”。',
         '2. 选择 AI 服务和套餐。',
@@ -217,7 +217,7 @@ if (botToken) {
         '4. 点击“提交购买申请”。',
         '5. 经理会在 5 分钟内联系你确认订单。',
       ].join('\n'),
-      orders: '🏆 订单\n\n购买记录即将上线。提交申请后，经理会在 5 分钟内联系你。',
+      orders: '🏆 订单\n\n你目前还没有订单。打开目录即可下单。',
       promotions: [
         '🎁 优惠活动',
         '',
@@ -233,7 +233,7 @@ if (botToken) {
         '',
         '下单请在目录中选择商品并提交申请。',
       ].join('\n'),
-      support: `🛠 支持\n\n联系卖家：${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
       shop: '🛍 打开目录',
       guideButton: '📘 如何购买',
@@ -241,7 +241,7 @@ if (botToken) {
       promotionsButton: '🎁 优惠',
       supportButton: '🛠 支持',
       aboutButton: '💠 OmniKey',
-      languageButton: '🔤 切换语言',
+      languageButton: '🌍 切换语言',
     },
   }
 
