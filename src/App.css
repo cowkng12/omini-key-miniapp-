@@ -101,7 +101,7 @@
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 14px;
 }
 
@@ -114,8 +114,12 @@
 }
 
 .product-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto auto;
+  gap: 18px;
+  align-items: center;
   text-align: left;
-  min-height: 148px;
+  min-height: 132px;
   padding: 16px 18px;
   color: inherit;
   cursor: pointer;
@@ -127,6 +131,25 @@
   transform: translateY(-2px);
   border-color: rgba(248, 113, 113, 0.72);
   background: linear-gradient(135deg, rgba(50, 18, 20, 0.98) 0%, rgba(18, 10, 12, 0.98) 58%, rgba(80, 20, 24, 0.96) 100%);
+}
+
+.product-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(248, 113, 113, 0.34);
+  border-radius: 18px;
+  background: radial-gradient(circle at 30% 20%, rgba(248, 113, 113, 0.42), rgba(127, 29, 29, 0.38));
+  color: #fff7ed;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.product-main {
+  min-width: 0;
 }
 
 .product-badge {
@@ -143,7 +166,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 10px;
 }
 
 .product-brand {
@@ -159,10 +182,11 @@
 
 .product-price {
   display: block;
-  margin-top: 18px;
+  margin-top: 0;
   color: #fff7ed;
   font-size: 34px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .product-promo {
@@ -173,13 +197,13 @@
 }
 
 .product-description {
-  margin: 12px 0 16px;
+  margin: 10px 0 10px;
   color: #b7c0d4;
   font-size: 14px;
 }
 
 .product-guarantee {
-  margin: -4px 0 14px;
+  margin: 0;
   color: #8fa0b8;
   font-size: 11px;
   line-height: 1.35;
@@ -188,54 +212,12 @@
 .product-action {
   color: #fca5a5;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 @media (min-width: 901px) {
   .product-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "badge price"
-      "topline price"
-      "promo action"
-      "description action"
-      "guarantee action";
-    column-gap: 22px;
-    align-items: start;
-  }
-
-  .product-badge {
-    grid-area: badge;
-    justify-self: start;
-  }
-
-  .product-topline {
-    grid-area: topline;
-  }
-
-  .product-price {
-    grid-area: price;
-    margin-top: 2px;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .product-promo {
-    grid-area: promo;
-  }
-
-  .product-description {
-    grid-area: description;
-  }
-
-  .product-guarantee {
-    grid-area: guarantee;
-  }
-
-  .product-action {
-    grid-area: action;
-    align-self: end;
-    white-space: nowrap;
+    grid-template-columns: 72px minmax(0, 1fr) 116px 124px;
   }
 }
 
@@ -413,8 +395,25 @@
   }
 
   .product-card {
+    grid-template-columns: 52px minmax(0, 1fr);
     min-height: 156px;
     padding: 12px;
+  }
+
+  .product-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    font-size: 13px;
+  }
+
+  .product-price,
+  .product-action {
+    grid-column: 2;
+  }
+
+  .product-price {
+    margin-top: 4px;
   }
 
   .product-description {
