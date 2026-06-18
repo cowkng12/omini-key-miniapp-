@@ -245,6 +245,12 @@
   white-space: nowrap;
 }
 
+.product-payment-status {
+  margin: 12px 0 0;
+  color: #fca5a5;
+  font-size: 14px;
+}
+
 @media (min-width: 901px) {
   .product-card {
     grid-template-columns: 72px minmax(0, 1fr) 116px 124px;

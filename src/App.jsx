@@ -251,7 +251,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey: подписки на нейросервисы',
     hero: 'Выберите товар и подайте заявку на покупку.',
-    selectPlan: 'Выбрать тариф',
+    selectPlan: 'Оплатить через Crypto Bot',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     promos: {
       'claude-pro-duo': 'Промо-лот: 2 аккаунта Pro — $18',
@@ -276,6 +276,7 @@ const translations = {
     topUpButton: 'Оплатить',
     topUpSuccess: 'Успешно, в течении 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
+    productPaymentError: 'Не удалось создать оплату товара. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
       'chatgpt-plus-ready': ['Готовый аккаунт', 'ChatGPT Plus на готовом аккаунте для быстрых задач и общения.'],
@@ -315,7 +316,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey: AI service subscriptions',
     hero: 'Choose a product and submit a purchase request.',
-    selectPlan: 'Select plan',
+    selectPlan: 'Pay via Crypto Bot',
     guarantee: 'Full guarantee and replacement if any issues arise.',
     promos: {
       'claude-pro-duo': 'Promo lot: 2 Accounts Pro — $18',
@@ -340,6 +341,7 @@ const translations = {
     topUpButton: 'Pay',
     topUpSuccess: 'Success. A manager will message you within 10 minutes to deliver the product. Please wait.',
     topUpError: 'Could not create a payment link. Try again later.',
+    productPaymentError: 'Could not create product payment. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
       'chatgpt-plus-ready': ['Ready account', 'ChatGPT Plus on a ready account for quick tasks and conversations.'],
@@ -379,7 +381,7 @@ const translations = {
     eyebrow: 'OmniKey',
     title: 'OmniKey：AI 服务订阅',
     hero: '选择商品并提交购买申请。',
-    selectPlan: '选择套餐',
+    selectPlan: '通过 Crypto Bot 支付',
     guarantee: '提供完整保障，如遇问题可更换商品。',
     promos: {
       'claude-pro-duo': '优惠商品：2 个 Pro 账号 — $18',
@@ -404,6 +406,7 @@ const translations = {
     topUpButton: '支付',
     topUpSuccess: '支付成功。经理会在 10 分钟内联系你并发放商品，请稍候。',
     topUpError: '无法创建付款链接。请稍后再试。',
+    productPaymentError: '无法创建商品付款。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
       'chatgpt-plus-ready': ['现成账号', '现成 ChatGPT Plus 账号，适合快速任务和聊天。'],
@@ -444,9 +447,13 @@ function formatPrice(price) {
   return `$${price}`
 }
 
-function openPaymentUrl(url) {
+function openPaymentUrl(url, onPaid) {
   if (window.Telegram?.WebApp?.openInvoice) {
-    window.Telegram.WebApp.openInvoice(url)
+    window.Telegram.WebApp.openInvoice(url, (status) => {
+      if (status === 'paid') {
+        onPaid?.()
+      }
+    })
     return
   }
 
@@ -462,7 +469,7 @@ function currentTelegramUser() {
   return window.Telegram?.WebApp?.initDataUnsafe?.user || null
 }
 
-function ProductCard({ product, onSelect, active, text, selectPlan }) {
+function ProductCard({ product, onSelect, active, text }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
   const avatar = productAvatars[product.group] || { src: '', fallback: product.brand.slice(0, 2).toUpperCase() }
@@ -488,7 +495,7 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
         <p className="product-guarantee">{text.guarantee}</p>
       </div>
       <strong className="product-price">{formatPrice(product.price)}</strong>
-      <span className="product-action">{selectPlan}</span>
+      <span className="product-action">{text.selectPlan} · {formatPrice(product.price)}</span>
     </button>
   )
 }
@@ -500,6 +507,7 @@ function App() {
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [topUpStatus, setTopUpStatus] = useState('')
+  const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [balance, setBalance] = useState(0)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
@@ -532,6 +540,38 @@ function App() {
 
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
+    setProductPaymentStatus('')
+
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    fetch(`${apiBase}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: product.id,
+        telegramUser: currentTelegramUser(),
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Product payment request failed')
+        }
+        return response.json()
+      })
+      .then(({ paymentUrl }) => {
+        if (!paymentUrl) {
+          throw new Error('Payment URL missing')
+        }
+
+        openPaymentUrl(paymentUrl, () => {
+          setProductPaymentStatus(text.topUpSuccess)
+        })
+      })
+      .catch(() => {
+        setProductPaymentStatus(text.productPaymentError)
+      })
   }
 
   const handleTopUp = () => {
@@ -560,16 +600,9 @@ function App() {
           throw new Error('Payment URL missing')
         }
 
-        if (window.Telegram?.WebApp?.openInvoice) {
-          window.Telegram.WebApp.openInvoice(paymentUrl, (status) => {
-            if (status === 'paid') {
-              setTopUpStatus(text.topUpSuccess)
-            }
-          })
-          return
-        }
-
-        openPaymentUrl(paymentUrl)
+        openPaymentUrl(paymentUrl, () => {
+          setTopUpStatus(text.topUpSuccess)
+        })
       })
       .catch(() => {
         setTopUpStatus(text.topUpError)
@@ -618,10 +651,10 @@ function App() {
                   onSelect={handleProductSelect}
                   active={selectedProduct.id === product.id}
                   text={text}
-                  selectPlan={text.selectPlan}
                 />
               ))}
             </div>
+            {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
 
           </section>
         </>
