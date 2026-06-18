@@ -226,23 +226,23 @@ const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
 const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
-const productIcons = {
-  ChatGPT: '🤖',
-  Grok: '𝕏',
-  Claude: '🧠',
-  Cursor: '💻',
-  Perplexity: '🔎',
-  Gemini: '💎',
-  Copilot: '🧩',
-  Midjourney: '🎨',
-  Runway: '🎬',
-  Suno: '🎵',
-  Kling: '🎞️',
-  'Leonardo AI': '🖼️',
-  ElevenLabs: '🎙️',
-  Canva: '✨',
-  'Notion AI': '📝',
-  Poe: '🗨️',
+const productAvatars = {
+  ChatGPT: { src: 'https://www.google.com/s2/favicons?domain=chatgpt.com&sz=128', fallback: 'GPT' },
+  Grok: { src: 'https://www.google.com/s2/favicons?domain=x.com&sz=128', fallback: 'X' },
+  Claude: { src: 'https://www.google.com/s2/favicons?domain=claude.ai&sz=128', fallback: 'CL' },
+  Cursor: { src: 'https://www.google.com/s2/favicons?domain=cursor.com&sz=128', fallback: 'CR' },
+  Perplexity: { src: 'https://www.google.com/s2/favicons?domain=perplexity.ai&sz=128', fallback: 'PX' },
+  Gemini: { src: 'https://www.google.com/s2/favicons?domain=gemini.google.com&sz=128', fallback: 'GM' },
+  Copilot: { src: 'https://www.google.com/s2/favicons?domain=copilot.microsoft.com&sz=128', fallback: 'CP' },
+  Midjourney: { src: 'https://www.google.com/s2/favicons?domain=midjourney.com&sz=128', fallback: 'MJ' },
+  Runway: { src: 'https://www.google.com/s2/favicons?domain=runwayml.com&sz=128', fallback: 'RW' },
+  Suno: { src: 'https://www.google.com/s2/favicons?domain=suno.com&sz=128', fallback: 'SN' },
+  Kling: { src: 'https://www.google.com/s2/favicons?domain=klingai.com&sz=128', fallback: 'KG' },
+  'Leonardo AI': { src: 'https://www.google.com/s2/favicons?domain=leonardo.ai&sz=128', fallback: 'LD' },
+  ElevenLabs: { src: 'https://www.google.com/s2/favicons?domain=elevenlabs.io&sz=128', fallback: 'EL' },
+  Canva: { src: 'https://www.google.com/s2/favicons?domain=canva.com&sz=128', fallback: 'CV' },
+  'Notion AI': { src: 'https://www.google.com/s2/favicons?domain=notion.so&sz=128', fallback: 'NT' },
+  Poe: { src: 'https://www.google.com/s2/favicons?domain=poe.com&sz=128', fallback: 'PO' },
 }
 
 const translations = {
@@ -465,7 +465,7 @@ function currentTelegramUser() {
 function ProductCard({ product, onSelect, active, text, selectPlan }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
-  const icon = productIcons[product.group] || '●'
+  const avatar = productAvatars[product.group] || { src: '', fallback: product.brand.slice(0, 2).toUpperCase() }
 
   return (
     <button
@@ -473,7 +473,10 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
       className={`product-card${active ? ' active' : ''}`}
       onClick={() => onSelect(product)}
     >
-      <span className="product-icon" aria-hidden="true">{icon}</span>
+      <span className="product-icon" aria-hidden="true">
+        {avatar.src ? <img src={avatar.src} alt="" loading="lazy" /> : null}
+        <span>{avatar.fallback}</span>
+      </span>
       <div className="product-main">
         <span className="product-badge">{badge}</span>
         <div className="product-topline">
