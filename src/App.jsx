@@ -577,18 +577,20 @@ function App() {
 
       {activeTab === 'catalog' ? (
         <>
-          <nav className="group-tabs" aria-label="AI service groups">
-            {productGroups.map((group) => (
-              <button
-                key={group}
-                type="button"
-                className={`group-tab${activeGroup === group ? ' active' : ''}`}
-                onClick={() => setActiveGroup(group)}
-              >
-                {group === 'Все' ? text.allGroup : group}
-              </button>
-            ))}
-          </nav>
+          <div className="group-tabs-shell">
+            <nav className="group-tabs" aria-label="AI service groups">
+              {productGroups.map((group) => (
+                <button
+                  key={group}
+                  type="button"
+                  className={`group-tab${activeGroup === group ? ' active' : ''}`}
+                  onClick={() => setActiveGroup(group)}
+                >
+                  {group === 'Все' ? text.allGroup : group}
+                </button>
+              ))}
+            </nav>
+          </div>
 
           <section className="catalog-layout">
             <div className="catalog-grid">
