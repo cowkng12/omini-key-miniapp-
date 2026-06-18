@@ -229,8 +229,10 @@ const products = [
 ]
 
 const sellerUsername = 'metifrysell'
+const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
+const topupAmounts = Array.from({ length: 20 }, (_, index) => (index + 1) * 5)
 
 const translations = {
   ru: {
@@ -258,6 +260,9 @@ const translations = {
     ordersText: 'История покупок скоро появится. По поданной заявке менеджер свяжется с вами в течение 5 минут.',
     balanceTitle: 'Баланс',
     balanceText: 'Пока что вы не пополняли баланс.',
+    topUpTitle: 'Пополнить баланс',
+    topUpHint: 'Выберите сумму пополнения через CryptoBot.',
+    topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
       'chatgpt-plus-ready': ['Готовый аккаунт', 'ChatGPT Plus на готовом аккаунте для быстрых задач и общения.'],
@@ -318,6 +323,9 @@ const translations = {
     ordersText: 'Purchase history is coming soon. A manager will contact you within 5 minutes regarding your request.',
     balanceTitle: 'Balance',
     balanceText: 'You have not topped up your balance yet.',
+    topUpTitle: 'Top up balance',
+    topUpHint: 'Choose a CryptoBot top-up amount.',
+    topUpError: 'Could not create a payment link. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
       'chatgpt-plus-ready': ['Ready account', 'ChatGPT Plus on a ready account for quick tasks and conversations.'],
@@ -378,6 +386,9 @@ const translations = {
     ordersText: '购买记录即将上线。提交申请后，经理会在 5 分钟内联系你。',
     balanceTitle: '余额',
     balanceText: '你还没有充值余额。',
+    topUpTitle: '充值余额',
+    topUpHint: '选择通过 CryptoBot 充值的金额。',
+    topUpError: '无法创建付款链接。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
       'chatgpt-plus-ready': ['现成账号', '现成 ChatGPT Plus 账号，适合快速任务和聊天。'],
@@ -419,6 +430,19 @@ function formatPrice(price) {
   return `$${price}`
 }
 
+function openTelegramLink(url) {
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    window.Telegram.WebApp.openTelegramLink(url)
+    return
+  }
+
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+function currentTelegramUser() {
+  return window.Telegram?.WebApp?.initDataUnsafe?.user || null
+}
+
 function ProductCard({ product, onSelect, active, text, selectPlan }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
@@ -448,6 +472,7 @@ function App() {
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
+  const [topUpStatus, setTopUpStatus] = useState('')
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
@@ -455,6 +480,39 @@ function App() {
 
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
+  }
+
+  const handleTopUp = (amount) => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    setTopUpStatus('')
+
+    fetch(`${apiBase}/api/topups`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount,
+        telegramUser: currentTelegramUser(),
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Top-up request failed')
+        }
+        return response.json()
+      })
+      .then(({ paymentUrl }) => {
+        if (!paymentUrl) {
+          throw new Error('Payment URL missing')
+        }
+
+        openTelegramLink(paymentUrl)
+      })
+      .catch(() => {
+        setTopUpStatus(text.topUpError)
+      })
   }
 
   return (
@@ -512,6 +570,20 @@ function App() {
           <h2>{activeTab === 'orders' ? text.ordersTitle : text.balanceTitle}</h2>
           {activeTab === 'balance' ? <strong className="balance-amount">$0</strong> : null}
           <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
+          {activeTab === 'balance' ? (
+            <div className="topup-panel">
+              <h3>{text.topUpTitle}</h3>
+              <p>{text.topUpHint}</p>
+              <div className="topup-grid">
+                {topupAmounts.map((amount) => (
+                  <button key={amount} type="button" onClick={() => handleTopUp(amount)}>
+                    ${amount}
+                  </button>
+                ))}
+              </div>
+              {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
+            </div>
+          ) : null}
         </section>
       )}
 

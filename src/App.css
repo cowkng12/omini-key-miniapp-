@@ -211,6 +211,43 @@
   line-height: 1;
 }
 
+.topup-panel {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topup-panel h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.topup-panel p {
+  margin: 0 0 14px;
+  color: #aab1cf;
+}
+
+.topup-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.topup-grid button {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #dce4ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.topup-status {
+  margin-top: 12px;
+  color: #8ec5ff;
+}
+
 .empty-panel p:last-child {
   max-width: 520px;
   margin: 0;
@@ -342,6 +379,10 @@
 
   .empty-panel h2 {
     font-size: 24px;
+  }
+
+  .topup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

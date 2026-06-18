@@ -52,8 +52,10 @@ const products = {
 }
 
 const orders = []
+const topups = []
+const topupAmounts = Array.from({ length: 20 }, (_, index) => (index + 1) * 5)
 
-async function createCryptoInvoice(order) {
+async function createCryptoInvoice({ id, amount, description }) {
   if (!cryptoPayToken) {
     return null
   }
@@ -66,9 +68,9 @@ async function createCryptoInvoice(order) {
     },
     body: JSON.stringify({
       asset: cryptoPayAsset,
-      amount: String(order.price),
-      description: `OmniKey: ${order.productTitle}`,
-      payload: order.id,
+      amount: String(amount),
+      description,
+      payload: id,
       allow_comments: false,
       allow_anonymous: true,
       expires_in: 3600,
@@ -93,6 +95,62 @@ app.get('/api/config', (request, response) => {
 
 app.get('/api/orders', (request, response) => {
   response.json({ orders })
+})
+
+app.post('/api/topups', async (request, response) => {
+  const { amount, telegramUser = null } = request.body ?? {}
+  const normalizedAmount = Number(amount)
+
+  if (!topupAmounts.includes(normalizedAmount)) {
+    response.status(400).json({ error: 'Unsupported top-up amount' })
+    return
+  }
+
+  const topup = {
+    id: `top_${Date.now()}`,
+    amount: normalizedAmount,
+    status: cryptoPayToken ? 'payment_pending' : 'new',
+    telegramUser,
+    createdAt: new Date().toISOString(),
+  }
+
+  topups.unshift(topup)
+
+  try {
+    const invoice = await createCryptoInvoice({
+      id: topup.id,
+      amount: topup.amount,
+      description: `OmniKey balance top-up: $${topup.amount}`,
+    })
+
+    if (invoice) {
+      topup.cryptoInvoice = {
+        id: invoice.invoice_id,
+        status: invoice.status,
+        payUrl: invoice.bot_invoice_url || invoice.mini_app_invoice_url || invoice.web_app_invoice_url,
+      }
+    }
+  } catch (error) {
+    topup.status = 'payment_error'
+    console.error('CryptoBot top-up invoice failed', error)
+    response.status(502).json({ error: 'Payment invoice creation failed' })
+    return
+  }
+
+  if (bot && adminChatId) {
+    const adminLines = [
+      'Новое пополнение баланса',
+      `ID: ${topup.id}`,
+      `Сумма: $${topup.amount}`,
+      `Статус: ${topup.status}`,
+      `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
+      topup.cryptoInvoice?.payUrl ? `Оплата CryptoBot: ${topup.cryptoInvoice.payUrl}` : null,
+    ].filter(Boolean)
+
+    await bot.telegram.sendMessage(adminChatId, adminLines.join('\n'))
+  }
+
+  response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
 })
 
 app.post('/api/orders', async (request, response) => {
@@ -121,7 +179,11 @@ app.post('/api/orders', async (request, response) => {
   orders.unshift(order)
 
   try {
-    const invoice = await createCryptoInvoice(order)
+    const invoice = await createCryptoInvoice({
+      id: order.id,
+      amount: order.price,
+      description: `OmniKey: ${order.productTitle}`,
+    })
 
     if (invoice) {
       order.cryptoInvoice = {
