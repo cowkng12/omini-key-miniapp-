@@ -3,95 +3,109 @@ import './App.css'
 
 const products = [
   {
+    id: 'chatgpt-plus-ready',
+    group: 'ChatGPT',
+    brand: 'ChatGPT',
+    plan: 'Plus Ready Account',
+    price: 1.8,
+  },
+  {
+    id: 'grok-premium',
+    group: 'Grok',
+    brand: 'Grok',
+    plan: 'Premium',
+    price: 5,
+  },
+  {
     id: 'claude-pro',
     group: 'Claude',
     brand: 'Claude',
     plan: 'Pro',
-    price: 12,
+    price: 6,
   },
   {
     id: 'claude-pro-duo',
     group: 'Claude',
     brand: 'Claude',
     plan: '2 Accounts',
-    price: 18,
+    price: 9,
   },
   {
     id: 'claude-max',
     group: 'Claude',
     brand: 'Claude',
     plan: 'Max',
-    price: 75,
+    price: 37.5,
   },
   {
     id: 'perplexity-pro',
     group: 'Perplexity',
     brand: 'Perplexity',
     plan: 'Pro',
-    price: 12,
+    price: 6,
   },
   {
     id: 'cursor-pro',
     group: 'Cursor',
     brand: 'Cursor',
     plan: 'Pro',
-    price: 10,
+    price: 5,
   },
   {
     id: 'cursor-pro-duo',
     group: 'Cursor',
     brand: 'Cursor',
     plan: '2 Accounts',
-    price: 18,
+    price: 9,
   },
   {
     id: 'cursor-ultra',
     group: 'Cursor',
     brand: 'Cursor',
     plan: 'Ultra',
-    price: 24,
+    price: 12,
   },
   {
     id: 'midjourney-basic',
     group: 'Midjourney',
     brand: 'Midjourney',
     plan: 'Basic',
-    price: 10,
+    price: 5,
   },
   {
     id: 'runway-standard',
     group: 'Runway',
     brand: 'Runway',
     plan: 'Standard',
-    price: 15,
+    price: 7.5,
   },
   {
     id: 'elevenlabs-starter',
     group: 'ElevenLabs',
     brand: 'ElevenLabs',
     plan: 'Starter',
-    price: 5,
+    price: 2.5,
   },
   {
     id: 'notion-ai',
     group: 'Notion AI',
     brand: 'Notion AI',
     plan: 'Plus',
-    price: 10,
+    price: 5,
   },
   {
     id: 'poe-subscription',
     group: 'Poe',
     brand: 'Poe',
     plan: 'Subscription',
-    price: 20,
+    price: 10,
   },
 ]
 
 const defaultApiBase = 'http://localhost:3001'
 const sellerUsername = 'metifrysell'
 const languages = ['ru', 'en', 'zh']
-const productGroups = ['Все', 'Claude', 'Cursor', 'Perplexity', 'Midjourney', 'Runway', 'ElevenLabs', 'Notion AI', 'Poe']
+const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Midjourney', 'Runway', 'ElevenLabs', 'Notion AI', 'Poe']
 
 const translations = {
   ru: {
@@ -102,8 +116,8 @@ const translations = {
     selectPlan: 'Выбрать тариф',
     guarantee: 'Полная гарантия и возможность замены товара при возникновении проблем.',
     promos: {
-      'claude-pro-duo': 'Промо-лот: 2 аккаунта — $18',
-      'cursor-pro-duo': 'Промо-лот: 2 аккаунта — $18',
+      'claude-pro-duo': 'Промо-лот: 2 аккаунта — $9',
+      'cursor-pro-duo': 'Промо-лот: 2 аккаунта — $9',
     },
     orderTitle: 'Ваш заказ',
     name: 'Имя',
@@ -121,6 +135,8 @@ const translations = {
     balanceText: 'Баланс и бонусы появятся в следующем обновлении.',
     productText: {
       'claude-pro': ['Хит старта', 'Быстрый старт для повседневной работы, учебы и текста.'],
+      'chatgpt-plus-ready': ['Готовый аккаунт', 'ChatGPT Plus на готовом аккаунте для быстрых задач и общения.'],
+      'grok-premium': ['AI чат', 'Доступ к Grok для быстрых ответов, идей и повседневных задач.'],
       'claude-pro-duo': ['2 аккаунта', 'Отдельный промо-лот на два аккаунта Claude Pro по спеццене.'],
       'claude-max': ['Премиум', 'Максимальный тариф для активной ежедневной нагрузки.'],
       'perplexity-pro': ['Ресерч', 'Поиск, ресерч и быстрые ответы с источниками.'],
@@ -142,8 +158,8 @@ const translations = {
     selectPlan: 'Select plan',
     guarantee: 'Full guarantee and replacement if any issues arise.',
     promos: {
-      'claude-pro-duo': 'Promo lot: 2 accounts — $18',
-      'cursor-pro-duo': 'Promo lot: 2 accounts — $18',
+      'claude-pro-duo': 'Promo lot: 2 accounts — $9',
+      'cursor-pro-duo': 'Promo lot: 2 accounts — $9',
     },
     orderTitle: 'Your order',
     name: 'Name',
@@ -161,6 +177,8 @@ const translations = {
     balanceText: 'Balance and bonuses will appear in the next update.',
     productText: {
       'claude-pro': ['Starter hit', 'Fast start for daily work, study and writing.'],
+      'chatgpt-plus-ready': ['Ready account', 'ChatGPT Plus on a ready account for quick tasks and conversations.'],
+      'grok-premium': ['AI chat', 'Access to Grok for quick answers, ideas and daily tasks.'],
       'claude-pro-duo': ['2 accounts', 'Separate promo lot for two Claude Pro accounts at a special price.'],
       'claude-max': ['Premium', 'Maximum plan for heavy daily usage.'],
       'perplexity-pro': ['Research', 'Search, research and quick answers with sources.'],
@@ -182,8 +200,8 @@ const translations = {
     selectPlan: '选择套餐',
     guarantee: '提供完整保障，如遇问题可更换商品。',
     promos: {
-      'claude-pro-duo': '优惠商品：2 个账号 — $18',
-      'cursor-pro-duo': '优惠商品：2 个账号 — $18',
+      'claude-pro-duo': '优惠商品：2 个账号 — $9',
+      'cursor-pro-duo': '优惠商品：2 个账号 — $9',
     },
     orderTitle: '你的订单',
     name: '姓名',
@@ -201,6 +219,8 @@ const translations = {
     balanceText: '余额和奖励将在下一次更新中上线。',
     productText: {
       'claude-pro': ['入门热门', '适合日常工作、学习和写作的快速入门。'],
+      'chatgpt-plus-ready': ['现成账号', '现成 ChatGPT Plus 账号，适合快速任务和聊天。'],
+      'grok-premium': ['AI 聊天', '使用 Grok 获取快速回答、想法和日常帮助。'],
       'claude-pro-duo': ['2 个账号', 'Claude Pro 双账号独立优惠商品，价格更划算。'],
       'claude-max': ['高级', '适合高频日常使用的最高套餐。'],
       'perplexity-pro': ['研究', '带来源的搜索、研究和快速回答。'],

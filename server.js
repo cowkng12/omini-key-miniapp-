@@ -14,18 +14,20 @@ const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 
 const products = {
-  'claude-pro': { title: 'Claude Pro', price: 12 },
-  'claude-pro-duo': { title: 'Claude Pro 2 Accounts', price: 18 },
-  'claude-max': { title: 'Claude Max', price: 75 },
-  'perplexity-pro': { title: 'Perplexity Pro', price: 12 },
-  'cursor-pro': { title: 'Cursor Pro', price: 10 },
-  'cursor-pro-duo': { title: 'Cursor Pro 2 Accounts', price: 18 },
-  'cursor-ultra': { title: 'Cursor Ultra', price: 24 },
-  'midjourney-basic': { title: 'Midjourney Basic', price: 10 },
-  'runway-standard': { title: 'Runway Standard', price: 15 },
-  'elevenlabs-starter': { title: 'ElevenLabs Starter', price: 5 },
-  'notion-ai': { title: 'Notion AI Plus', price: 10 },
-  'poe-subscription': { title: 'Poe Subscription', price: 20 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.8 },
+  'grok-premium': { title: 'Grok Premium', price: 5 },
+  'claude-pro': { title: 'Claude Pro', price: 6 },
+  'claude-pro-duo': { title: 'Claude Pro 2 Accounts', price: 9 },
+  'claude-max': { title: 'Claude Max', price: 37.5 },
+  'perplexity-pro': { title: 'Perplexity Pro', price: 6 },
+  'cursor-pro': { title: 'Cursor Pro', price: 5 },
+  'cursor-pro-duo': { title: 'Cursor Pro 2 Accounts', price: 9 },
+  'cursor-ultra': { title: 'Cursor Ultra', price: 12 },
+  'midjourney-basic': { title: 'Midjourney Basic', price: 5 },
+  'runway-standard': { title: 'Runway Standard', price: 7.5 },
+  'elevenlabs-starter': { title: 'ElevenLabs Starter', price: 2.5 },
+  'notion-ai': { title: 'Notion AI Plus', price: 5 },
+  'poe-subscription': { title: 'Poe Subscription', price: 10 },
 }
 
 const orders = []
