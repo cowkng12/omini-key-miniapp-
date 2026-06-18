@@ -256,6 +256,7 @@ const translations = {
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения через CryptoBot.',
     topUpButton: 'Оплатить',
+    topUpSuccess: 'Успешно, в течении 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
@@ -319,6 +320,7 @@ const translations = {
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a CryptoBot top-up amount.',
     topUpButton: 'Pay',
+    topUpSuccess: 'Success. A manager will message you within 10 minutes to deliver the product. Please wait.',
     topUpError: 'Could not create a payment link. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
@@ -382,6 +384,7 @@ const translations = {
     topUpTitle: '充值余额',
     topUpHint: '选择通过 CryptoBot 充值的金额。',
     topUpButton: '支付',
+    topUpSuccess: '支付成功。经理会在 10 分钟内联系你并发放商品，请稍候。',
     topUpError: '无法创建付款链接。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
@@ -530,6 +533,15 @@ function App() {
       .then(({ paymentUrl }) => {
         if (!paymentUrl) {
           throw new Error('Payment URL missing')
+        }
+
+        if (window.Telegram?.WebApp?.openInvoice) {
+          window.Telegram.WebApp.openInvoice(paymentUrl, (status) => {
+            if (status === 'paid') {
+              setTopUpStatus(text.topUpSuccess)
+            }
+          })
+          return
         }
 
         openPaymentUrl(paymentUrl)
