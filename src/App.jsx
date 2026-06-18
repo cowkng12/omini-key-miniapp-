@@ -551,7 +551,11 @@ function App() {
         }
         return response.json()
       })
-      .then(() => {
+      .then(({ paymentUrl }) => {
+        if (paymentUrl) {
+          openTelegramLink(paymentUrl)
+        }
+
         setStatusText(text.success)
       })
       .catch(() => {

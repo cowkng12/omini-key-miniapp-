@@ -12,6 +12,9 @@ const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
 const adminChatId = process.env.ADMIN_CHAT_ID?.trim()
 const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
+const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
+const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
+const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
@@ -50,6 +53,37 @@ const products = {
 
 const orders = []
 
+async function createCryptoInvoice(order) {
+  if (!cryptoPayToken) {
+    return null
+  }
+
+  const response = await fetch(`${cryptoPayApiUrl}/createInvoice`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Crypto-Pay-API-Token': cryptoPayToken,
+    },
+    body: JSON.stringify({
+      asset: cryptoPayAsset,
+      amount: String(order.price),
+      description: `OmniKey: ${order.productTitle}`,
+      payload: order.id,
+      allow_comments: false,
+      allow_anonymous: true,
+      expires_in: 3600,
+    }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error?.message || 'CryptoBot invoice creation failed')
+  }
+
+  return data.result
+}
+
 app.use(cors())
 app.use(express.json())
 
@@ -75,7 +109,7 @@ app.post('/api/orders', async (request, response) => {
     productId,
     productTitle: product.title,
     price: product.price,
-    status: 'new',
+    status: cryptoPayToken ? 'payment_pending' : 'new',
     customer: {
       name: (customer.name || '').trim(),
       telegram: (customer.telegram || '').trim(),
@@ -86,21 +120,40 @@ app.post('/api/orders', async (request, response) => {
 
   orders.unshift(order)
 
+  try {
+    const invoice = await createCryptoInvoice(order)
+
+    if (invoice) {
+      order.cryptoInvoice = {
+        id: invoice.invoice_id,
+        status: invoice.status,
+        payUrl: invoice.bot_invoice_url || invoice.mini_app_invoice_url || invoice.web_app_invoice_url,
+      }
+    }
+  } catch (error) {
+    order.status = 'payment_error'
+    console.error('CryptoBot invoice failed', error)
+    response.status(502).json({ error: 'Payment invoice creation failed' })
+    return
+  }
+
   if (bot && adminChatId) {
     const adminLines = [
       'Новый заказ',
       `ID: ${order.id}`,
       `Товар: ${order.productTitle}`,
       `Цена: $${order.price}`,
+      `Статус: ${order.status}`,
       `Имя: ${order.customer.name || 'Не указано'}`,
       `Telegram: ${order.customer.telegram || 'Не указан'}`,
       `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
-    ]
+      order.cryptoInvoice?.payUrl ? `Оплата CryptoBot: ${order.cryptoInvoice.payUrl}` : null,
+    ].filter(Boolean)
 
     await bot.telegram.sendMessage(adminChatId, adminLines.join('\n'))
   }
 
-  response.status(201).json({ order })
+  response.status(201).json({ order, paymentUrl: order.cryptoInvoice?.payUrl || null })
 })
 
 app.use(express.static(path.join(__dirname, 'dist')))
