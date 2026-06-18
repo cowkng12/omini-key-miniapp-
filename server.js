@@ -53,6 +53,7 @@ const products = {
 
 const orders = []
 const topups = []
+const balances = new Map()
 const topupAmounts = Array.from({ length: 20 }, (_, index) => (index + 1) * 5)
 
 async function createCryptoInvoice({ id, amount, description }) {
@@ -95,6 +96,13 @@ app.get('/api/config', (request, response) => {
 
 app.get('/api/orders', (request, response) => {
   response.json({ orders })
+})
+
+app.get('/api/balance/:telegramId', (request, response) => {
+  const telegramId = request.params.telegramId?.trim()
+  const balance = balances.get(telegramId) || 0
+
+  response.json({ balance })
 })
 
 app.post('/api/topups', async (request, response) => {
@@ -416,6 +424,28 @@ if (botToken) {
 
   bot.command('shop', async (context) => {
     await sendMainMenu(context, currentLanguage(context))
+  })
+
+  bot.command('myid', async (context) => {
+    await context.reply(`Ваш Telegram ID: ${context.from.id}`)
+  })
+
+  bot.command('setbalance', async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await context.reply('Команда доступна только администратору.')
+      return
+    }
+
+    const [, telegramId, amount] = context.message.text.trim().split(/\s+/)
+    const balance = Number(amount)
+
+    if (!telegramId || !Number.isFinite(balance) || balance < 0) {
+      await context.reply('Использование: /setbalance <telegram_id> <amount>')
+      return
+    }
+
+    balances.set(telegramId, balance)
+    await context.reply(`Баланс пользователя ${telegramId} установлен: $${balance}`)
   })
 
   bot.action('support', async (context) => {

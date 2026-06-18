@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const products = [
@@ -482,10 +482,35 @@ function App() {
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [topUpStatus, setTopUpStatus] = useState('')
+  const [balance, setBalance] = useState(0)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
     : products.filter((product) => product.group === activeGroup)
+
+  useEffect(() => {
+    const telegramId = currentTelegramUser()?.id
+
+    if (!telegramId) {
+      return
+    }
+
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    fetch(`${apiBase}/api/balance/${telegramId}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Balance request failed')
+        }
+        return response.json()
+      })
+      .then(({ balance: userBalance = 0 }) => {
+        setBalance(Number(userBalance) || 0)
+      })
+      .catch(() => {
+        setBalance(0)
+      })
+  }, [])
 
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
@@ -577,7 +602,7 @@ function App() {
         <section className="empty-panel">
           <p className="eyebrow">OmniKey</p>
           <h2>{activeTab === 'orders' ? text.ordersTitle : text.balanceTitle}</h2>
-          {activeTab === 'balance' ? <strong className="balance-amount">$0</strong> : null}
+          {activeTab === 'balance' ? <strong className="balance-amount">{formatPrice(balance)}</strong> : null}
           <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
           {activeTab === 'balance' ? (
             <div className="topup-panel">
