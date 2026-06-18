@@ -1,6 +1,6 @@
 .page-shell {
   position: relative;
-  max-width: 1380px;
+  max-width: 1460px;
   margin: 0 auto;
   padding: 24px 18px 92px;
 }
@@ -13,7 +13,7 @@
   border: 1px solid rgba(226, 232, 240, 0.2);
   border-radius: 999px;
   padding: 8px 10px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(24, 10, 12, 0.92);
   color: #f8fafc;
   font-size: 12px;
   font-weight: 700;
@@ -31,7 +31,7 @@
 
 .eyebrow {
   margin: 0 0 10px;
-  color: #93c5fd;
+  color: #fca5a5;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -85,7 +85,7 @@
 .group-tab {
   flex: 0 0 auto;
   scroll-snap-align: start;
-  border: 1px solid rgba(226, 232, 240, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.18);
   border-radius: 999px;
   padding: 10px 14px;
   background: rgba(15, 23, 42, 0.72);
@@ -94,20 +94,20 @@
 }
 
 .group-tab.active {
-  border-color: rgba(96, 165, 250, 0.75);
-  background: rgba(30, 64, 175, 0.34);
+  border-color: rgba(248, 113, 113, 0.78);
+  background: rgba(127, 29, 29, 0.42);
   color: #f8fafc;
 }
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .product-card {
-  border: 1px solid rgba(226, 232, 240, 0.12);
-  background: linear-gradient(180deg, rgba(18, 26, 41, 0.96) 0%, rgba(10, 15, 25, 0.96) 100%);
+  border: 1px solid rgba(248, 113, 113, 0.18);
+  background: linear-gradient(135deg, rgba(35, 14, 16, 0.98) 0%, rgba(15, 9, 11, 0.98) 58%, rgba(54, 16, 18, 0.94) 100%);
   backdrop-filter: blur(14px);
   border-radius: 22px;
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
@@ -115,8 +115,8 @@
 
 .product-card {
   text-align: left;
-  min-height: 172px;
-  padding: 14px;
+  min-height: 148px;
+  padding: 16px 18px;
   color: inherit;
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
@@ -125,16 +125,16 @@
 .product-card:hover,
 .product-card.active {
   transform: translateY(-2px);
-  border-color: rgba(96, 165, 250, 0.66);
-  background: linear-gradient(180deg, rgba(22, 32, 50, 0.98) 0%, rgba(11, 18, 30, 0.98) 100%);
+  border-color: rgba(248, 113, 113, 0.72);
+  background: linear-gradient(135deg, rgba(50, 18, 20, 0.98) 0%, rgba(18, 10, 12, 0.98) 58%, rgba(80, 20, 24, 0.96) 100%);
 }
 
 .product-badge {
   display: inline-flex;
   padding: 7px 10px;
   border-radius: 999px;
-  background: rgba(30, 64, 175, 0.28);
-  color: #bfdbfe;
+  background: rgba(127, 29, 29, 0.48);
+  color: #fecaca;
   font-size: 12px;
 }
 
@@ -143,7 +143,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 .product-brand {
@@ -159,14 +159,15 @@
 
 .product-price {
   display: block;
-  margin-top: 16px;
-  font-size: 32px;
+  margin-top: 18px;
+  color: #fff7ed;
+  font-size: 34px;
   line-height: 1;
 }
 
 .product-promo {
   margin: 8px 0 10px;
-  color: #7dd3fc;
+  color: #fca5a5;
   font-size: 12px;
   font-weight: 700;
 }
@@ -185,8 +186,57 @@
 }
 
 .product-action {
-  color: #93c5fd;
+  color: #fca5a5;
   font-size: 14px;
+}
+
+@media (min-width: 901px) {
+  .product-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "badge price"
+      "topline price"
+      "promo action"
+      "description action"
+      "guarantee action";
+    column-gap: 22px;
+    align-items: start;
+  }
+
+  .product-badge {
+    grid-area: badge;
+    justify-self: start;
+  }
+
+  .product-topline {
+    grid-area: topline;
+  }
+
+  .product-price {
+    grid-area: price;
+    margin-top: 2px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .product-promo {
+    grid-area: promo;
+  }
+
+  .product-description {
+    grid-area: description;
+  }
+
+  .product-guarantee {
+    grid-area: guarantee;
+  }
+
+  .product-action {
+    grid-area: action;
+    align-self: end;
+    white-space: nowrap;
+  }
 }
 
 .empty-panel {
@@ -194,7 +244,7 @@
   border: 1px solid rgba(226, 232, 240, 0.12);
   border-radius: 22px;
   padding: 24px;
-  background: linear-gradient(180deg, rgba(18, 26, 41, 0.96) 0%, rgba(10, 15, 25, 0.96) 100%);
+  background: linear-gradient(135deg, rgba(35, 14, 16, 0.98) 0%, rgba(15, 9, 11, 0.98) 100%);
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
 }
 
@@ -206,7 +256,7 @@
 .balance-amount {
   display: block;
   margin: 0 0 14px;
-  color: #93c5fd;
+  color: #fca5a5;
   font-size: 42px;
   line-height: 1;
 }
@@ -244,8 +294,8 @@
 }
 
 .topup-grid button.active {
-  border-color: rgba(96, 165, 250, 0.75);
-  background: rgba(30, 64, 175, 0.36);
+  border-color: rgba(248, 113, 113, 0.78);
+  background: rgba(127, 29, 29, 0.42);
   color: #f8fafc;
 }
 
@@ -255,7 +305,7 @@
   border: 0;
   border-radius: 18px;
   padding: 15px 18px;
-  background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
   color: #ffffff;
   font-weight: 800;
   cursor: pointer;
@@ -263,7 +313,7 @@
 
 .topup-status {
   margin-top: 12px;
-  color: #7dd3fc;
+  color: #fca5a5;
 }
 
 .empty-panel p:last-child {
@@ -282,8 +332,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-  background: rgba(8, 11, 18, 0.96);
-  border-top: 1px solid rgba(226, 232, 240, 0.12);
+  background: rgba(13, 9, 11, 0.97);
+  border-top: 1px solid rgba(248, 113, 113, 0.18);
   backdrop-filter: blur(16px);
 }
 
@@ -298,7 +348,7 @@
 }
 
 .bottom-tabs button.active {
-  background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
   color: #ffffff;
 }
 
