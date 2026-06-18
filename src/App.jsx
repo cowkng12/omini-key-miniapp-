@@ -227,22 +227,22 @@ const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
 const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const productIcons = {
-  ChatGPT: 'GPT',
-  Grok: 'GX',
-  Claude: 'CL',
-  Cursor: 'CR',
-  Perplexity: 'PX',
-  Gemini: 'GM',
-  Copilot: 'CP',
-  Midjourney: 'MJ',
-  Runway: 'RW',
-  Suno: 'SN',
-  Kling: 'KG',
-  'Leonardo AI': 'LD',
-  ElevenLabs: 'EL',
-  Canva: 'CV',
-  'Notion AI': 'NT',
-  Poe: 'PO',
+  ChatGPT: '🤖',
+  Grok: '𝕏',
+  Claude: '🧠',
+  Cursor: '💻',
+  Perplexity: '🔎',
+  Gemini: '💎',
+  Copilot: '🧩',
+  Midjourney: '🎨',
+  Runway: '🎬',
+  Suno: '🎵',
+  Kling: '🎞️',
+  'Leonardo AI': '🖼️',
+  ElevenLabs: '🎙️',
+  Canva: '✨',
+  'Notion AI': '📝',
+  Poe: '🗨️',
 }
 
 const translations = {
@@ -465,7 +465,7 @@ function currentTelegramUser() {
 function ProductCard({ product, onSelect, active, text, selectPlan }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
-  const icon = productIcons[product.group] || product.brand.slice(0, 2).toUpperCase()
+  const icon = productIcons[product.group] || '●'
 
   return (
     <button
