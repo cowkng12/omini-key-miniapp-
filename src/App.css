@@ -10,11 +10,11 @@
   top: 86px;
   right: 18px;
   z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(226, 232, 240, 0.2);
   border-radius: 999px;
   padding: 8px 10px;
-  background: rgba(13, 18, 36, 0.88);
-  color: #dce4ff;
+  background: rgba(15, 23, 42, 0.9);
+  color: #f8fafc;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -31,7 +31,7 @@
 
 .eyebrow {
   margin: 0 0 10px;
-  color: #a0abff;
+  color: #93c5fd;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -47,7 +47,7 @@
 .hero-copy {
   margin: 0;
   max-width: 420px;
-  color: #b8bfd8;
+  color: #b7c0d4;
   font-size: 16px;
 }
 
@@ -85,18 +85,18 @@
 .group-tab {
   flex: 0 0 auto;
   scroll-snap-align: start;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.12);
   border-radius: 999px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #aeb8da;
+  background: rgba(15, 23, 42, 0.72);
+  color: #b7c0d4;
   cursor: pointer;
 }
 
 .group-tab.active {
-  border-color: rgba(136, 122, 255, 0.72);
-  background: rgba(137, 118, 255, 0.18);
-  color: #ffffff;
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(30, 64, 175, 0.34);
+  color: #f8fafc;
 }
 
 .catalog-grid {
@@ -106,11 +106,11 @@
 }
 
 .product-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(11, 16, 32, 0.78);
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  background: linear-gradient(180deg, rgba(18, 26, 41, 0.96) 0%, rgba(10, 15, 25, 0.96) 100%);
   backdrop-filter: blur(14px);
-  border-radius: 26px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  border-radius: 22px;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
 }
 
 .product-card {
@@ -125,16 +125,16 @@
 .product-card:hover,
 .product-card.active {
   transform: translateY(-2px);
-  border-color: rgba(136, 122, 255, 0.65);
-  background: rgba(18, 24, 46, 0.95);
+  border-color: rgba(96, 165, 250, 0.66);
+  background: linear-gradient(180deg, rgba(22, 32, 50, 0.98) 0%, rgba(11, 18, 30, 0.98) 100%);
 }
 
 .product-badge {
   display: inline-flex;
   padding: 7px 10px;
   border-radius: 999px;
-  background: rgba(137, 118, 255, 0.14);
-  color: #c9c2ff;
+  background: rgba(30, 64, 175, 0.28);
+  color: #bfdbfe;
   font-size: 12px;
 }
 
@@ -148,12 +148,12 @@
 
 .product-brand {
   font-size: 16px;
-  color: #d6dbf5;
+  color: #f1f5f9;
 }
 
 .product-plan {
   font-size: 14px;
-  color: #8e97ba;
+  color: #94a3b8;
   text-transform: uppercase;
 }
 
@@ -166,36 +166,36 @@
 
 .product-promo {
   margin: 8px 0 10px;
-  color: #8ec5ff;
+  color: #7dd3fc;
   font-size: 12px;
   font-weight: 700;
 }
 
 .product-description {
   margin: 12px 0 16px;
-  color: #aab1cf;
+  color: #b7c0d4;
   font-size: 14px;
 }
 
 .product-guarantee {
   margin: -4px 0 14px;
-  color: #8790b4;
+  color: #8fa0b8;
   font-size: 11px;
   line-height: 1.35;
 }
 
 .product-action {
-  color: #93a0ff;
+  color: #93c5fd;
   font-size: 14px;
 }
 
 .empty-panel {
   min-height: 320px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 26px;
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  border-radius: 22px;
   padding: 24px;
-  background: rgba(11, 16, 32, 0.78);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(180deg, rgba(18, 26, 41, 0.96) 0%, rgba(10, 15, 25, 0.96) 100%);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
 }
 
 .empty-panel h2 {
@@ -206,7 +206,7 @@
 .balance-amount {
   display: block;
   margin: 0 0 14px;
-  color: #8fc7ff;
+  color: #93c5fd;
   font-size: 42px;
   line-height: 1;
 }
@@ -214,7 +214,7 @@
 .topup-panel {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(226, 232, 240, 0.12);
 }
 
 .topup-panel h3 {
@@ -224,7 +224,7 @@
 
 .topup-panel p {
   margin: 0 0 14px;
-  color: #aab1cf;
+  color: #b7c0d4;
 }
 
 .topup-grid {
@@ -234,19 +234,19 @@
 }
 
 .topup-grid button {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.12);
   border-radius: 14px;
   padding: 12px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #dce4ff;
+  background: rgba(15, 23, 42, 0.72);
+  color: #e2e8f0;
   font-weight: 700;
   cursor: pointer;
 }
 
 .topup-grid button.active {
-  border-color: rgba(136, 122, 255, 0.72);
-  background: rgba(137, 118, 255, 0.22);
-  color: #ffffff;
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(30, 64, 175, 0.36);
+  color: #f8fafc;
 }
 
 .topup-pay-button {
@@ -255,7 +255,7 @@
   border: 0;
   border-radius: 18px;
   padding: 15px 18px;
-  background: linear-gradient(135deg, #7d6bff 0%, #2ab0ff 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
   color: #ffffff;
   font-weight: 800;
   cursor: pointer;
@@ -263,13 +263,13 @@
 
 .topup-status {
   margin-top: 12px;
-  color: #8ec5ff;
+  color: #7dd3fc;
 }
 
 .empty-panel p:last-child {
   max-width: 520px;
   margin: 0;
-  color: #aab1cf;
+  color: #b7c0d4;
 }
 
 .bottom-tabs {
@@ -282,8 +282,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-  background: rgba(14, 19, 31, 0.94);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 11, 18, 0.96);
+  border-top: 1px solid rgba(226, 232, 240, 0.12);
   backdrop-filter: blur(16px);
 }
 
@@ -291,14 +291,14 @@
   border: 0;
   border-radius: 16px;
   padding: 12px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #aeb8da;
+  background: rgba(15, 23, 42, 0.86);
+  color: #b7c0d4;
   font-weight: 700;
   cursor: pointer;
 }
 
 .bottom-tabs button.active {
-  background: linear-gradient(135deg, #7d6bff 0%, #2ab0ff 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
   color: #ffffff;
 }
 
