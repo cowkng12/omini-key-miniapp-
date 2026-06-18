@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 const products = [
@@ -228,7 +228,6 @@ const products = [
   },
 ]
 
-const defaultApiBase = 'http://localhost:3001'
 const sellerUsername = 'metifrysell'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
@@ -258,7 +257,7 @@ const translations = {
     ordersTitle: 'Мои покупки',
     ordersText: 'История покупок скоро появится. По поданной заявке менеджер свяжется с вами в течение 5 минут.',
     balanceTitle: 'Баланс',
-    balanceText: 'Баланс и бонусы появятся в следующем обновлении.',
+    balanceText: 'Пока что вы не пополняли баланс.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
       'chatgpt-plus-ready': ['Готовый аккаунт', 'ChatGPT Plus на готовом аккаунте для быстрых задач и общения.'],
@@ -318,7 +317,7 @@ const translations = {
     ordersTitle: 'My purchases',
     ordersText: 'Purchase history is coming soon. A manager will contact you within 5 minutes regarding your request.',
     balanceTitle: 'Balance',
-    balanceText: 'Balance and bonuses will appear in the next update.',
+    balanceText: 'You have not topped up your balance yet.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
       'chatgpt-plus-ready': ['Ready account', 'ChatGPT Plus on a ready account for quick tasks and conversations.'],
@@ -378,7 +377,7 @@ const translations = {
     ordersTitle: '我的购买',
     ordersText: '购买记录即将上线。提交申请后，经理会在 5 分钟内联系你。',
     balanceTitle: '余额',
-    balanceText: '余额和奖励将在下一次更新中上线。',
+    balanceText: '你还没有充值余额。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
       'chatgpt-plus-ready': ['现成账号', '现成 ChatGPT Plus 账号，适合快速任务和聊天。'],
@@ -420,29 +419,6 @@ function formatPrice(price) {
   return `$${price}`
 }
 
-function buildMessage(product, customer) {
-  return [
-    'Новый заказ',
-    `${product.brand} ${product.plan}`,
-    `Цена: ${formatPrice(product.price)}`,
-    `Имя: ${customer.name || 'Не указано'}`,
-    `Telegram: ${customer.telegram || 'Не указан'}`,
-  ].join('\n')
-}
-
-function openTelegramLink(url) {
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    window.Telegram.WebApp.openTelegramLink(url)
-    return
-  }
-
-  window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-function currentTelegramUser() {
-  return window.Telegram?.WebApp?.initDataUnsafe?.user || null
-}
-
 function ProductCard({ product, onSelect, active, text, selectPlan }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
@@ -467,100 +443,18 @@ function ProductCard({ product, onSelect, active, text, selectPlan }) {
   )
 }
 
-function OrderForm({ product, customer, onChange, onPay, text, actionRef }) {
-  return (
-    <section className="order-panel">
-      <div className="order-head">
-        <div>
-          <p className="eyebrow">{text.orderTitle}</p>
-          <h2>{product.brand} {product.plan}</h2>
-        </div>
-        <strong>{formatPrice(product.price)}</strong>
-      </div>
-
-      <label>
-        <span>{text.name}</span>
-        <input
-          value={customer.name}
-          onChange={(event) => onChange('name', event.target.value)}
-          placeholder={text.namePlaceholder}
-        />
-      </label>
-
-      <label>
-        <span>Telegram</span>
-        <input
-          value={customer.telegram}
-          onChange={(event) => onChange('telegram', event.target.value)}
-          placeholder={text.telegramPlaceholder}
-        />
-      </label>
-
-      <button type="button" className="pay-button" onClick={onPay} ref={actionRef}>
-        {text.buyButton}
-      </button>
-
-    </section>
-  )
-}
-
 function App() {
   const [selectedProduct, setSelectedProduct] = useState(products[0])
-  const [customer, setCustomer] = useState({
-    name: '',
-    telegram: '',
-  })
-  const [statusText, setStatusText] = useState('')
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
-  const orderActionRef = useRef(null)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
     : products.filter((product) => product.group === activeGroup)
 
-  const handleChange = (field, value) => {
-    setCustomer((current) => ({ ...current, [field]: value }))
-  }
-
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
-    window.setTimeout(() => {
-      orderActionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }, 80)
-  }
-
-  const handlePay = () => {
-    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
-
-    fetch(`${apiBase}/api/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId: selectedProduct.id,
-        customer,
-        telegramUser: currentTelegramUser(),
-      }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Order request failed')
-        }
-        return response.json()
-      })
-      .then(({ paymentUrl }) => {
-        if (paymentUrl) {
-          openTelegramLink(paymentUrl)
-        }
-
-        setStatusText(text.success)
-      })
-      .catch(() => {
-        setStatusText(text.error)
-      })
   }
 
   return (
@@ -610,25 +504,16 @@ function App() {
               ))}
             </div>
 
-            <OrderForm
-              product={selectedProduct}
-              customer={customer}
-              onChange={handleChange}
-              onPay={handlePay}
-              text={text}
-              actionRef={orderActionRef}
-            />
           </section>
         </>
       ) : (
         <section className="empty-panel">
           <p className="eyebrow">OmniKey</p>
           <h2>{activeTab === 'orders' ? text.ordersTitle : text.balanceTitle}</h2>
+          {activeTab === 'balance' ? <strong className="balance-amount">$0</strong> : null}
           <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
         </section>
       )}
-
-      {statusText ? <p className="status-banner">{statusText}</p> : null}
 
       <nav className="bottom-tabs" aria-label="Mini app tabs">
         {Object.entries(text.tabs).map(([tab, label]) => (
