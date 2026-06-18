@@ -59,10 +59,23 @@
 }
 
 .group-tabs-shell {
+  position: relative;
   max-width: 100%;
-  margin: 0 -18px 16px;
+  margin: 0 -18px 18px;
+  padding-bottom: 11px;
   overflow: hidden;
   mask-image: linear-gradient(90deg, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%);
+}
+
+.group-tabs-shell::after {
+  position: absolute;
+  right: 18px;
+  bottom: 0;
+  left: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.9), rgba(239, 68, 68, 0.2));
+  content: '';
 }
 
 .group-tabs {
@@ -115,9 +128,9 @@
 
 .product-card {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto auto;
+  grid-template-columns: 86px minmax(0, 1fr) auto auto;
   gap: 18px;
-  align-items: center;
+  align-items: stretch;
   text-align: left;
   min-height: 132px;
   padding: 16px 18px;
@@ -136,8 +149,9 @@
 .product-icon {
   position: relative;
   display: grid;
-  width: 58px;
-  height: 58px;
+  width: 86px;
+  height: 100%;
+  min-height: 112px;
   place-items: center;
   border: 1px solid rgba(248, 113, 113, 0.34);
   border-radius: 18px;
@@ -152,9 +166,9 @@
 .product-icon img {
   position: relative;
   z-index: 1;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
   object-fit: contain;
   background: rgba(255, 255, 255, 0.92);
   padding: 4px;
@@ -236,7 +250,7 @@
 
 @media (min-width: 901px) {
   .product-card {
-    grid-template-columns: 72px minmax(0, 1fr) 116px 124px;
+    grid-template-columns: 86px minmax(0, 1fr) 116px 124px;
   }
 }
 
@@ -409,27 +423,33 @@
     mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
   }
 
+  .group-tabs-shell::after {
+    right: 12px;
+    left: 12px;
+  }
+
   .group-tabs {
     padding-inline: 12px;
   }
 
   .product-card {
-    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-columns: 58px minmax(0, 1fr);
     min-height: 156px;
     padding: 12px;
   }
 
   .product-icon {
-    width: 46px;
-    height: 46px;
+    width: 58px;
+    height: 100%;
+    min-height: 132px;
     border-radius: 15px;
     font-size: 12px;
   }
 
   .product-icon img {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     padding: 3px;
   }
 
