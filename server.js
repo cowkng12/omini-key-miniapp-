@@ -20,7 +20,6 @@ const products = {
   'grok-premium': { title: 'Grok Premium', price: 5 },
   'grok-premium-plus': { title: 'Grok Premium Plus', price: 8 },
   'grok-ready-account': { title: 'Grok Ready Account', price: 3 },
-  'grok-duo': { title: 'Grok 2 Accounts', price: 9 },
   'claude-pro': { title: 'Claude Pro', price: 6 },
   'claude-pro-duo': { title: 'Claude Pro 2 Accounts', price: 9 },
   'claude-max': { title: 'Claude Max', price: 37.5 },
