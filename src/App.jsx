@@ -430,7 +430,12 @@ function formatPrice(price) {
   return `$${price}`
 }
 
-function openTelegramLink(url) {
+function openPaymentUrl(url) {
+  if (window.Telegram?.WebApp?.openInvoice) {
+    window.Telegram.WebApp.openInvoice(url)
+    return
+  }
+
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(url)
     return
@@ -508,7 +513,7 @@ function App() {
           throw new Error('Payment URL missing')
         }
 
-        openTelegramLink(paymentUrl)
+        openPaymentUrl(paymentUrl)
       })
       .catch(() => {
         setTopUpStatus(text.topUpError)

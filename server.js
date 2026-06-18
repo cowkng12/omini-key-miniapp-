@@ -127,7 +127,7 @@ app.post('/api/topups', async (request, response) => {
       topup.cryptoInvoice = {
         id: invoice.invoice_id,
         status: invoice.status,
-        payUrl: invoice.bot_invoice_url || invoice.mini_app_invoice_url || invoice.web_app_invoice_url,
+        payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url,
       }
     }
   } catch (error) {
@@ -189,7 +189,7 @@ app.post('/api/orders', async (request, response) => {
       order.cryptoInvoice = {
         id: invoice.invoice_id,
         status: invoice.status,
-        payUrl: invoice.bot_invoice_url || invoice.mini_app_invoice_url || invoice.web_app_invoice_url,
+        payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url,
       }
     }
   } catch (error) {
