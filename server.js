@@ -119,7 +119,7 @@ if (botToken) {
         '4. Нажмите "Подать заявку на покупку".',
         '5. В течение 5 минут с вами свяжется менеджер для подтверждения заказа.',
       ].join('\n'),
-      orders: '🏆 Заказы\n\nПока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
+      orders: '🧾 Мои покупки\n\nПока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
       promotions: [
         '🎁 Акции',
         '',
@@ -168,7 +168,7 @@ if (botToken) {
         '4. Press "Submit purchase request".',
         '5. A manager will contact you within 5 minutes to confirm the order.',
       ].join('\n'),
-      orders: '🏆 Orders\n\nYou do not have any orders yet. Open the catalog to place one.',
+      orders: '🧾 My purchases\n\nYou do not have any orders yet. Open the catalog to place one.',
       promotions: [
         '🎁 Promotions',
         '',
@@ -217,7 +217,7 @@ if (botToken) {
         '4. 点击“提交购买申请”。',
         '5. 经理会在 5 分钟内联系你确认订单。',
       ].join('\n'),
-      orders: '🏆 订单\n\n你目前还没有订单。打开目录即可下单。',
+      orders: '🧾 我的购买\n\n你目前还没有订单。打开目录即可下单。',
       promotions: [
         '🎁 优惠活动',
         '',
