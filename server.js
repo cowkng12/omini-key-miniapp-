@@ -238,6 +238,18 @@ if (botToken) {
   bot = new Telegraf(botToken)
   const userLanguages = new Map()
 
+  async function safeAnswerCbQuery(context, text) {
+    try {
+      await context.answerCbQuery(text)
+    } catch (error) {
+      const description = error?.response?.description || error?.message || ''
+
+      if (!description.includes('query is too old') && !description.includes('query ID is invalid')) {
+        throw error
+      }
+    }
+  }
+
   const botText = {
     ru: {
       languageSelected: 'Язык выбран: Русский.',
@@ -449,32 +461,32 @@ if (botToken) {
   })
 
   bot.action('support', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].support)
   })
 
   bot.action('guide', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].guide)
   })
 
   bot.action('orders', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].orders)
   })
 
   bot.action('promotions', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].promotions)
   })
 
   bot.action('about', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].about)
   })
 
   bot.action('language', async (context) => {
-    await context.answerCbQuery()
+    await safeAnswerCbQuery(context)
     await context.reply('Выберите язык / Choose language / 选择语言', languageKeyboard)
   })
 
@@ -482,9 +494,19 @@ if (botToken) {
     const language = context.match[1]
 
     userLanguages.set(context.from.id, language)
-    await context.answerCbQuery(botText[language].languageSelected)
+    await safeAnswerCbQuery(context, botText[language].languageSelected)
     await context.reply(botText[language].languageSelected)
     await sendMainMenu(context, language)
+  })
+
+  bot.catch((error, context) => {
+    console.error('Telegram bot update error', {
+      error: error?.message,
+      description: error?.response?.description,
+      updateType: context.updateType,
+      callbackData: context.callbackQuery?.data,
+      fromId: context.from?.id,
+    })
   })
 
   bot.launch()
