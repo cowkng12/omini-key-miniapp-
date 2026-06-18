@@ -60,11 +60,11 @@
 
 .group-tabs {
   display: flex;
-  gap: 10px;
+  gap: 16px;
   max-width: 100%;
   min-width: 0;
   margin: 0 0 16px;
-  padding-bottom: 4px;
+  padding: 0 4px 4px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
