@@ -19,7 +19,6 @@ const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
-  'chatgpt-plus-shared': { title: 'ChatGPT Plus Shared', price: 3 },
   'chatgpt-business-seat': { title: 'ChatGPT Business Seat', price: 15 },
   'grok-x-premium': { title: 'Grok via X Premium', price: 4 },
   'grok-x-premium-plus': { title: 'Grok via X Premium+', price: 20 },
