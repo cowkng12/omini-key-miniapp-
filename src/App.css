@@ -243,6 +243,24 @@
   cursor: pointer;
 }
 
+.topup-grid button.active {
+  border-color: rgba(136, 122, 255, 0.72);
+  background: rgba(137, 118, 255, 0.22);
+  color: #ffffff;
+}
+
+.topup-pay-button {
+  width: 100%;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 18px;
+  padding: 15px 18px;
+  background: linear-gradient(135deg, #7d6bff 0%, #2ab0ff 100%);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .topup-status {
   margin-top: 12px;
   color: #8ec5ff;

@@ -262,6 +262,7 @@ const translations = {
     balanceText: 'Пока что вы не пополняли баланс.',
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения через CryptoBot.',
+    topUpButton: 'Оплатить',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
@@ -325,6 +326,7 @@ const translations = {
     balanceText: 'You have not topped up your balance yet.',
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a CryptoBot top-up amount.',
+    topUpButton: 'Pay',
     topUpError: 'Could not create a payment link. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
@@ -388,6 +390,7 @@ const translations = {
     balanceText: '你还没有充值余额。',
     topUpTitle: '充值余额',
     topUpHint: '选择通过 CryptoBot 充值的金额。',
+    topUpButton: '支付',
     topUpError: '无法创建付款链接。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
@@ -477,6 +480,7 @@ function App() {
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
+  const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [topUpStatus, setTopUpStatus] = useState('')
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
@@ -487,7 +491,7 @@ function App() {
     setSelectedProduct(product)
   }
 
-  const handleTopUp = (amount) => {
+  const handleTopUp = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
 
     setTopUpStatus('')
@@ -498,7 +502,7 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        amount,
+        amount: selectedTopUpAmount,
         telegramUser: currentTelegramUser(),
       }),
     })
@@ -581,11 +585,22 @@ function App() {
               <p>{text.topUpHint}</p>
               <div className="topup-grid">
                 {topupAmounts.map((amount) => (
-                  <button key={amount} type="button" onClick={() => handleTopUp(amount)}>
+                  <button
+                    key={amount}
+                    type="button"
+                    className={selectedTopUpAmount === amount ? 'active' : ''}
+                    onClick={() => {
+                      setSelectedTopUpAmount(amount)
+                      setTopUpStatus('')
+                    }}
+                  >
                     ${amount}
                   </button>
                 ))}
               </div>
+              <button type="button" className="topup-pay-button" onClick={handleTopUp}>
+                {text.topUpButton} ${selectedTopUpAmount}
+              </button>
               {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
             </div>
           ) : null}
