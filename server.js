@@ -17,7 +17,7 @@ const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.c
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
 
 const products = {
-  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
   'chatgpt-pro-ready': { title: 'ChatGPT Pro Ready Account', price: 60 },
   'chatgpt-business-seat': { title: 'ChatGPT Business Seat', price: 15 },
