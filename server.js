@@ -12,7 +12,7 @@ const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
 const adminChatId = process.env.ADMIN_CHAT_ID?.trim()
 const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
-const supportUsername = '@ominikeySUPPORT'
+const supportUsername = '@OmniKeySUPPORT'
 const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
 const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
@@ -708,7 +708,7 @@ if (botToken) {
       await bot.telegram.setChatMenuButton({
         menu_button: {
           type: 'web_app',
-          text: 'OmniKey',
+          text: 'Open',
           web_app: { url: webAppUrl },
         },
       })
