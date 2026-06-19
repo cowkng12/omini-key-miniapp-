@@ -490,6 +490,12 @@ function currentTelegramUser() {
   return window.Telegram?.WebApp?.initDataUnsafe?.user || null
 }
 
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
 function ProductCard({ product, onSelect, active, text }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
@@ -599,6 +605,34 @@ function App() {
   const handleTopUp = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
 
+    const checkTopUpStatus = (topupId, attempt = 0) => {
+      fetch(`${apiBase}/api/topups/${topupId}/status`)
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error('Top-up status request failed')
+          }
+          return response.json()
+        })
+        .then(({ topup, balance: updatedBalance = 0 }) => {
+          if (topup?.status === 'paid') {
+            setBalance(Number(updatedBalance) || 0)
+            setTopUpStatus(text.topUpSuccess)
+            return
+          }
+
+          if (attempt < 12) {
+            wait(5000).then(() => checkTopUpStatus(topupId, attempt + 1))
+          }
+        })
+        .catch(() => {
+          if (attempt < 12) {
+            wait(5000).then(() => checkTopUpStatus(topupId, attempt + 1))
+          } else {
+            setTopUpStatus(text.topUpError)
+          }
+        })
+    }
+
     setTopUpStatus('')
 
     fetch(`${apiBase}/api/topups`, {
@@ -623,23 +657,9 @@ function App() {
         }
 
         openPaymentUrl(paymentUrl, () => {
-          fetch(`${apiBase}/api/topups/${topup.id}/paid`, {
-            method: 'POST',
-          })
-            .then(async (response) => {
-              if (!response.ok) {
-                throw new Error('Top-up confirmation failed')
-              }
-              return response.json()
-            })
-            .then(({ balance: updatedBalance = 0 }) => {
-              setBalance(Number(updatedBalance) || 0)
-              setTopUpStatus(text.topUpSuccess)
-            })
-            .catch(() => {
-              setTopUpStatus(text.topUpError)
-            })
+          checkTopUpStatus(topup.id)
         })
+        wait(5000).then(() => checkTopUpStatus(topup.id))
       })
       .catch(() => {
         setTopUpStatus(text.topUpError)

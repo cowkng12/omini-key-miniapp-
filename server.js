@@ -122,6 +122,62 @@ async function createCryptoInvoice({ id, amount, description }) {
   return data.result
 }
 
+async function getCryptoInvoice(invoiceId) {
+  if (!cryptoPayToken || !invoiceId) {
+    return null
+  }
+
+  const response = await fetch(`${cryptoPayApiUrl}/getInvoices?invoice_ids=${invoiceId}`, {
+    headers: {
+      'Crypto-Pay-API-Token': cryptoPayToken,
+    },
+  })
+
+  const data = await response.json()
+
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error?.message || 'CryptoBot invoice status request failed')
+  }
+
+  return data.result?.items?.[0] || null
+}
+
+async function creditTopup(topup) {
+  const telegramId = String(topup?.telegramUser?.id || '').trim()
+
+  if (!topup || !telegramId || topup.status === 'paid') {
+    return balances.get(telegramId) || 0
+  }
+
+  const currentBalance = balances.get(telegramId) || 0
+  const updatedBalance = Number((currentBalance + topup.amount).toFixed(2))
+
+  balances.set(telegramId, updatedBalance)
+  topup.status = 'paid'
+  topup.paidAt = new Date().toISOString()
+  topup.balanceAfter = updatedBalance
+
+  await bot?.telegram.sendMessage(
+    telegramId,
+    [`Баланс пополнен на $${topup.amount}.`, `Текущий баланс: $${updatedBalance}.`].join('\n'),
+  )
+
+  if (bot && adminChatId) {
+    await bot.telegram.sendMessage(
+      adminChatId,
+      [
+        'Баланс пополнен',
+        `ID: ${topup.id}`,
+        `Сумма: $${topup.amount}`,
+        `Баланс после: $${updatedBalance}`,
+        `Пользователь Telegram: ${topup.telegramUser?.username ? `@${topup.telegramUser.username}` : telegramId}`,
+      ].join('\n'),
+    )
+  }
+
+  return updatedBalance
+}
+
 app.use(cors())
 app.use(express.json())
 
@@ -196,7 +252,7 @@ app.post('/api/topups', async (request, response) => {
   response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
 })
 
-app.post('/api/topups/:topupId/paid', async (request, response) => {
+app.get('/api/topups/:topupId/status', async (request, response) => {
   const topupId = request.params.topupId?.trim()
   const topup = topups.find((item) => item.id === topupId)
   const telegramId = String(topup?.telegramUser?.id || '').trim()
@@ -211,27 +267,20 @@ app.post('/api/topups/:topupId/paid', async (request, response) => {
     return
   }
 
-  if (topup.status !== 'paid') {
-    const currentBalance = balances.get(telegramId) || 0
-    const updatedBalance = Number((currentBalance + topup.amount).toFixed(2))
+  try {
+    const invoice = await getCryptoInvoice(topup.cryptoInvoice?.id)
 
-    balances.set(telegramId, updatedBalance)
-    topup.status = 'paid'
-    topup.paidAt = new Date().toISOString()
-    topup.balanceAfter = updatedBalance
-
-    if (bot && adminChatId) {
-      await bot.telegram.sendMessage(
-        adminChatId,
-        [
-          'Баланс пополнен',
-          `ID: ${topup.id}`,
-          `Сумма: $${topup.amount}`,
-          `Баланс после: $${updatedBalance}`,
-          `Пользователь Telegram: ${topup.telegramUser?.username ? `@${topup.telegramUser.username}` : telegramId}`,
-        ].join('\n'),
-      )
+    if (invoice?.status) {
+      topup.cryptoInvoice.status = invoice.status
     }
+
+    if (invoice?.status === 'paid') {
+      await creditTopup(topup)
+    }
+  } catch (error) {
+    console.error('CryptoBot top-up status check failed', error)
+    response.status(502).json({ error: 'Payment status check failed' })
+    return
   }
 
   response.json({ topup, balance: balances.get(telegramId) || 0 })
