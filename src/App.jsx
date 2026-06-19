@@ -472,7 +472,9 @@ function formatPrice(price) {
 }
 
 function openPaymentUrl(url, onPaid) {
-  if (window.Telegram?.WebApp?.openInvoice) {
+  const isTelegramInvoiceUrl = /^https:\/\/t\.me\/\$/.test(url)
+
+  if (isTelegramInvoiceUrl && window.Telegram?.WebApp?.openInvoice) {
     window.Telegram.WebApp.openInvoice(url, (status) => {
       if (status === 'paid') {
         onPaid?.()
