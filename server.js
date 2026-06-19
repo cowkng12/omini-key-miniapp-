@@ -12,6 +12,7 @@ const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim()
 const adminChatId = process.env.ADMIN_CHAT_ID?.trim()
 const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
+const supportUsername = '@ominikeySUPPORT'
 const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
 const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
@@ -473,7 +474,7 @@ if (botToken) {
         '',
         'Для заказа выберите нужный товар в каталоге и подайте заявку.',
       ].join('\n'),
-      support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${supportUsername}`,
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
       balance: (amount) => `💰 Баланс\n\nВаш текущий баланс: $${amount}`,
       shop: '🛍 Открыть каталог',
@@ -521,7 +522,7 @@ if (botToken) {
         '',
         'To order, choose the required product in the catalog and submit a request.',
       ].join('\n'),
-      support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${supportUsername}`,
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
       balance: (amount) => `💰 Balance\n\nYour current balance: $${amount}`,
       shop: '🛍 Open catalog',
@@ -569,7 +570,7 @@ if (botToken) {
         '',
         '下单请在目录中选择商品并提交申请。',
       ].join('\n'),
-      support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${sellerUrl.replace('https://t.me/', '@')}`,
+      support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${supportUsername}`,
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
       balance: (amount) => `💰 余额\n\n当前余额：$${amount}`,
       shop: '🛍 打开目录',
