@@ -285,7 +285,7 @@ app.post('/api/topups', async (request, response) => {
       topup.cryptoInvoice = {
         id: invoice.invoice_id,
         status: invoice.status,
-        payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url,
+        payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url || invoice.pay_url,
       }
       watchTopupPayment(topup)
     }
