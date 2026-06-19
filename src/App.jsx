@@ -617,13 +617,28 @@ function App() {
         }
         return response.json()
       })
-      .then(({ paymentUrl }) => {
+      .then(({ topup, paymentUrl }) => {
         if (!paymentUrl) {
           throw new Error('Payment URL missing')
         }
 
         openPaymentUrl(paymentUrl, () => {
-          setTopUpStatus(text.topUpSuccess)
+          fetch(`${apiBase}/api/topups/${topup.id}/paid`, {
+            method: 'POST',
+          })
+            .then(async (response) => {
+              if (!response.ok) {
+                throw new Error('Top-up confirmation failed')
+              }
+              return response.json()
+            })
+            .then(({ balance: updatedBalance = 0 }) => {
+              setBalance(Number(updatedBalance) || 0)
+              setTopUpStatus(text.topUpSuccess)
+            })
+            .catch(() => {
+              setTopUpStatus(text.topUpError)
+            })
         })
       })
       .catch(() => {

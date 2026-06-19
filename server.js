@@ -196,6 +196,47 @@ app.post('/api/topups', async (request, response) => {
   response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
 })
 
+app.post('/api/topups/:topupId/paid', async (request, response) => {
+  const topupId = request.params.topupId?.trim()
+  const topup = topups.find((item) => item.id === topupId)
+  const telegramId = String(topup?.telegramUser?.id || '').trim()
+
+  if (!topup) {
+    response.status(404).json({ error: 'Top-up not found' })
+    return
+  }
+
+  if (!telegramId) {
+    response.status(400).json({ error: 'Telegram user is required' })
+    return
+  }
+
+  if (topup.status !== 'paid') {
+    const currentBalance = balances.get(telegramId) || 0
+    const updatedBalance = Number((currentBalance + topup.amount).toFixed(2))
+
+    balances.set(telegramId, updatedBalance)
+    topup.status = 'paid'
+    topup.paidAt = new Date().toISOString()
+    topup.balanceAfter = updatedBalance
+
+    if (bot && adminChatId) {
+      await bot.telegram.sendMessage(
+        adminChatId,
+        [
+          'Баланс пополнен',
+          `ID: ${topup.id}`,
+          `Сумма: $${topup.amount}`,
+          `Баланс после: $${updatedBalance}`,
+          `Пользователь Telegram: ${topup.telegramUser?.username ? `@${topup.telegramUser.username}` : telegramId}`,
+        ].join('\n'),
+      )
+    }
+  }
+
+  response.json({ topup, balance: balances.get(telegramId) || 0 })
+})
+
 app.post('/api/orders/balance', async (request, response) => {
   const { productId, customer = {}, telegramUser = null } = request.body ?? {}
   const product = products[productId]
