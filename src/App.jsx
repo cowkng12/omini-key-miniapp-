@@ -520,6 +520,7 @@ function App() {
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
+  const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
   const [balance, setBalance] = useState(0)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
@@ -553,6 +554,7 @@ function App() {
   const handleProductSelect = (product) => {
     setSelectedProduct(product)
     setProductPaymentStatus('')
+    setIsProductPaymentOpen(true)
   }
 
   const handleProductPayment = () => {
@@ -668,22 +670,44 @@ function App() {
                 />
               ))}
             </div>
-            <aside className="product-payment-panel">
-              <div>
-                <span>{text.paymentTitle}</span>
-                <strong>{formatPrice(selectedProduct.price)}</strong>
-              </div>
-              <div>
-                <span>{text.paymentMethods}</span>
-                <strong>{text.cryptoBotMethod}</strong>
-              </div>
-              <button type="button" onClick={handleProductPayment}>
-                {text.payProductButton} {formatPrice(selectedProduct.price)}
-              </button>
-              {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
-            </aside>
-
           </section>
+
+          {isProductPaymentOpen ? (
+            <div
+              className="product-payment-overlay"
+              role="presentation"
+              onClick={() => setIsProductPaymentOpen(false)}
+            >
+              <section
+                className="product-payment-panel"
+                role="dialog"
+                aria-modal="true"
+                aria-label={text.paymentTitle}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="product-payment-close"
+                  aria-label="Close"
+                  onClick={() => setIsProductPaymentOpen(false)}
+                >
+                  ×
+                </button>
+                <div>
+                  <span>{text.paymentTitle}</span>
+                  <strong>{formatPrice(selectedProduct.price)}</strong>
+                </div>
+                <div>
+                  <span>{text.paymentMethods}</span>
+                  <strong>{text.cryptoBotMethod}</strong>
+                </div>
+                <button type="button" className="product-payment-button" onClick={handleProductPayment}>
+                  {text.payProductButton} {formatPrice(selectedProduct.price)}
+                </button>
+                {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
+              </section>
+            </div>
+          ) : null}
         </>
       ) : (
         <section className="empty-panel">
