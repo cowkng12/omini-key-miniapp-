@@ -276,6 +276,7 @@ const translations = {
     topUpButton: 'Оплатить',
     topUpSuccess: 'Успешно, в течении 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
+    telegramUserRequired: 'Откройте приложение через кнопку бота в Telegram и попробуйте снова.',
     paymentTitle: 'К оплате',
     paymentMethods: 'Способы оплаты',
     cryptoBotMethod: 'Crypto Bot',
@@ -348,6 +349,7 @@ const translations = {
     topUpButton: 'Pay',
     topUpSuccess: 'Success. A manager will message you within 10 minutes to deliver the product. Please wait.',
     topUpError: 'Could not create a payment link. Try again later.',
+    telegramUserRequired: 'Open the app through the bot button in Telegram and try again.',
     paymentTitle: 'To pay',
     paymentMethods: 'Payment methods',
     cryptoBotMethod: 'Crypto Bot',
@@ -420,6 +422,7 @@ const translations = {
     topUpButton: '支付',
     topUpSuccess: '支付成功。经理会在 10 分钟内联系你并发放商品，请稍候。',
     topUpError: '无法创建付款链接。请稍后再试。',
+    telegramUserRequired: '请通过 Telegram 机器人的按钮打开应用后重试。',
     paymentTitle: '应付金额',
     paymentMethods: '支付方式',
     cryptoBotMethod: 'Crypto Bot',
@@ -564,6 +567,11 @@ function App() {
     : products.filter((product) => product.group === activeGroup)
 
   useEffect(() => {
+    window.Telegram?.WebApp?.ready?.()
+    window.Telegram?.WebApp?.expand?.()
+  }, [])
+
+  useEffect(() => {
     const telegramId = currentTelegramUser()?.id
 
     if (!telegramId) {
@@ -670,7 +678,8 @@ function App() {
     })
       .then(async (response) => {
         if (!response.ok) {
-          throw new Error('Top-up request failed')
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || 'Top-up request failed')
         }
         return response.json()
       })
@@ -684,8 +693,8 @@ function App() {
         })
         wait(5000).then(() => checkTopUpStatus(topup.id))
       })
-      .catch(() => {
-        setTopUpStatus(text.topUpError)
+      .catch((error) => {
+        setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : text.topUpError)
       })
   }
 
