@@ -178,6 +178,36 @@ async function creditTopup(topup) {
   return updatedBalance
 }
 
+async function refreshTopupStatus(topup) {
+  const invoice = await getCryptoInvoice(topup?.cryptoInvoice?.id)
+
+  if (invoice?.status) {
+    topup.cryptoInvoice.status = invoice.status
+  }
+
+  if (invoice?.status === 'paid') {
+    await creditTopup(topup)
+  }
+
+  return topup
+}
+
+function watchTopupPayment(topup, attempt = 0) {
+  if (!topup || topup.status === 'paid' || attempt >= 36) {
+    return
+  }
+
+  setTimeout(() => {
+    refreshTopupStatus(topup)
+      .catch((error) => {
+        console.error('CryptoBot top-up background status check failed', error)
+      })
+      .finally(() => {
+        watchTopupPayment(topup, attempt + 1)
+      })
+  }, 5000)
+}
+
 app.use(cors())
 app.use(express.json())
 
@@ -228,6 +258,7 @@ app.post('/api/topups', async (request, response) => {
         status: invoice.status,
         payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url,
       }
+      watchTopupPayment(topup)
     }
   } catch (error) {
     topup.status = 'payment_error'
@@ -268,15 +299,7 @@ app.get('/api/topups/:topupId/status', async (request, response) => {
   }
 
   try {
-    const invoice = await getCryptoInvoice(topup.cryptoInvoice?.id)
-
-    if (invoice?.status) {
-      topup.cryptoInvoice.status = invoice.status
-    }
-
-    if (invoice?.status === 'paid') {
-      await creditTopup(topup)
-    }
+    await refreshTopupStatus(topup)
   } catch (error) {
     console.error('CryptoBot top-up status check failed', error)
     response.status(502).json({ error: 'Payment status check failed' })

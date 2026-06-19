@@ -487,7 +487,24 @@ function openPaymentUrl(url, onPaid) {
 }
 
 function currentTelegramUser() {
-  return window.Telegram?.WebApp?.initDataUnsafe?.user || null
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user
+
+  if (user?.id) {
+    return user
+  }
+
+  const initData = window.Telegram?.WebApp?.initData || ''
+  const encodedUser = new URLSearchParams(initData).get('user')
+
+  if (!encodedUser) {
+    return null
+  }
+
+  try {
+    return JSON.parse(encodedUser)
+  } catch {
+    return null
+  }
 }
 
 function wait(ms) {
