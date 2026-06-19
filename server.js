@@ -91,6 +91,28 @@ function purchaseDeliveryMessage(accessKey) {
   ].join('\n')
 }
 
+function userFromInitData(initData) {
+  const encodedUser = new URLSearchParams(initData || '').get('user')
+
+  if (!encodedUser) {
+    return null
+  }
+
+  try {
+    return JSON.parse(encodedUser)
+  } catch {
+    return null
+  }
+}
+
+function resolveTelegramUser({ telegramUser = null, telegramInitData = '' } = {}) {
+  if (telegramUser?.id) {
+    return telegramUser
+  }
+
+  return userFromInitData(telegramInitData)
+}
+
 async function createCryptoInvoice({ id, amount, description }) {
   if (!cryptoPayToken) {
     return null
@@ -227,11 +249,18 @@ app.get('/api/balance/:telegramId', (request, response) => {
 })
 
 app.post('/api/topups', async (request, response) => {
-  const { amount, telegramUser = null } = request.body ?? {}
+  const { amount } = request.body ?? {}
+  const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
+  const telegramId = String(telegramUser?.id || '').trim()
 
   if (!topupAmounts.includes(normalizedAmount)) {
     response.status(400).json({ error: 'Unsupported top-up amount' })
+    return
+  }
+
+  if (!telegramId) {
+    response.status(400).json({ error: 'Open the app through Telegram to top up balance' })
     return
   }
 
@@ -310,7 +339,8 @@ app.get('/api/topups/:topupId/status', async (request, response) => {
 })
 
 app.post('/api/orders/balance', async (request, response) => {
-  const { productId, customer = {}, telegramUser = null } = request.body ?? {}
+  const { productId, customer = {} } = request.body ?? {}
+  const telegramUser = resolveTelegramUser(request.body)
   const product = products[productId]
   const telegramId = String(telegramUser?.id || '').trim()
 

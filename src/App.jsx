@@ -507,6 +507,10 @@ function currentTelegramUser() {
   }
 }
 
+function currentTelegramInitData() {
+  return window.Telegram?.WebApp?.initData || ''
+}
+
 function wait(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
@@ -602,6 +606,7 @@ function App() {
       body: JSON.stringify({
         productId: selectedProduct.id,
         telegramUser: currentTelegramUser(),
+        telegramInitData: currentTelegramInitData(),
       }),
     })
       .then(async (response) => {
@@ -660,6 +665,7 @@ function App() {
       body: JSON.stringify({
         amount: selectedTopUpAmount,
         telegramUser: currentTelegramUser(),
+        telegramInitData: currentTelegramInitData(),
       }),
     })
       .then(async (response) => {
