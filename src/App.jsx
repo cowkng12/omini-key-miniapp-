@@ -774,7 +774,10 @@ function App() {
                 </div>
                 <div>
                   <span>{text.paymentMethods}</span>
-                  <strong>{text.balanceMethod}</strong>
+                  <strong className="product-payment-method">
+                    {text.balanceMethod}
+                    <span>{formatPrice(balance)}</span>
+                  </strong>
                 </div>
                 <button type="button" className="product-balance-button" onClick={handleBalancePayment}>
                   {text.payBalanceButton}

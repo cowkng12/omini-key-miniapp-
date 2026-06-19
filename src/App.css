@@ -285,6 +285,18 @@
   color: #fff7ed;
 }
 
+.product-payment-method {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+}
+
+.product-payment-method span {
+  color: #fca5a5;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .product-payment-close {
   position: absolute;
   top: 10px;
