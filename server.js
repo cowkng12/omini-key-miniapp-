@@ -17,7 +17,7 @@ const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.c
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
 
 const products = {
-  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
   'chatgpt-pro-ready': { title: 'ChatGPT Pro Ready Account', price: 60 },
   'chatgpt-business-seat': { title: 'ChatGPT Business Seat', price: 15 },
@@ -475,9 +475,11 @@ if (botToken) {
       ].join('\n'),
       support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
+      balance: (amount) => `💰 Баланс\n\nВаш текущий баланс: $${amount}`,
       shop: '🛍 Открыть каталог',
       guideButton: '📘 Как купить',
       ordersButton: '🧾 Мои покупки',
+      balanceButton: '💰 Баланс',
       promotionsButton: '🎁 Акции',
       supportButton: '🛠 Поддержка',
       aboutButton: '💠 OmniKey',
@@ -521,9 +523,11 @@ if (botToken) {
       ].join('\n'),
       support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
+      balance: (amount) => `💰 Balance\n\nYour current balance: $${amount}`,
       shop: '🛍 Open catalog',
       guideButton: '📘 How to buy',
       ordersButton: '🧾 My purchases',
+      balanceButton: '💰 Balance',
       promotionsButton: '🎁 Deals',
       supportButton: '🛠 Support',
       aboutButton: '💠 OmniKey',
@@ -567,9 +571,11 @@ if (botToken) {
       ].join('\n'),
       support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${sellerUrl.replace('https://t.me/', '@')}`,
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
+      balance: (amount) => `💰 余额\n\n当前余额：$${amount}`,
       shop: '🛍 打开目录',
       guideButton: '📘 如何购买',
       ordersButton: '🧾 我的购买',
+      balanceButton: '💰 余额',
       promotionsButton: '🎁 优惠',
       supportButton: '🛠 支持',
       aboutButton: '💠 OmniKey',
@@ -589,7 +595,8 @@ if (botToken) {
     return Markup.inlineKeyboard([
       [Markup.button.webApp(text.shop, webAppUrl)],
       [Markup.button.callback(text.guideButton, 'guide'), Markup.button.callback(text.promotionsButton, 'promotions')],
-      [Markup.button.callback(text.ordersButton, 'orders'), Markup.button.callback(text.supportButton, 'support')],
+      [Markup.button.callback(text.ordersButton, 'orders'), Markup.button.callback(text.balanceButton, 'balance')],
+      [Markup.button.callback(text.supportButton, 'support')],
       [Markup.button.callback(text.aboutButton, 'about')],
       [Markup.button.callback(text.languageButton, 'language')],
     ])
@@ -650,6 +657,15 @@ if (botToken) {
   bot.action('orders', async (context) => {
     await safeAnswerCbQuery(context)
     await context.reply(botText[currentLanguage(context)].orders)
+  })
+
+  bot.action('balance', async (context) => {
+    await safeAnswerCbQuery(context)
+
+    const telegramId = String(context.from?.id || '').trim()
+    const balance = balances.get(telegramId) || 0
+
+    await context.reply(botText[currentLanguage(context)].balance(balance))
   })
 
   bot.action('promotions', async (context) => {
