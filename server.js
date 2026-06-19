@@ -225,6 +225,65 @@ app.post('/api/orders', async (request, response) => {
   response.status(201).json({ order, paymentUrl: order.cryptoInvoice?.payUrl || null })
 })
 
+app.post('/api/orders/balance', async (request, response) => {
+  const { productId, customer = {}, telegramUser = null } = request.body ?? {}
+  const product = products[productId]
+  const telegramId = String(telegramUser?.id || '').trim()
+
+  if (!product) {
+    response.status(400).json({ error: 'Unknown product' })
+    return
+  }
+
+  if (!telegramId) {
+    response.status(400).json({ error: 'Telegram user is required' })
+    return
+  }
+
+  const currentBalance = balances.get(telegramId) || 0
+
+  if (currentBalance < product.price) {
+    response.status(402).json({ error: 'Insufficient balance', balance: currentBalance })
+    return
+  }
+
+  const updatedBalance = Number((currentBalance - product.price).toFixed(2))
+  balances.set(telegramId, updatedBalance)
+
+  const order = {
+    id: `ord_${Date.now()}`,
+    productId,
+    productTitle: product.title,
+    price: product.price,
+    status: 'paid_from_balance',
+    paymentMethod: 'balance',
+    customer: {
+      name: (customer.name || '').trim(),
+      telegram: (customer.telegram || '').trim(),
+    },
+    telegramUser,
+    createdAt: new Date().toISOString(),
+  }
+
+  orders.unshift(order)
+
+  if (bot && adminChatId) {
+    const adminLines = [
+      'Новый заказ с баланса',
+      `ID: ${order.id}`,
+      `Товар: ${order.productTitle}`,
+      `Цена: $${order.price}`,
+      `Статус: ${order.status}`,
+      `Остаток баланса: $${updatedBalance}`,
+      `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
+    ]
+
+    await bot.telegram.sendMessage(adminChatId, adminLines.join('\n'))
+  }
+
+  response.status(201).json({ order, balance: updatedBalance })
+})
+
 app.use(express.static(path.join(__dirname, 'dist')))
 
 app.get(/.*/, (request, response) => {

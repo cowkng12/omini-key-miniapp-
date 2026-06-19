@@ -280,6 +280,10 @@ const translations = {
     paymentMethods: 'Способы оплаты',
     cryptoBotMethod: 'Crypto Bot',
     payProductButton: 'Оплатить',
+    payBalanceButton: 'Оплатить с баланса',
+    balanceMethod: 'Баланс',
+    balancePaymentSuccess: 'Заказ оплачен с баланса. В течение 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
+    balancePaymentError: 'Не удалось оплатить с баланса. Проверьте баланс и попробуйте позже.',
     productPaymentError: 'Не удалось создать оплату товара. Попробуйте позже.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
@@ -349,6 +353,10 @@ const translations = {
     paymentMethods: 'Payment methods',
     cryptoBotMethod: 'Crypto Bot',
     payProductButton: 'Pay',
+    payBalanceButton: 'Pay from balance',
+    balanceMethod: 'Balance',
+    balancePaymentSuccess: 'Order paid from balance. A manager will message you within 10 minutes to deliver the product. Please wait.',
+    balancePaymentError: 'Could not pay from balance. Check your balance and try later.',
     productPaymentError: 'Could not create product payment. Try again later.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
@@ -418,6 +426,10 @@ const translations = {
     paymentMethods: '支付方式',
     cryptoBotMethod: 'Crypto Bot',
     payProductButton: '支付',
+    payBalanceButton: '用余额支付',
+    balanceMethod: '余额',
+    balancePaymentSuccess: '订单已用余额支付。经理会在 10 分钟内联系你并发放商品，请稍候。',
+    balancePaymentError: '无法用余额支付。请检查余额后稍后再试。',
     productPaymentError: '无法创建商品付款。请稍后再试。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
@@ -590,6 +602,36 @@ function App() {
       })
   }
 
+  const handleBalancePayment = () => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    setProductPaymentStatus('')
+
+    fetch(`${apiBase}/api/orders/balance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: selectedProduct.id,
+        telegramUser: currentTelegramUser(),
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Balance payment request failed')
+        }
+        return response.json()
+      })
+      .then(({ balance: updatedBalance = 0 }) => {
+        setBalance(Number(updatedBalance) || 0)
+        setProductPaymentStatus(text.balancePaymentSuccess)
+      })
+      .catch(() => {
+        setProductPaymentStatus(text.balancePaymentError)
+      })
+  }
+
   const handleTopUp = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
 
@@ -699,10 +741,13 @@ function App() {
                 </div>
                 <div>
                   <span>{text.paymentMethods}</span>
-                  <strong>{text.cryptoBotMethod}</strong>
+                  <strong>{text.cryptoBotMethod} / {text.balanceMethod}</strong>
                 </div>
                 <button type="button" className="product-payment-button" onClick={handleProductPayment}>
                   {text.payProductButton} {formatPrice(selectedProduct.price)}
+                </button>
+                <button type="button" className="product-balance-button" onClick={handleBalancePayment}>
+                  {text.payBalanceButton}
                 </button>
                 {productPaymentStatus ? <p className="product-payment-status">{productPaymentStatus}</p> : null}
               </section>
