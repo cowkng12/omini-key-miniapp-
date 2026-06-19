@@ -279,10 +279,9 @@ const translations = {
     paymentTitle: 'К оплате',
     paymentMethods: 'Способы оплаты',
     cryptoBotMethod: 'Crypto Bot',
-    payProductButton: 'Оплатить',
     payBalanceButton: 'Оплатить с баланса',
     balanceMethod: 'Баланс',
-    balancePaymentSuccess: 'Заказ оплачен с баланса. В течение 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
+    balancePaymentSuccess: 'Заказ оплачен с баланса. Данные отправлены вам в бот.',
     balancePaymentError: 'Не удалось оплатить с баланса. Проверьте баланс и попробуйте позже.',
     productPaymentError: 'Не удалось создать оплату товара. Попробуйте позже.',
     productText: {
@@ -352,10 +351,9 @@ const translations = {
     paymentTitle: 'To pay',
     paymentMethods: 'Payment methods',
     cryptoBotMethod: 'Crypto Bot',
-    payProductButton: 'Pay',
     payBalanceButton: 'Pay from balance',
     balanceMethod: 'Balance',
-    balancePaymentSuccess: 'Order paid from balance. A manager will message you within 10 minutes to deliver the product. Please wait.',
+    balancePaymentSuccess: 'Order paid from balance. Access details were sent to you in the bot.',
     balancePaymentError: 'Could not pay from balance. Check your balance and try later.',
     productPaymentError: 'Could not create product payment. Try again later.',
     productText: {
@@ -425,10 +423,9 @@ const translations = {
     paymentTitle: '应付金额',
     paymentMethods: '支付方式',
     cryptoBotMethod: 'Crypto Bot',
-    payProductButton: '支付',
     payBalanceButton: '用余额支付',
     balanceMethod: '余额',
-    balancePaymentSuccess: '订单已用余额支付。经理会在 10 分钟内联系你并发放商品，请稍候。',
+    balancePaymentSuccess: '订单已用余额支付。访问数据已通过机器人发送给你。',
     balancePaymentError: '无法用余额支付。请检查余额后稍后再试。',
     productPaymentError: '无法创建商品付款。请稍后再试。',
     productText: {
@@ -567,39 +564,6 @@ function App() {
     setSelectedProduct(product)
     setProductPaymentStatus('')
     setIsProductPaymentOpen(true)
-  }
-
-  const handleProductPayment = () => {
-    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
-
-    fetch(`${apiBase}/api/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productId: selectedProduct.id,
-        telegramUser: currentTelegramUser(),
-      }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Product payment request failed')
-        }
-        return response.json()
-      })
-      .then(({ paymentUrl }) => {
-        if (!paymentUrl) {
-          throw new Error('Payment URL missing')
-        }
-
-        openPaymentUrl(paymentUrl, () => {
-          setProductPaymentStatus(text.topUpSuccess)
-        })
-      })
-      .catch(() => {
-        setProductPaymentStatus(text.productPaymentError)
-      })
   }
 
   const handleBalancePayment = () => {
@@ -741,11 +705,8 @@ function App() {
                 </div>
                 <div>
                   <span>{text.paymentMethods}</span>
-                  <strong>{text.cryptoBotMethod} / {text.balanceMethod}</strong>
+                  <strong>{text.balanceMethod}</strong>
                 </div>
-                <button type="button" className="product-payment-button" onClick={handleProductPayment}>
-                  {text.payProductButton} {formatPrice(selectedProduct.price)}
-                </button>
                 <button type="button" className="product-balance-button" onClick={handleBalancePayment}>
                   {text.payBalanceButton}
                 </button>

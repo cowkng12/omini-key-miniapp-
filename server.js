@@ -54,6 +54,42 @@ const orders = []
 const topups = []
 const balances = new Map()
 const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const activationSiteUrl = 'https://gpt.byesu.com/'
+const issuedAccessKeys = new Set()
+
+function generateAccessKey() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let accessKey = ''
+
+  do {
+    const parts = []
+
+    for (let groupIndex = 0; groupIndex < 4; groupIndex += 1) {
+      let group = ''
+
+      for (let charIndex = 0; charIndex < 4; charIndex += 1) {
+        group += alphabet[Math.floor(Math.random() * alphabet.length)]
+      }
+
+      parts.push(group)
+    }
+
+    accessKey = parts.join('-')
+  } while (issuedAccessKeys.has(accessKey))
+
+  issuedAccessKeys.add(accessKey)
+
+  return accessKey
+}
+
+function purchaseDeliveryMessage(accessKey) {
+  return [
+    'Поздравляем с покупкой. Ваши данные для получения:',
+    '',
+    `1. Зайдите на сайт: ${activationSiteUrl}`,
+    `2. Введите этот код: ${accessKey}`,
+  ].join('\n')
+}
 
 async function createCryptoInvoice({ id, amount, description }) {
   if (!cryptoPayToken) {
@@ -160,71 +196,6 @@ app.post('/api/topups', async (request, response) => {
   response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
 })
 
-app.post('/api/orders', async (request, response) => {
-  const { productId, customer = {}, telegramUser = null } = request.body ?? {}
-  const product = products[productId]
-
-  if (!product) {
-    response.status(400).json({ error: 'Unknown product' })
-    return
-  }
-
-  const order = {
-    id: `ord_${Date.now()}`,
-    productId,
-    productTitle: product.title,
-    price: product.price,
-    status: cryptoPayToken ? 'payment_pending' : 'new',
-    customer: {
-      name: (customer.name || '').trim(),
-      telegram: (customer.telegram || '').trim(),
-    },
-    telegramUser,
-    createdAt: new Date().toISOString(),
-  }
-
-  orders.unshift(order)
-
-  try {
-    const invoice = await createCryptoInvoice({
-      id: order.id,
-      amount: order.price,
-      description: `OmniKey: ${order.productTitle}`,
-    })
-
-    if (invoice) {
-      order.cryptoInvoice = {
-        id: invoice.invoice_id,
-        status: invoice.status,
-        payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url,
-      }
-    }
-  } catch (error) {
-    order.status = 'payment_error'
-    console.error('CryptoBot invoice failed', error)
-    response.status(502).json({ error: 'Payment invoice creation failed' })
-    return
-  }
-
-  if (bot && adminChatId) {
-    const adminLines = [
-      'Новый заказ',
-      `ID: ${order.id}`,
-      `Товар: ${order.productTitle}`,
-      `Цена: $${order.price}`,
-      `Статус: ${order.status}`,
-      `Имя: ${order.customer.name || 'Не указано'}`,
-      `Telegram: ${order.customer.telegram || 'Не указан'}`,
-      `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
-      order.cryptoInvoice?.payUrl ? `Оплата CryptoBot: ${order.cryptoInvoice.payUrl}` : null,
-    ].filter(Boolean)
-
-    await bot.telegram.sendMessage(adminChatId, adminLines.join('\n'))
-  }
-
-  response.status(201).json({ order, paymentUrl: order.cryptoInvoice?.payUrl || null })
-})
-
 app.post('/api/orders/balance', async (request, response) => {
   const { productId, customer = {}, telegramUser = null } = request.body ?? {}
   const product = products[productId]
@@ -257,6 +228,7 @@ app.post('/api/orders/balance', async (request, response) => {
     price: product.price,
     status: 'paid_from_balance',
     paymentMethod: 'balance',
+    accessKey: generateAccessKey(),
     customer: {
       name: (customer.name || '').trim(),
       telegram: (customer.telegram || '').trim(),
@@ -267,6 +239,8 @@ app.post('/api/orders/balance', async (request, response) => {
 
   orders.unshift(order)
 
+  await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey))
+
   if (bot && adminChatId) {
     const adminLines = [
       'Новый заказ с баланса',
@@ -274,6 +248,7 @@ app.post('/api/orders/balance', async (request, response) => {
       `Товар: ${order.productTitle}`,
       `Цена: $${order.price}`,
       `Статус: ${order.status}`,
+      `Ключ: ${order.accessKey}`,
       `Остаток баланса: $${updatedBalance}`,
       `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramUser?.id || 'Не определен'}`,
     ]

@@ -300,7 +300,7 @@
   cursor: pointer;
 }
 
-.product-payment-button {
+.product-balance-button {
   width: 100%;
   margin-top: 12px;
   border: 0;
@@ -308,18 +308,6 @@
   padding: 14px 16px;
   background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
   color: #ffffff;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.product-balance-button {
-  width: 100%;
-  margin-top: 10px;
-  border: 1px solid rgba(248, 113, 113, 0.38);
-  border-radius: 16px;
-  padding: 14px 16px;
-  background: rgba(127, 29, 29, 0.24);
-  color: #fecaca;
   font-weight: 800;
   cursor: pointer;
 }
