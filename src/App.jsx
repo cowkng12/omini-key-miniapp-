@@ -694,7 +694,7 @@ function App() {
         wait(5000).then(() => checkTopUpStatus(topup.id))
       })
       .catch((error) => {
-        setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : text.topUpError)
+        setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : error.message)
       })
   }
 

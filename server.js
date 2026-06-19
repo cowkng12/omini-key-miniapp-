@@ -264,6 +264,11 @@ app.post('/api/topups', async (request, response) => {
     return
   }
 
+  if (!cryptoPayToken) {
+    response.status(500).json({ error: 'CryptoBot token is not configured on Render' })
+    return
+  }
+
   const topup = {
     id: `top_${Date.now()}`,
     amount: normalizedAmount,
@@ -271,8 +276,6 @@ app.post('/api/topups', async (request, response) => {
     telegramUser,
     createdAt: new Date().toISOString(),
   }
-
-  topups.unshift(topup)
 
   try {
     const invoice = await createCryptoInvoice({
@@ -287,12 +290,19 @@ app.post('/api/topups', async (request, response) => {
         status: invoice.status,
         payUrl: invoice.mini_app_invoice_url || invoice.web_app_invoice_url || invoice.bot_invoice_url || invoice.pay_url,
       }
+
+      if (!topup.cryptoInvoice.payUrl) {
+        response.status(502).json({ error: 'CryptoBot did not return a payment URL' })
+        return
+      }
+
+      topups.unshift(topup)
       watchTopupPayment(topup)
     }
   } catch (error) {
     topup.status = 'payment_error'
     console.error('CryptoBot top-up invoice failed', error)
-    response.status(502).json({ error: 'Payment invoice creation failed' })
+    response.status(502).json({ error: error.message || 'Payment invoice creation failed' })
     return
   }
 
