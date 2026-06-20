@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Markup, Telegraf } from 'telegraf'
@@ -13,9 +14,12 @@ const adminChatId = process.env.ADMIN_CHAT_ID?.trim()
 const webAppUrl = process.env.WEB_APP_URL?.trim() || 'http://localhost:5173'
 const sellerUrl = process.env.SELLER_URL?.trim() || 'https://t.me/metifrysell'
 const supportUsername = '@OmniKeySUPPORT'
+const requiredChannelUsername = process.env.REQUIRED_CHANNEL_USERNAME?.trim() || '@Omni_Key'
+const requiredChannelUrl = process.env.REQUIRED_CHANNEL_URL?.trim() || 'https://t.me/Omni_Key'
 const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
 const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
+const storeFilePath = process.env.STORE_FILE_PATH?.trim() || path.join(__dirname, 'data', 'store.json')
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
@@ -51,16 +55,44 @@ const products = {
   'poe-subscription': { title: 'Poe Subscription', price: 10 },
 }
 
-const orders = []
-const topups = []
-const balances = new Map()
-const topupAmounts = [0.1, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const store = loadStore()
+const orders = store.orders
+const topups = store.topups
+const balances = new Map(Object.entries(store.balances))
+const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const activationSiteUrl = 'https://gpt.byesu.com/'
 const issuedAccessKeys = new Set()
 
+function loadStore() {
+  try {
+    const rawStore = fs.readFileSync(storeFilePath, 'utf8')
+    const parsedStore = JSON.parse(rawStore)
+
+    return {
+      orders: Array.isArray(parsedStore.orders) ? parsedStore.orders : [],
+      topups: Array.isArray(parsedStore.topups) ? parsedStore.topups : [],
+      balances: parsedStore.balances && typeof parsedStore.balances === 'object' ? parsedStore.balances : {},
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Store load failed', error)
+    }
+
+    return { orders: [], topups: [], balances: {} }
+  }
+}
+
+function saveStore() {
+  fs.mkdirSync(path.dirname(storeFilePath), { recursive: true })
+  fs.writeFileSync(
+    storeFilePath,
+    JSON.stringify({ orders, topups, balances: Object.fromEntries(balances) }, null, 2),
+  )
+}
+
 function generateAccessKey() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let accessKey = ''
+  let accessKey
 
   do {
     const parts = []
@@ -165,6 +197,16 @@ async function getCryptoInvoice(invoiceId) {
   return data.result?.items?.[0] || null
 }
 
+async function isSubscribedToRequiredChannel(telegramId) {
+  if (!bot || !telegramId) {
+    return false
+  }
+
+  const member = await bot.telegram.getChatMember(requiredChannelUsername, telegramId)
+
+  return ['creator', 'administrator', 'member'].includes(member.status)
+}
+
 async function creditTopup(topup) {
   const telegramId = String(topup?.telegramUser?.id || '').trim()
 
@@ -179,6 +221,8 @@ async function creditTopup(topup) {
   topup.status = 'paid'
   topup.paidAt = new Date().toISOString()
   topup.balanceAfter = updatedBalance
+
+  saveStore()
 
   await bot?.telegram.sendMessage(
     telegramId,
@@ -249,6 +293,25 @@ app.get('/api/balance/:telegramId', (request, response) => {
   response.json({ balance })
 })
 
+app.post('/api/subscription/check', async (request, response) => {
+  const telegramUser = resolveTelegramUser(request.body)
+  const telegramId = String(telegramUser?.id || '').trim()
+
+  if (!telegramId) {
+    response.status(400).json({ error: 'Open the app through Telegram to continue', channelUrl: requiredChannelUrl })
+    return
+  }
+
+  try {
+    const subscribed = await isSubscribedToRequiredChannel(telegramId)
+
+    response.json({ subscribed, channelUrl: requiredChannelUrl })
+  } catch (error) {
+    console.error('Telegram channel subscription check failed', error)
+    response.status(502).json({ error: 'Could not check channel subscription', channelUrl: requiredChannelUrl })
+  }
+})
+
 app.post('/api/topups', async (request, response) => {
   const { amount } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
@@ -298,6 +361,7 @@ app.post('/api/topups', async (request, response) => {
       }
 
       topups.unshift(topup)
+      saveStore()
       watchTopupPayment(topup)
     }
   } catch (error) {
@@ -392,6 +456,7 @@ app.post('/api/orders/balance', async (request, response) => {
   }
 
   orders.unshift(order)
+  saveStore()
 
   await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey))
 
@@ -453,10 +518,10 @@ if (botToken) {
         '📘 Как купить',
         '',
         '1. Нажмите "🛍 Открыть каталог".',
-        '2. Выберите нужный AI-сервис и тариф.',
-        '3. Укажите имя и Telegram.',
-        '4. Нажмите "Подать заявку на покупку".',
-        '5. В течение 5 минут с вами свяжется менеджер для подтверждения заказа.',
+        '2. Пополните баланс на нужную вам сумму.',
+        '3. Выберите товар.',
+        '4. Оплатите товар.',
+        '5. В бота придут данные от товара.',
       ].join('\n'),
       orders: '🧾 Мои покупки\n\nПока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
       promotions: [
@@ -501,10 +566,10 @@ if (botToken) {
         '📘 How to buy',
         '',
         '1. Press "🛍 Open catalog".',
-        '2. Pick an AI service and plan.',
-        '3. Enter your name and Telegram.',
-        '4. Press "Submit purchase request".',
-        '5. A manager will contact you within 5 minutes to confirm the order.',
+        '2. Top up your balance with the required amount.',
+        '3. Choose a product.',
+        '4. Pay for the product.',
+        '5. Product access details will arrive in the bot.',
       ].join('\n'),
       orders: '🧾 My purchases\n\nYou do not have any orders yet. Open the catalog to place one.',
       promotions: [
@@ -549,10 +614,10 @@ if (botToken) {
         '📘 如何购买',
         '',
         '1. 点击“🛍 打开目录”。',
-        '2. 选择 AI 服务和套餐。',
-        '3. 填写姓名和 Telegram。',
-        '4. 点击“提交购买申请”。',
-        '5. 经理会在 5 分钟内联系你确认订单。',
+        '2. 按所需金额充值余额。',
+        '3. 选择商品。',
+        '4. 支付商品。',
+        '5. 商品数据会发送到机器人。',
       ].join('\n'),
       orders: '🧾 我的购买\n\n你目前还没有订单。打开目录即可下单。',
       promotions: [
@@ -642,6 +707,7 @@ if (botToken) {
     }
 
     balances.set(telegramId, balance)
+    saveStore()
     await context.reply(`Баланс пользователя ${telegramId} установлен: $${balance}`)
   })
 

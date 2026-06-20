@@ -21,6 +21,62 @@
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
 }
 
+.subscription-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding-bottom: 24px;
+}
+
+.subscription-gate {
+  width: min(520px, 100%);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 28px;
+  padding: 30px 22px;
+  background: linear-gradient(135deg, rgba(35, 14, 16, 0.98) 0%, rgba(15, 9, 11, 0.98) 58%, rgba(80, 20, 24, 0.96) 100%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+
+.subscription-gate h1 {
+  margin: 0;
+  font-size: clamp(30px, 7vw, 48px);
+  line-height: 1;
+}
+
+.subscription-gate p {
+  margin: 16px auto 0;
+  max-width: 390px;
+  color: #b7c0d4;
+}
+
+.subscription-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.subscription-actions button {
+  border: 0;
+  border-radius: 18px;
+  padding: 15px 18px;
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.subscription-actions button + button {
+  border: 1px solid rgba(248, 113, 113, 0.26);
+  background: rgba(15, 23, 42, 0.72);
+  color: #fecaca;
+}
+
+.subscription-gate .subscription-status {
+  color: #fca5a5;
+  font-size: 14px;
+}
+
 .hero-block {
   display: flex;
   align-items: end;
