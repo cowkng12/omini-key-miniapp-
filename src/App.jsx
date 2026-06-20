@@ -225,7 +225,7 @@ const sellerUsername = 'metifrysell'
 const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
-const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const productAvatars = {
   ChatGPT: { src: 'https://www.google.com/s2/favicons?domain=chatgpt.com&sz=128', fallback: 'GPT' },
   Grok: { src: 'https://www.google.com/s2/favicons?domain=x.com&sz=128', fallback: 'X' },

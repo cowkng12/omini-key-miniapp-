@@ -62,7 +62,7 @@ const store = await loadStore()
 const orders = store.orders
 const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
-const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const activationSiteUrl = 'https://gpt.byesu.com/'
 const issuedAccessKeys = new Set()
 
