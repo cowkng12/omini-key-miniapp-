@@ -223,7 +223,6 @@ const products = [
 
 const sellerUsername = 'metifrysell'
 const defaultApiBase = 'http://localhost:3001'
-const requiredChannelUrl = 'https://t.me/Omni_Key'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
 const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
@@ -286,13 +285,6 @@ const translations = {
     balancePaymentSuccess: 'Заказ оплачен с баланса. Данные отправлены вам в бот.',
     balancePaymentError: 'Не удалось оплатить с баланса. Проверьте баланс и попробуйте позже.',
     productPaymentError: 'Не удалось создать оплату товара. Попробуйте позже.',
-    subscribeTitle: 'Подпишитесь на канал OmniKey',
-    subscribeText: 'Чтобы продолжить пользоваться каталогом, подпишитесь на наш Telegram-канал.',
-    subscribeButton: 'Подписаться на канал',
-    checkSubscribeButton: 'Я подписался',
-    checkingSubscription: 'Проверяем подписку...',
-    subscriptionError: 'Подписка не найдена. Подпишитесь на канал и попробуйте снова.',
-    subscriptionTelegramRequired: 'Откройте приложение через Telegram, чтобы проверить подписку.',
     productText: {
       'claude-pro': ['Готовый аккаунт', 'Готовый аккаунт Claude Pro для повседневной работы, учебы и текста.'],
       'chatgpt-plus-ready': ['Готовый аккаунт', 'ChatGPT Plus на готовом аккаунте для быстрых задач и общения.'],
@@ -366,13 +358,6 @@ const translations = {
     balancePaymentSuccess: 'Order paid from balance. Access details were sent to you in the bot.',
     balancePaymentError: 'Could not pay from balance. Check your balance and try later.',
     productPaymentError: 'Could not create product payment. Try again later.',
-    subscribeTitle: 'Subscribe to OmniKey channel',
-    subscribeText: 'To continue using the catalog, subscribe to our Telegram channel.',
-    subscribeButton: 'Subscribe to channel',
-    checkSubscribeButton: 'I subscribed',
-    checkingSubscription: 'Checking subscription...',
-    subscriptionError: 'Subscription was not found. Subscribe to the channel and try again.',
-    subscriptionTelegramRequired: 'Open the app through Telegram to check your subscription.',
     productText: {
       'claude-pro': ['Ready account', 'Ready Claude Pro account for daily work, study and writing.'],
       'chatgpt-plus-ready': ['Ready account', 'ChatGPT Plus on a ready account for quick tasks and conversations.'],
@@ -446,13 +431,6 @@ const translations = {
     balancePaymentSuccess: '订单已用余额支付。访问数据已通过机器人发送给你。',
     balancePaymentError: '无法用余额支付。请检查余额后稍后再试。',
     productPaymentError: '无法创建商品付款。请稍后再试。',
-    subscribeTitle: '订阅 OmniKey 频道',
-    subscribeText: '如需继续使用目录，请先订阅我们的 Telegram 频道。',
-    subscribeButton: '订阅频道',
-    checkSubscribeButton: '我已订阅',
-    checkingSubscription: '正在检查订阅...',
-    subscriptionError: '未找到订阅。请订阅频道后重试。',
-    subscriptionTelegramRequired: '请通过 Telegram 打开应用以检查订阅。',
     productText: {
       'claude-pro': ['现成账号', '现成 Claude Pro 账号，适合日常工作、学习和写作。'],
       'chatgpt-plus-ready': ['现成账号', '现成 ChatGPT Plus 账号，适合快速任务和聊天。'],
@@ -584,8 +562,6 @@ function App() {
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
-  const [isSubscriptionAllowed, setIsSubscriptionAllowed] = useState(false)
-  const [subscriptionStatus, setSubscriptionStatus] = useState('')
   const [balance, setBalance] = useState(0)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
@@ -596,52 +572,6 @@ function App() {
     window.Telegram?.WebApp?.ready?.()
     window.Telegram?.WebApp?.expand?.()
   }, [])
-
-  const checkSubscription = () => {
-    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
-    const telegramUser = currentTelegramUser()
-
-    setSubscriptionStatus(text.checkingSubscription)
-
-    if (!telegramUser?.id) {
-      setSubscriptionStatus(text.subscriptionTelegramRequired)
-      return
-    }
-
-    fetch(`${apiBase}/api/subscription/check`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        telegramUser,
-        telegramInitData: currentTelegramInitData(),
-      }),
-    })
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}))
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Subscription check failed')
-        }
-
-        return data
-      })
-      .then(({ subscribed }) => {
-        setIsSubscriptionAllowed(Boolean(subscribed))
-        setSubscriptionStatus(subscribed ? '' : text.subscriptionError)
-      })
-      .catch(() => {
-        setSubscriptionStatus(text.subscriptionError)
-      })
-  }
-
-  useEffect(() => {
-    const timeoutId = setTimeout(checkSubscription, 0)
-
-    return () => clearTimeout(timeoutId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language])
 
   useEffect(() => {
     const telegramId = currentTelegramUser()?.id
@@ -768,40 +698,6 @@ function App() {
       .catch((error) => {
         setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : error.message)
       })
-  }
-
-  const openRequiredChannel = () => {
-    if (window.Telegram?.WebApp?.openTelegramLink) {
-      window.Telegram.WebApp.openTelegramLink(requiredChannelUrl)
-      return
-    }
-
-    window.open(requiredChannelUrl, '_blank', 'noopener,noreferrer')
-  }
-
-  if (!isSubscriptionAllowed) {
-    return (
-      <main className="page-shell subscription-page">
-        <button
-          type="button"
-          className="language-toggle"
-          onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
-        >
-          {text.languageLabel}
-        </button>
-
-        <section className="subscription-gate">
-          <p className="eyebrow">OmniKey</p>
-          <h1>{text.subscribeTitle}</h1>
-          <p>{text.subscribeText}</p>
-          <div className="subscription-actions">
-            <button type="button" onClick={openRequiredChannel}>{text.subscribeButton}</button>
-            <button type="button" onClick={checkSubscription}>{text.checkSubscribeButton}</button>
-          </div>
-          {subscriptionStatus ? <p className="subscription-status">{subscriptionStatus}</p> : null}
-        </section>
-      </main>
-    )
   }
 
   return (

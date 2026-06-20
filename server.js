@@ -616,6 +616,15 @@ if (botToken) {
       support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${supportUsername}`,
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
       balance: (amount) => `💰 Баланс\n\nВаш текущий баланс: $${amount}`,
+      subscribeRequired: [
+        'Подпишитесь на канал OmniKey, чтобы открыть каталог.',
+        '',
+        'Если вы уже подписаны, нажмите кнопку проверки ниже.',
+      ].join('\n'),
+      subscribeSuccess: 'Подписка найдена. Открываю меню.',
+      subscribeMissing: 'Подписка не найдена. Подпишитесь на канал и нажмите проверку еще раз.',
+      subscribeButton: 'Подписаться на канал',
+      checkSubscribeButton: 'Я подписался',
       shop: '🛍 Открыть каталог',
       guideButton: '📘 Как купить',
       ordersButton: '🧾 Мои покупки',
@@ -664,6 +673,15 @@ if (botToken) {
       support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${supportUsername}`,
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
       balance: (amount) => `💰 Balance\n\nYour current balance: $${amount}`,
+      subscribeRequired: [
+        'Subscribe to the OmniKey channel to open the catalog.',
+        '',
+        'If you are already subscribed, press the check button below.',
+      ].join('\n'),
+      subscribeSuccess: 'Subscription found. Opening the menu.',
+      subscribeMissing: 'Subscription was not found. Subscribe to the channel and press check again.',
+      subscribeButton: 'Subscribe to channel',
+      checkSubscribeButton: 'I subscribed',
       shop: '🛍 Open catalog',
       guideButton: '📘 How to buy',
       ordersButton: '🧾 My purchases',
@@ -712,6 +730,15 @@ if (botToken) {
       support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${supportUsername}`,
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
       balance: (amount) => `💰 余额\n\n当前余额：$${amount}`,
+      subscribeRequired: [
+        '请先订阅 OmniKey 频道，然后打开目录。',
+        '',
+        '如果你已经订阅，请点击下面的检查按钮。',
+      ].join('\n'),
+      subscribeSuccess: '已找到订阅。正在打开菜单。',
+      subscribeMissing: '未找到订阅。请订阅频道后再次点击检查。',
+      subscribeButton: '订阅频道',
+      checkSubscribeButton: '我已订阅',
       shop: '🛍 打开目录',
       guideButton: '📘 如何购买',
       ordersButton: '🧾 我的购买',
@@ -742,6 +769,16 @@ if (botToken) {
     ])
   }
 
+  function subscriptionKeyboard(language) {
+    const text = botText[language]
+
+    return Markup.inlineKeyboard([
+      [Markup.button.url(text.subscribeButton, requiredChannelUrl)],
+      [Markup.button.callback(text.checkSubscribeButton, 'check_subscription')],
+      [Markup.button.callback(text.languageButton, 'language')],
+    ])
+  }
+
   function currentLanguage(context) {
     return userLanguages.get(context.from?.id) || 'ru'
   }
@@ -749,6 +786,26 @@ if (botToken) {
   async function sendMainMenu(context, language) {
     const name = context.from?.first_name || 'friend'
     await context.reply(botText[language].welcome(name), mainKeyboard(language))
+  }
+
+  async function sendSubscriptionGate(context, language) {
+    await context.reply(botText[language].subscribeRequired, subscriptionKeyboard(language))
+  }
+
+  async function sendMainMenuIfSubscribed(context, language) {
+    const telegramId = String(context.from?.id || '').trim()
+
+    try {
+      if (await isSubscribedToRequiredChannel(telegramId)) {
+        await sendMainMenu(context, language)
+        return true
+      }
+    } catch (error) {
+      console.error('Telegram channel subscription check failed', error)
+    }
+
+    await sendSubscriptionGate(context, language)
+    return false
   }
 
   bot.start(async (context) => {
@@ -759,7 +816,7 @@ if (botToken) {
   })
 
   bot.command('shop', async (context) => {
-    await sendMainMenu(context, currentLanguage(context))
+    await sendMainMenuIfSubscribed(context, currentLanguage(context))
   })
 
   bot.command('myid', async (context) => {
@@ -824,13 +881,30 @@ if (botToken) {
     await context.reply('Выберите язык / Choose language / 选择语言', languageKeyboard)
   })
 
+  bot.action('check_subscription', async (context) => {
+    const language = currentLanguage(context)
+
+    try {
+      if (await isSubscribedToRequiredChannel(String(context.from?.id || '').trim())) {
+        await safeAnswerCbQuery(context, botText[language].subscribeSuccess)
+        await sendMainMenu(context, language)
+        return
+      }
+    } catch (error) {
+      console.error('Telegram channel subscription check failed', error)
+    }
+
+    await safeAnswerCbQuery(context, botText[language].subscribeMissing)
+    await sendSubscriptionGate(context, language)
+  })
+
   bot.action(/set_lang_(ru|en|zh)/, async (context) => {
     const language = context.match[1]
 
     userLanguages.set(context.from.id, language)
     await safeAnswerCbQuery(context, botText[language].languageSelected)
     await context.reply(botText[language].languageSelected)
-    await sendMainMenu(context, language)
+    await sendMainMenuIfSubscribed(context, language)
   })
 
   bot.catch((error, context) => {
