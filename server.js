@@ -65,6 +65,7 @@ const orders = store.orders
 const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
 const activations = store.activations
+const refbotUsers = new Set(store.refbotUsers)
 const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const issuedAccessKeys = new Set(Object.keys(activations))
 
@@ -74,6 +75,7 @@ function normalizeStore(rawStore = {}) {
     topups: Array.isArray(rawStore.topups) ? rawStore.topups : [],
     balances: rawStore.balances && typeof rawStore.balances === 'object' ? rawStore.balances : {},
     activations: rawStore.activations && typeof rawStore.activations === 'object' ? rawStore.activations : {},
+    refbotUsers: Array.isArray(rawStore.refbotUsers) ? rawStore.refbotUsers : [],
   }
 }
 
@@ -145,12 +147,12 @@ async function loadStore() {
       console.error('Store load failed', error)
     }
 
-    return { orders: [], topups: [], balances: {}, activations: {} }
+    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [] }
   }
 }
 
 async function saveStore() {
-  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations }
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers) }
 
   try {
     if (await saveSupabaseStore(snapshot)) {
@@ -372,7 +374,7 @@ async function creditTopup(topup) {
     [`Баланс пополнен на $${topup.amount}.`, `Текущий баланс: $${updatedBalance}.`].join('\n'),
   )
 
-  if (bot && topup.amount >= accountDeliveryThreshold && !topup.accountDataDelivered) {
+  if (bot && topup.amount >= accountDeliveryThreshold && refbotUsers.has(telegramId) && !topup.accountDataDelivered) {
     const activation = createActivation(telegramId, topup.amount)
     topup.activationKey = activation.key
     await bot.telegram.sendMessage(telegramId, accountDeliveryMessage(activation.key))
@@ -902,6 +904,11 @@ if (botToken) {
   }
 
   bot.start(async (context) => {
+    if (context.startPayload?.startsWith('refbot_') && context.from?.id) {
+      refbotUsers.add(String(context.from.id))
+      await saveStore()
+    }
+
     await context.reply(
       'Выберите язык / Choose language / 选择语言',
       languageKeyboard,
