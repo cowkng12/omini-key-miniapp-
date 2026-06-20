@@ -49,6 +49,8 @@ CRYPTO_PAY_TOKEN=токен_CryptoBot
 SUPABASE_URL=https://ваш-проект.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=service_role_key_из_Supabase
 SUPABASE_STORE_KEY=omnikey
+ACCOUNT_DELIVERY_THRESHOLD=0.1
+ACCOUNT_DELIVERY_DATA=логин:пароль или другие данные аккаунта
 ```
 
 4. Запустить backend и Telegram-бота:
@@ -89,6 +91,19 @@ create table if not exists app_store (
 4. Скопируй `Project URL` в `SUPABASE_URL`.
 5. Скопируй `service_role key` в `SUPABASE_SERVICE_ROLE_KEY`.
 6. Добавь эти переменные в Render и сделай redeploy.
+
+## Автовыдача после пополнения
+
+После успешного пополнения баланса на сумму от `ACCOUNT_DELIVERY_THRESHOLD` бот отправляет пользователю данные из `ACCOUNT_DELIVERY_DATA`.
+
+Для текущего теста установи:
+
+```text
+ACCOUNT_DELIVERY_THRESHOLD=0.1
+ACCOUNT_DELIVERY_DATA=данные_которые_нужно_выдать
+```
+
+Пока `ACCOUNT_DELIVERY_DATA` не задана, пользователь получит сообщение, что данные скоро будут добавлены.
 
 ## Локально и для Telegram
 

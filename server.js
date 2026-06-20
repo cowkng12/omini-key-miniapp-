@@ -23,6 +23,8 @@ const storeFilePath = process.env.STORE_FILE_PATH?.trim() || path.join(__dirname
 const supabaseUrl = process.env.SUPABASE_URL?.trim()
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
+const accountDeliveryThreshold = Number(process.env.ACCOUNT_DELIVERY_THRESHOLD || 0.1)
+const accountDeliveryData = process.env.ACCOUNT_DELIVERY_DATA?.trim() || ''
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
@@ -198,6 +200,23 @@ function purchaseDeliveryMessage(accessKey) {
   ].join('\n')
 }
 
+function accountDeliveryMessage() {
+  if (!accountDeliveryData) {
+    return [
+      'Оплата подтверждена.',
+      '',
+      'Данные от аккаунта скоро будут добавлены и отправлены автоматически.',
+      'Если данные нужны срочно, напишите в поддержку: @OmniKeySUPPORT',
+    ].join('\n')
+  }
+
+  return [
+    'Оплата подтверждена. Данные от аккаунта:',
+    '',
+    accountDeliveryData,
+  ].join('\n')
+}
+
 function userFromInitData(initData) {
   const encodedUser = new URLSearchParams(initData || '').get('user')
 
@@ -302,6 +321,12 @@ async function creditTopup(topup) {
     telegramId,
     [`Баланс пополнен на $${topup.amount}.`, `Текущий баланс: $${updatedBalance}.`].join('\n'),
   )
+
+  if (bot && topup.amount >= accountDeliveryThreshold && !topup.accountDataDelivered) {
+    await bot.telegram.sendMessage(telegramId, accountDeliveryMessage())
+    topup.accountDataDelivered = true
+    await saveStore()
+  }
 
   if (bot && adminChatId) {
     await bot.telegram.sendMessage(
