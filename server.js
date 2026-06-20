@@ -20,6 +20,9 @@ const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
 const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
 const storeFilePath = process.env.STORE_FILE_PATH?.trim() || path.join(__dirname, 'data', 'store.json')
+const supabaseUrl = process.env.SUPABASE_URL?.trim()
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
@@ -55,7 +58,7 @@ const products = {
   'poe-subscription': { title: 'Poe Subscription', price: 10 },
 }
 
-const store = loadStore()
+const store = await loadStore()
 const orders = store.orders
 const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
@@ -63,16 +66,77 @@ const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index
 const activationSiteUrl = 'https://gpt.byesu.com/'
 const issuedAccessKeys = new Set()
 
-function loadStore() {
+function normalizeStore(rawStore = {}) {
+  return {
+    orders: Array.isArray(rawStore.orders) ? rawStore.orders : [],
+    topups: Array.isArray(rawStore.topups) ? rawStore.topups : [],
+    balances: rawStore.balances && typeof rawStore.balances === 'object' ? rawStore.balances : {},
+  }
+}
+
+async function loadSupabaseStore() {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return null
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/app_store?key=eq.${encodeURIComponent(supabaseStoreKey)}&select=data`, {
+    headers: {
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+    },
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Supabase store load failed')
+  }
+
+  return normalizeStore(data[0]?.data)
+}
+
+async function saveSupabaseStore(snapshot) {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return false
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/app_store?on_conflict=key`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      key: supabaseStoreKey,
+      data: snapshot,
+      updated_at: new Date().toISOString(),
+    }),
+  })
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.message || 'Supabase store save failed')
+  }
+
+  return true
+}
+
+async function loadStore() {
+  try {
+    const supabaseStore = await loadSupabaseStore()
+
+    if (supabaseStore) {
+      return supabaseStore
+    }
+  } catch (error) {
+    console.error('Supabase store load failed', error)
+  }
+
   try {
     const rawStore = fs.readFileSync(storeFilePath, 'utf8')
-    const parsedStore = JSON.parse(rawStore)
-
-    return {
-      orders: Array.isArray(parsedStore.orders) ? parsedStore.orders : [],
-      topups: Array.isArray(parsedStore.topups) ? parsedStore.topups : [],
-      balances: parsedStore.balances && typeof parsedStore.balances === 'object' ? parsedStore.balances : {},
-    }
+    return normalizeStore(JSON.parse(rawStore))
   } catch (error) {
     if (error.code !== 'ENOENT') {
       console.error('Store load failed', error)
@@ -82,11 +146,21 @@ function loadStore() {
   }
 }
 
-function saveStore() {
+async function saveStore() {
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances) }
+
+  try {
+    if (await saveSupabaseStore(snapshot)) {
+      return
+    }
+  } catch (error) {
+    console.error('Supabase store save failed', error)
+  }
+
   fs.mkdirSync(path.dirname(storeFilePath), { recursive: true })
   fs.writeFileSync(
     storeFilePath,
-    JSON.stringify({ orders, topups, balances: Object.fromEntries(balances) }, null, 2),
+    JSON.stringify(snapshot, null, 2),
   )
 }
 
@@ -222,7 +296,7 @@ async function creditTopup(topup) {
   topup.paidAt = new Date().toISOString()
   topup.balanceAfter = updatedBalance
 
-  saveStore()
+  await saveStore()
 
   await bot?.telegram.sendMessage(
     telegramId,
@@ -361,7 +435,7 @@ app.post('/api/topups', async (request, response) => {
       }
 
       topups.unshift(topup)
-      saveStore()
+      await saveStore()
       watchTopupPayment(topup)
     }
   } catch (error) {
@@ -456,7 +530,7 @@ app.post('/api/orders/balance', async (request, response) => {
   }
 
   orders.unshift(order)
-  saveStore()
+  await saveStore()
 
   await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey))
 
@@ -707,7 +781,7 @@ if (botToken) {
     }
 
     balances.set(telegramId, balance)
-    saveStore()
+    await saveStore()
     await context.reply(`Баланс пользователя ${telegramId} установлен: $${balance}`)
   })
 

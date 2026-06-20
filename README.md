@@ -43,6 +43,12 @@ TELEGRAM_BOT_TOKEN=токен_от_BotFather
 ADMIN_CHAT_ID=ваш_chat_id
 WEB_APP_URL=https://ваш_https_url_miniapp
 SELLER_URL=https://t.me/metifrysell
+REQUIRED_CHANNEL_USERNAME=@Omni_Key
+REQUIRED_CHANNEL_URL=https://t.me/Omni_Key
+CRYPTO_PAY_TOKEN=токен_CryptoBot
+SUPABASE_URL=https://ваш-проект.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=service_role_key_из_Supabase
+SUPABASE_STORE_KEY=omnikey
 ```
 
 4. Запустить backend и Telegram-бота:
@@ -63,6 +69,26 @@ npm run dev
 - в `@BotFather` открыть `Bot Settings` -> `Menu Button`;
 - вставить туда `WEB_APP_URL`;
 - открыть бота и нажать `/start`.
+
+## Как подключить Supabase
+
+Supabase нужен, чтобы баланс, покупки и пополнения не пропадали после перезапуска Render на бесплатном тарифе.
+
+1. Создай бесплатный проект на `supabase.com`.
+2. Открой `SQL Editor` и выполни:
+
+```sql
+create table if not exists app_store (
+  key text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+```
+
+3. Открой `Project Settings` -> `API`.
+4. Скопируй `Project URL` в `SUPABASE_URL`.
+5. Скопируй `service_role key` в `SUPABASE_SERVICE_ROLE_KEY`.
+6. Добавь эти переменные в Render и сделай redeploy.
 
 ## Локально и для Telegram
 
