@@ -25,7 +25,7 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
 
 const products = {
-  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
   'chatgpt-pro-ready': { title: 'ChatGPT Pro Ready Account', price: 60 },
   'chatgpt-business-seat': { title: 'ChatGPT Business Seat', price: 15 },
