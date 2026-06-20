@@ -24,7 +24,7 @@ const supabaseUrl = process.env.SUPABASE_URL?.trim()
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
 const accountDeliveryThreshold = Number(process.env.ACCOUNT_DELIVERY_THRESHOLD || 0.1)
-const accountDeliveryData = process.env.ACCOUNT_DELIVERY_DATA?.trim() || ''
+const activationSiteUrl = process.env.ACTIVATION_SITE_URL?.trim() || `${webAppUrl.replace(/\/$/, '')}/activate`
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
@@ -64,15 +64,16 @@ const store = await loadStore()
 const orders = store.orders
 const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
+const activations = store.activations
 const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
-const activationSiteUrl = 'https://gpt.byesu.com/'
-const issuedAccessKeys = new Set()
+const issuedAccessKeys = new Set(Object.keys(activations))
 
 function normalizeStore(rawStore = {}) {
   return {
     orders: Array.isArray(rawStore.orders) ? rawStore.orders : [],
     topups: Array.isArray(rawStore.topups) ? rawStore.topups : [],
     balances: rawStore.balances && typeof rawStore.balances === 'object' ? rawStore.balances : {},
+    activations: rawStore.activations && typeof rawStore.activations === 'object' ? rawStore.activations : {},
   }
 }
 
@@ -144,12 +145,12 @@ async function loadStore() {
       console.error('Store load failed', error)
     }
 
-    return { orders: [], topups: [], balances: {} }
+    return { orders: [], topups: [], balances: {}, activations: {} }
   }
 }
 
 async function saveStore() {
-  const snapshot = { orders, topups, balances: Object.fromEntries(balances) }
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations }
 
   try {
     if (await saveSupabaseStore(snapshot)) {
@@ -191,6 +192,62 @@ function generateAccessKey() {
   return accessKey
 }
 
+function generateCredentialEmail() {
+  const prefixes = ['omni', 'spark', 'nova', 'pixel', 'orbit', 'neuro', 'cloud', 'orange']
+  const domains = ['mailkey.pro', 'omniaccess.app', 'keymail.cloud', 'aivault.site']
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
+  const domain = domains[Math.floor(Math.random() * domains.length)]
+  const suffix = Math.random().toString(36).slice(2, 8)
+
+  return `${prefix}.${suffix}@${domain}`
+}
+
+function generateCredentialPassword() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$%'
+  let password = ''
+
+  for (let index = 0; index < 14; index += 1) {
+    password += alphabet[Math.floor(Math.random() * alphabet.length)]
+  }
+
+  return password
+}
+
+function createActivation(telegramId, amount) {
+  const accessKey = generateAccessKey()
+
+  activations[accessKey] = {
+    key: accessKey,
+    telegramId,
+    amount,
+    status: 'new',
+    credentials: null,
+    createdAt: new Date().toISOString(),
+  }
+
+  return activations[accessKey]
+}
+
+function activateKey(accessKey) {
+  const normalizedKey = String(accessKey || '').trim().toUpperCase()
+  const activation = activations[normalizedKey]
+
+  if (!activation) {
+    return null
+  }
+
+  if (!activation.credentials) {
+    activation.credentials = {
+      email: generateCredentialEmail(),
+      password: generateCredentialPassword(),
+    }
+    activation.status = 'activated'
+    activation.activatedAt = new Date().toISOString()
+  }
+
+  return activation
+}
+
 function purchaseDeliveryMessage(accessKey) {
   return [
     'Поздравляем с покупкой. Ваши данные для получения:',
@@ -200,20 +257,13 @@ function purchaseDeliveryMessage(accessKey) {
   ].join('\n')
 }
 
-function accountDeliveryMessage() {
-  if (!accountDeliveryData) {
-    return [
-      'Оплата подтверждена.',
-      '',
-      'Данные от аккаунта скоро будут добавлены и отправлены автоматически.',
-      'Если данные нужны срочно, напишите в поддержку: @OmniKeySUPPORT',
-    ].join('\n')
-  }
-
+function accountDeliveryMessage(accessKey) {
   return [
-    'Оплата подтверждена. Данные от аккаунта:',
+    'Оплата подтверждена. Ваш ключ для получения аккаунта:',
     '',
-    accountDeliveryData,
+    accessKey,
+    '',
+    `Активируйте ключ на сайте: ${activationSiteUrl}`,
   ].join('\n')
 }
 
@@ -323,7 +373,9 @@ async function creditTopup(topup) {
   )
 
   if (bot && topup.amount >= accountDeliveryThreshold && !topup.accountDataDelivered) {
-    await bot.telegram.sendMessage(telegramId, accountDeliveryMessage())
+    const activation = createActivation(telegramId, topup.amount)
+    topup.activationKey = activation.key
+    await bot.telegram.sendMessage(telegramId, accountDeliveryMessage(activation.key))
     topup.accountDataDelivered = true
     await saveStore()
   }
@@ -484,6 +536,22 @@ app.post('/api/topups', async (request, response) => {
   }
 
   response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
+})
+
+app.post('/api/activate', async (request, response) => {
+  const activation = activateKey(request.body?.key)
+
+  if (!activation) {
+    response.status(404).json({ error: 'Invalid activation key' })
+    return
+  }
+
+  await saveStore()
+
+  response.json({
+    email: activation.credentials.email,
+    password: activation.credentials.password,
+  })
 })
 
 app.get('/api/topups/:topupId/status', async (request, response) => {

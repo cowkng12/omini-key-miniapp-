@@ -522,6 +522,91 @@ function wait(ms) {
   })
 }
 
+function ActivationPage() {
+  const [key, setKey] = useState('')
+  const [credentials, setCredentials] = useState(null)
+  const [status, setStatus] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleActivate = (event) => {
+    event.preventDefault()
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || ''
+    const normalizedKey = key.trim().toUpperCase()
+
+    if (!normalizedKey) {
+      setStatus('Введите ключ активации.')
+      return
+    }
+
+    setIsLoading(true)
+    setStatus('')
+    setCredentials(null)
+
+    fetch(`${apiBase}/api/activate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ key: normalizedKey }),
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Не удалось активировать ключ.')
+        }
+
+        return data
+      })
+      .then((data) => {
+        setCredentials(data)
+        setStatus('Ключ активирован. Данные аккаунта готовы.')
+      })
+      .catch(() => {
+        setStatus('Ключ не найден. Проверьте ввод и попробуйте снова.')
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
+  }
+
+  return (
+    <main className="activation-page">
+      <section className="activation-card">
+        <div className="activation-logo">OmniKey</div>
+        <p className="activation-eyebrow">Активация доступа</p>
+        <h1>Введите ключ из Telegram</h1>
+        <p className="activation-copy">
+          После оплаты бот отправляет уникальный ключ. Активируйте его здесь, чтобы получить данные аккаунта.
+        </p>
+
+        <form className="activation-form" onSubmit={handleActivate}>
+          <label htmlFor="activation-key">Ключ активации</label>
+          <input
+            id="activation-key"
+            value={key}
+            onChange={(event) => setKey(event.target.value)}
+            placeholder="XXXX-XXXX-XXXX-XXXX"
+            autoComplete="off"
+          />
+          <button type="submit" disabled={isLoading}>{isLoading ? 'Проверяем...' : 'Активировать'}</button>
+        </form>
+
+        {status ? <p className="activation-status">{status}</p> : null}
+
+        {credentials ? (
+          <div className="activation-result">
+            <span>Почта</span>
+            <strong>{credentials.email}</strong>
+            <span>Пароль</span>
+            <strong>{credentials.password}</strong>
+          </div>
+        ) : null}
+      </section>
+    </main>
+  )
+}
+
 function ProductCard({ product, onSelect, active, text }) {
   const [badge, description] = text.productText[product.id]
   const promo = text.promos?.[product.id]
@@ -553,7 +638,7 @@ function ProductCard({ product, onSelect, active, text }) {
   )
 }
 
-function App() {
+function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState(products[0])
   const [language, setLanguage] = useState('ru')
   const [activeTab, setActiveTab] = useState('catalog')
@@ -835,6 +920,10 @@ function App() {
       </nav>
     </main>
   )
+}
+
+function App() {
+  return window.location.pathname === '/activate' ? <ActivationPage /> : <StoreApp />
 }
 
 export default App

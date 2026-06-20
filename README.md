@@ -50,7 +50,7 @@ SUPABASE_URL=https://ваш-проект.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=service_role_key_из_Supabase
 SUPABASE_STORE_KEY=omnikey
 ACCOUNT_DELIVERY_THRESHOLD=0.1
-ACCOUNT_DELIVERY_DATA=логин:пароль или другие данные аккаунта
+ACTIVATION_SITE_URL=https://ваш_https_url_miniapp/activate
 ```
 
 4. Запустить backend и Telegram-бота:
@@ -94,16 +94,16 @@ create table if not exists app_store (
 
 ## Автовыдача после пополнения
 
-После успешного пополнения баланса на сумму от `ACCOUNT_DELIVERY_THRESHOLD` бот отправляет пользователю данные из `ACCOUNT_DELIVERY_DATA`.
+После успешного пополнения баланса на сумму от `ACCOUNT_DELIVERY_THRESHOLD` бот отправляет пользователю случайный ключ и ссылку на страницу активации `ACTIVATION_SITE_URL`.
 
 Для текущего теста установи:
 
 ```text
 ACCOUNT_DELIVERY_THRESHOLD=0.1
-ACCOUNT_DELIVERY_DATA=данные_которые_нужно_выдать
+ACTIVATION_SITE_URL=https://ваш_https_url_miniapp/activate
 ```
 
-Пока `ACCOUNT_DELIVERY_DATA` не задана, пользователь получит сообщение, что данные скоро будут добавлены.
+На странице активации пользователь вводит ключ, после чего сайт показывает случайно сгенерированные `email` и `password`. Один и тот же ключ всегда возвращает одни и те же данные после первой активации.
 
 ## Локально и для Telegram
 
