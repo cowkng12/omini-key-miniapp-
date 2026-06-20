@@ -230,6 +230,24 @@ function createActivation(telegramId, amount) {
   return activations[accessKey]
 }
 
+function registerActivationKey(accessKey, telegramId, amount, source) {
+  const normalizedKey = String(accessKey || '').trim().toUpperCase()
+
+  activations[normalizedKey] = activations[normalizedKey] || {
+    key: normalizedKey,
+    telegramId,
+    amount,
+    source,
+    status: 'new',
+    credentials: null,
+    createdAt: new Date().toISOString(),
+  }
+
+  issuedAccessKeys.add(normalizedKey)
+
+  return activations[normalizedKey]
+}
+
 function activateKey(accessKey) {
   const normalizedKey = String(accessKey || '').trim().toUpperCase()
   const activation = activations[normalizedKey]
@@ -625,6 +643,7 @@ app.post('/api/orders/balance', async (request, response) => {
   }
 
   orders.unshift(order)
+  registerActivationKey(order.accessKey, telegramId, order.price, 'balance_order')
   await saveStore()
 
   await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey))
