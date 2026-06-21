@@ -215,12 +215,10 @@ function generateAccessKey() {
 
 function generateCredentialEmail() {
   const prefixes = ['omni', 'spark', 'nova', 'pixel', 'orbit', 'neuro', 'cloud', 'orange']
-  const domains = ['mailkey.pro', 'omniaccess.app', 'keymail.cloud', 'aivault.site']
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
-  const domain = domains[Math.floor(Math.random() * domains.length)]
   const suffix = Math.random().toString(36).slice(2, 8)
 
-  return `${prefix}.${suffix}@${domain}`
+  return `${prefix}.${suffix}@gmail.com`
 }
 
 function generateCredentialPassword() {
