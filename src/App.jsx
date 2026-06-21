@@ -781,7 +781,12 @@ function WalletPaymentPage() {
         return data
       })
       .then(({ topup, paymentUrl }) => {
-        setPayment(topup)
+        setPayment((currentPayment) => ({
+          ...currentPayment,
+          ...topup,
+          walletPayments: currentPayment?.walletPayments || topup.walletPayments,
+          cryptoPayAvailable: currentPayment?.cryptoPayAvailable ?? topup.cryptoPayAvailable,
+        }))
 
         if (paymentUrl) {
           window.location.href = paymentUrl
@@ -816,7 +821,12 @@ function WalletPaymentPage() {
         return data
       })
       .then(({ topup }) => {
-        setPayment(topup)
+        setPayment((currentPayment) => ({
+          ...currentPayment,
+          ...topup,
+          walletPayments: currentPayment?.walletPayments || topup.walletPayments,
+          cryptoPayAvailable: currentPayment?.cryptoPayAvailable ?? topup.cryptoPayAvailable,
+        }))
       })
       .catch((error) => {
         setStatus(error.message)
@@ -850,7 +860,12 @@ function WalletPaymentPage() {
         return response.json()
       })
       .then(({ topup }) => {
-        setPayment(topup)
+        setPayment((currentPayment) => ({
+          ...currentPayment,
+          ...topup,
+          walletPayments: currentPayment?.walletPayments || topup.walletPayments,
+          cryptoPayAvailable: currentPayment?.cryptoPayAvailable ?? topup.cryptoPayAvailable,
+        }))
         setStatus(text.review)
       })
       .catch(() => {
