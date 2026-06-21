@@ -256,6 +256,36 @@
   right: 18px;
 }
 
+.balance-pill {
+  position: fixed;
+  top: 86px;
+  right: 18px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 999px;
+  padding: 8px 10px 8px 12px;
+  background: rgba(24, 10, 12, 0.94);
+  color: #fff7ed;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+
+.balance-pill strong {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  color: #ffffff;
+  line-height: 1;
+}
+
 .hero-block {
   display: flex;
   align-items: end;
@@ -593,6 +623,17 @@
   border-top: 1px solid rgba(226, 232, 240, 0.12);
 }
 
+.topup-modal-panel {
+  position: relative;
+  width: min(420px, 100%);
+  margin-top: 0;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 22px;
+  padding: 28px 20px 20px;
+  background: linear-gradient(135deg, rgba(35, 14, 16, 0.98) 0%, rgba(15, 9, 11, 0.98) 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+}
+
 .topup-panel h3 {
   margin: 0 0 8px;
   font-size: 18px;
@@ -640,6 +681,10 @@
 .topup-status {
   margin-top: 12px;
   color: #fca5a5;
+}
+
+.balance-tab-topup {
+  max-width: 320px;
 }
 
 .empty-panel p:last-child {
@@ -702,6 +747,11 @@
     top: 70px;
     right: 10px;
     padding: 7px 9px;
+  }
+
+  .balance-pill {
+    top: 70px;
+    right: 10px;
   }
 
   .page-shell {

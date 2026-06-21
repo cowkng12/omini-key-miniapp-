@@ -953,13 +953,14 @@ function ProductCard({ product, onSelect, active, text }) {
 
 function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState(products[0])
-  const [language, setLanguage] = useState('en')
+  const [language] = useState('en')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
+  const [isTopUpPanelOpen, setIsTopUpPanelOpen] = useState(false)
   const [balance, setBalance] = useState(0)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
@@ -1080,10 +1081,11 @@ function StoreApp() {
     <main className="page-shell">
       <button
         type="button"
-        className="language-toggle"
-        onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
+        className="balance-pill"
+        onClick={() => setIsTopUpPanelOpen(true)}
       >
-        {text.languageLabel}
+        <span>{formatPrice(balance)}</span>
+        <strong>+</strong>
       </button>
 
       <section className="hero-block">
@@ -1170,32 +1172,58 @@ function StoreApp() {
           {activeTab === 'balance' ? <strong className="balance-amount">{formatPrice(balance)}</strong> : null}
           <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
           {activeTab === 'balance' ? (
-            <div className="topup-panel">
-              <h3>{text.topUpTitle}</h3>
-              <p>{text.topUpHint}</p>
-              <div className="topup-grid">
-                {topupAmounts.map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    className={selectedTopUpAmount === amount ? 'active' : ''}
-                    onClick={() => {
-                      setSelectedTopUpAmount(amount)
-                      setTopUpStatus('')
-                    }}
-                  >
-                    ${amount}
-                  </button>
-                ))}
-              </div>
-              <button type="button" className="topup-pay-button" onClick={handleWalletTopUp}>
-                {text.topUpButton} ${selectedTopUpAmount}
-              </button>
-              {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
-            </div>
+            <button type="button" className="topup-pay-button balance-tab-topup" onClick={() => setIsTopUpPanelOpen(true)}>
+              {text.topUpButton} ${selectedTopUpAmount}
+            </button>
           ) : null}
         </section>
       )}
+
+      {isTopUpPanelOpen ? (
+        <div
+          className="product-payment-overlay"
+          role="presentation"
+          onClick={() => setIsTopUpPanelOpen(false)}
+        >
+          <section
+            className="topup-panel topup-modal-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={text.topUpTitle}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="product-payment-close"
+              aria-label="Close"
+              onClick={() => setIsTopUpPanelOpen(false)}
+            >
+              ×
+            </button>
+            <h3>{text.topUpTitle}</h3>
+            <p>{text.topUpHint}</p>
+            <div className="topup-grid">
+              {topupAmounts.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  className={selectedTopUpAmount === amount ? 'active' : ''}
+                  onClick={() => {
+                    setSelectedTopUpAmount(amount)
+                    setTopUpStatus('')
+                  }}
+                >
+                  ${amount}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="topup-pay-button" onClick={handleWalletTopUp}>
+              {text.topUpButton} ${selectedTopUpAmount}
+            </button>
+            {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
+          </section>
+        </div>
+      ) : null}
 
       <nav className="bottom-tabs" aria-label="Mini app tabs">
         {Object.entries(text.tabs).map(([tab, label]) => (
