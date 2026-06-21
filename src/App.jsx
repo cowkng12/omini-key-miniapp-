@@ -668,6 +668,7 @@ function StoreApp() {
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
+  const [isTopUpPaymentOpen, setIsTopUpPaymentOpen] = useState(false)
   const [balance, setBalance] = useState(0)
   const [walletPayments, setWalletPayments] = useState([])
   const [selectedWalletNetwork, setSelectedWalletNetwork] = useState('ton')
@@ -1002,50 +1003,83 @@ function StoreApp() {
                     onClick={() => {
                       setSelectedTopUpAmount(amount)
                       setTopUpStatus('')
+                      setWalletTopUp(null)
                     }}
                   >
                     ${amount}
                   </button>
                 ))}
               </div>
-              <button type="button" className="topup-pay-button" onClick={handleTopUp}>
-                CryptoBot: {text.topUpButton} ${selectedTopUpAmount}
+              <button type="button" className="topup-pay-button" onClick={() => setIsTopUpPaymentOpen(true)}>
+                {text.topUpButton} ${selectedTopUpAmount}
               </button>
-              <button type="button" className="topup-wallet-button" onClick={handleWalletTopUp}>
-                {text.walletTopUpButton}
-              </button>
-              {walletPayments.length > 0 ? (
-                <div className="wallet-network-tabs" aria-label={text.walletNetwork}>
-                  {walletPayments.map((walletOption) => (
+              {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
+              {isTopUpPaymentOpen ? (
+                <div
+                  className="product-payment-overlay"
+                  role="presentation"
+                  onClick={() => setIsTopUpPaymentOpen(false)}
+                >
+                  <section
+                    className="topup-payment-panel"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={text.paymentMethods}
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <button
-                      key={walletOption.id}
                       type="button"
-                      className={selectedWalletNetwork === walletOption.id ? 'active' : ''}
-                      onClick={() => {
-                        setSelectedWalletNetwork(walletOption.id)
-                        setWalletTopUp(null)
-                        setTopUpStatus('')
-                      }}
+                      className="product-payment-close"
+                      aria-label="Close"
+                      onClick={() => setIsTopUpPaymentOpen(false)}
                     >
-                      {walletOption.label}
+                      ×
                     </button>
-                  ))}
+                    <div>
+                      <span>{text.paymentTitle}</span>
+                      <strong>{formatPrice(selectedTopUpAmount)}</strong>
+                    </div>
+                    <button type="button" className="topup-pay-button" onClick={handleTopUp}>
+                      CryptoBot: {text.topUpButton} ${selectedTopUpAmount}
+                    </button>
+                    <button type="button" className="topup-wallet-button" onClick={handleWalletTopUp}>
+                      {text.walletTopUpButton}
+                    </button>
+                    {walletPayments.length > 0 ? (
+                      <div className="wallet-network-tabs" aria-label={text.walletNetwork}>
+                        {walletPayments.map((walletOption) => (
+                          <button
+                            key={walletOption.id}
+                            type="button"
+                            className={selectedWalletNetwork === walletOption.id ? 'active' : ''}
+                            onClick={() => {
+                              setSelectedWalletNetwork(walletOption.id)
+                              setWalletTopUp(null)
+                              setTopUpStatus('')
+                            }}
+                          >
+                            {walletOption.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                    {walletTopUp ? (
+                      <div className="wallet-payment-card">
+                        <span>{text.walletMethod}</span>
+                        <strong>{walletTopUp.walletPayment.payableAmount} {walletTopUp.walletPayment.asset}</strong>
+                        <code>{walletTopUp.walletPayment.address}</code>
+                        <small>{walletTopUp.walletPayment.network}</small>
+                        <button type="button" onClick={handleWalletPaid}>{text.walletPaidButton}</button>
+                      </div>
+                    ) : selectedWalletPayment ? (
+                      <p className="wallet-payment-note">{selectedWalletPayment.network}: {selectedWalletPayment.asset}</p>
+                    ) : (
+                      <p className="wallet-payment-note">{text.walletNotConfigured}</p>
+                    )}
+                    {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
+                  </section>
                 </div>
               ) : null}
-              {walletTopUp ? (
-                <div className="wallet-payment-card">
-                  <span>{text.walletMethod}</span>
-                  <strong>{walletTopUp.walletPayment.payableAmount} {walletTopUp.walletPayment.asset}</strong>
-                  <code>{walletTopUp.walletPayment.address}</code>
-                  <small>{walletTopUp.walletPayment.network}</small>
-                  <button type="button" onClick={handleWalletPaid}>{text.walletPaidButton}</button>
-                </div>
-              ) : selectedWalletPayment ? (
-                <p className="wallet-payment-note">{selectedWalletPayment.network}: {selectedWalletPayment.asset}</p>
-              ) : (
-                <p className="wallet-payment-note">{text.walletNotConfigured}</p>
-              )}
-              {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
             </div>
           ) : null}
         </section>
