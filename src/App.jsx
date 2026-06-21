@@ -968,7 +968,7 @@ function ProductCard({ product, onSelect, active, text }) {
 
 function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState(products[0])
-  const [language] = useState('en')
+  const [language, setLanguage] = useState('en')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
@@ -986,6 +986,14 @@ function StoreApp() {
     window.Telegram?.WebApp?.ready?.()
     window.Telegram?.WebApp?.expand?.()
   }, [])
+
+  useEffect(() => {
+    document.body.classList.toggle('modal-open', isTopUpPanelOpen)
+
+    return () => {
+      document.body.classList.remove('modal-open')
+    }
+  }, [isTopUpPanelOpen])
 
   useEffect(() => {
     const telegramId = currentTelegramUser()?.id
@@ -1094,6 +1102,13 @@ function StoreApp() {
 
   return (
     <main className="page-shell">
+      <button
+        type="button"
+        className="language-toggle store-language-toggle"
+        onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
+      >
+        {text.languageLabel}
+      </button>
       <button
         type="button"
         className="balance-pill"
