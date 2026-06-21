@@ -721,6 +721,24 @@ app.get('/api/topups/:topupId/status', async (request, response) => {
   response.json({ topup, balance: balances.get(telegramId) || 0 })
 })
 
+app.get('/api/topups/:topupId/payment', (request, response) => {
+  const topupId = request.params.topupId?.trim()
+  const topup = topups.find((item) => item.id === topupId)
+
+  if (!topup || topup.paymentMethod !== 'wallet') {
+    response.status(404).json({ error: 'Wallet payment not found' })
+    return
+  }
+
+  response.json({
+    id: topup.id,
+    status: topup.status,
+    amount: topup.amount,
+    walletPayment: topup.walletPayment,
+    createdAt: topup.createdAt,
+  })
+})
+
 app.post('/api/orders/balance', async (request, response) => {
   const { productId, customer = {} } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)

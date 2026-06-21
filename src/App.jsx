@@ -274,7 +274,8 @@ const translations = {
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения через CryptoBot.',
     topUpButton: 'Оплатить',
-    walletTopUpButton: 'Оплатить криптой на кошелек',
+    walletTopUpButton: 'Оплата на кошелек',
+    walletOpenPaymentPage: 'Открыть страницу оплаты',
     walletMethod: 'Криптокошелек',
     walletPaidButton: 'Я оплатил',
     walletPayReview: 'Заявка отправлена. Мы проверим транзакцию и зачислим баланс.',
@@ -354,7 +355,8 @@ const translations = {
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a CryptoBot top-up amount.',
     topUpButton: 'Pay',
-    walletTopUpButton: 'Pay crypto to wallet',
+    walletTopUpButton: 'Wallet payment',
+    walletOpenPaymentPage: 'Open payment page',
     walletMethod: 'Crypto wallet',
     walletPaidButton: 'I paid',
     walletPayReview: 'Request sent. We will verify the transaction and credit your balance.',
@@ -434,7 +436,8 @@ const translations = {
     topUpTitle: '充值余额',
     topUpHint: '选择通过 CryptoBot 充值的金额。',
     topUpButton: '支付',
-    walletTopUpButton: '用加密钱包支付',
+    walletTopUpButton: '钱包支付',
+    walletOpenPaymentPage: '打开付款页面',
     walletMethod: '加密钱包',
     walletPaidButton: '我已付款',
     walletPayReview: '请求已发送。我们会检查交易并充值余额。',
@@ -623,6 +626,72 @@ function ActivationPage() {
             <strong>{credentials.password}</strong>
           </div>
         ) : null}
+      </section>
+    </main>
+  )
+}
+
+function WalletPaymentPage() {
+  const [payment, setPayment] = useState(null)
+  const [status, setStatus] = useState('')
+  const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || ''
+  const topupId = window.location.pathname.split('/').filter(Boolean)[1]
+  const visibleStatus = status || (!topupId ? 'Платеж не найден.' : '')
+
+  useEffect(() => {
+    if (!topupId) {
+      return
+    }
+
+    fetch(`${apiBase}/api/topups/${topupId}/payment`)
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Payment not found')
+        }
+
+        return data
+      })
+      .then((data) => {
+        setPayment(data)
+        setStatus('')
+      })
+      .catch(() => {
+        setStatus('Платеж не найден или уже недоступен.')
+      })
+  }, [apiBase, topupId])
+
+  const copyAddress = () => {
+    if (!payment?.walletPayment?.address) {
+      return
+    }
+
+    navigator.clipboard?.writeText(payment.walletPayment.address)
+    setStatus('Адрес скопирован.')
+  }
+
+  return (
+    <main className="wallet-pay-page">
+      <section className="wallet-pay-card">
+        <div className="activation-logo">OmniKey</div>
+        <p className="activation-eyebrow">Страница оплаты</p>
+        <h1>Оплата заявки</h1>
+        {payment ? (
+          <>
+            <div className="wallet-pay-details">
+              <span>К оплате</span>
+              <strong>{payment.walletPayment.payableAmount} {payment.walletPayment.asset}</strong>
+              <span>Сеть</span>
+              <strong>{payment.walletPayment.network}</strong>
+              <span>Адрес кошелька</span>
+              <code>{payment.walletPayment.address}</code>
+            </div>
+            <button type="button" onClick={copyAddress}>Скопировать адрес</button>
+            <p className="activation-copy">Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил" в приложении.</p>
+          </>
+        ) : null}
+        {visibleStatus ? <p className="activation-status">{visibleStatus}</p> : null}
       </section>
     </main>
   )
@@ -1069,6 +1138,7 @@ function StoreApp() {
                         <strong>{walletTopUp.walletPayment.payableAmount} {walletTopUp.walletPayment.asset}</strong>
                         <code>{walletTopUp.walletPayment.address}</code>
                         <small>{walletTopUp.walletPayment.network}</small>
+                        <a href={`/pay/${walletTopUp.id}`} target="_blank" rel="noreferrer">{text.walletOpenPaymentPage}</a>
                         <button type="button" onClick={handleWalletPaid}>{text.walletPaidButton}</button>
                       </div>
                     ) : selectedWalletPayment ? (
@@ -1102,7 +1172,15 @@ function StoreApp() {
 }
 
 function App() {
-  return window.location.pathname === '/activate' ? <ActivationPage /> : <StoreApp />
+  if (window.location.pathname === '/activate') {
+    return <ActivationPage />
+  }
+
+  if (window.location.pathname.startsWith('/pay/')) {
+    return <WalletPaymentPage />
+  }
+
+  return <StoreApp />
 }
 
 export default App
