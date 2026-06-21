@@ -494,7 +494,12 @@ app.get('/health', (request, response) => {
 })
 
 app.get('/api/orders', (request, response) => {
-  response.json({ orders })
+  const telegramId = String(request.query.telegramId || '').trim()
+  const userOrders = telegramId
+    ? orders.filter((order) => String(order.telegramUser?.id || '').trim() === telegramId)
+    : orders
+
+  response.json({ orders: userOrders })
 })
 
 app.get('/api/balance/:telegramId', (request, response) => {
@@ -1006,17 +1011,9 @@ if (botToken) {
       promotions: [
         '🎁 Акции',
         '',
-        'В честь открытия OmniKey Store действует специальное предложение:',
+        'В честь открытия OmniKey Store 2 аккаунта Pro стоят $18 вместо двух по $20.',
         '',
-        '• Cursor Pro — $10',
-        '• Claude Pro — $10',
-        '• при заказе от 2 подписок каждая позиция — $9',
-        '',
-        'Акционное предложение уже отмечено в соответствующих позициях каталога.',
-        '',
-        'Чтобы получить акционную цену, укажите промокод: HAPPYOPENING.',
-        '',
-        'Для заказа выберите нужный товар в каталоге и подайте заявку.',
+        'Акция уже отмечена в карточках Claude Pro Duo и Cursor Pro Duo в каталоге.',
       ].join('\n'),
       support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${supportUsername}`,
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
@@ -1063,17 +1060,9 @@ if (botToken) {
       promotions: [
         '🎁 Promotions',
         '',
-        'Special opening offer from OmniKey Store:',
+        'Opening offer: 2 Pro accounts cost $18 instead of two at $20 each.',
         '',
-        '• Cursor Pro — $10',
-        '• Claude Pro — $10',
-        '• when ordering 2 or more subscriptions, each item is $9',
-        '',
-        'This offer is already marked inside the relevant catalog items.',
-        '',
-        'To get the promotional price, use promo code: HAPPYOPENING.',
-        '',
-        'To order, choose the required product in the catalog and submit a request.',
+        'The deal is already marked on Claude Pro Duo and Cursor Pro Duo in the catalog.',
       ].join('\n'),
       support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${supportUsername}`,
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
@@ -1120,17 +1109,9 @@ if (botToken) {
       promotions: [
         '🎁 优惠活动',
         '',
-        'OmniKey Store 开业优惠：',
+        '开业优惠：2 个 Pro 账号只需 $18，而不是两个各 $20。',
         '',
-        '• Cursor Pro — $10',
-        '• Claude Pro — $10',
-        '• 购买 2 个或以上订阅，每个仅 $9',
-        '',
-        '该优惠已在对应的商品卡片中标注。',
-        '',
-        '如需享受优惠价格，请使用优惠码：HAPPYOPENING。',
-        '',
-        '下单请在目录中选择商品并提交申请。',
+        '该优惠已在目录中的 Claude Pro Duo 和 Cursor Pro Duo 商品卡片中标注。',
       ].join('\n'),
       support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${supportUsername}`,
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',

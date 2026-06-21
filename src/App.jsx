@@ -272,7 +272,7 @@ const translations = {
     balanceTitle: 'Баланс',
     balanceText: 'Пока что вы не пополняли баланс.',
     topUpTitle: 'Пополнить баланс',
-    topUpHint: 'Выберите сумму пополнения через CryptoBot.',
+    topUpHint: 'Выберите сумму пополнения баланса.',
     topUpButton: 'Оплатить',
     walletTopUpButton: 'Оплата на кошелек',
     walletMethod: 'Криптокошелек',
@@ -286,7 +286,7 @@ const translations = {
     telegramUserRequired: 'Откройте приложение через кнопку бота в Telegram и попробуйте снова.',
     paymentTitle: 'К оплате',
     paymentMethods: 'Способы оплаты',
-    cryptoBotMethod: 'Crypto Bot',
+    cryptoBotMethod: 'Быстрая оплата',
     payBalanceButton: 'Оплатить с баланса',
     balanceMethod: 'Баланс',
     balancePaymentSuccess: 'Заказ оплачен с баланса. Данные отправлены вам в бот.',
@@ -352,7 +352,7 @@ const translations = {
     balanceTitle: 'Balance',
     balanceText: 'You have not topped up your balance yet.',
     topUpTitle: 'Top up balance',
-    topUpHint: 'Choose a CryptoBot top-up amount.',
+    topUpHint: 'Choose a balance top-up amount.',
     topUpButton: 'Pay',
     walletTopUpButton: 'Wallet payment',
     walletMethod: 'Crypto wallet',
@@ -366,7 +366,7 @@ const translations = {
     telegramUserRequired: 'Open the app through the bot button in Telegram and try again.',
     paymentTitle: 'To pay',
     paymentMethods: 'Payment methods',
-    cryptoBotMethod: 'Crypto Bot',
+    cryptoBotMethod: 'Fast payment',
     payBalanceButton: 'Pay from balance',
     balanceMethod: 'Balance',
     balancePaymentSuccess: 'Order paid from balance. Access details were sent to you in the bot.',
@@ -432,7 +432,7 @@ const translations = {
     balanceTitle: '余额',
     balanceText: '你还没有充值余额。',
     topUpTitle: '充值余额',
-    topUpHint: '选择通过 CryptoBot 充值的金额。',
+    topUpHint: '选择余额充值金额。',
     topUpButton: '支付',
     walletTopUpButton: '钱包支付',
     walletMethod: '加密钱包',
@@ -446,7 +446,7 @@ const translations = {
     telegramUserRequired: '请通过 Telegram 机器人的按钮打开应用后重试。',
     paymentTitle: '应付金额',
     paymentMethods: '支付方式',
-    cryptoBotMethod: 'Crypto Bot',
+    cryptoBotMethod: '快速付款',
     payBalanceButton: '用余额支付',
     balanceMethod: '余额',
     balancePaymentSuccess: '订单已用余额支付。访问数据已通过机器人发送给你。',
@@ -595,6 +595,19 @@ const paymentTranslations = {
 
 function formatPrice(price) {
   return `$${price}`
+}
+
+function formatOrderDate(value) {
+  if (!value) {
+    return ''
+  }
+
+  return new Date(value).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function currentTelegramUser() {
@@ -895,7 +908,7 @@ function WalletPaymentPage() {
               <strong>{payment.walletPayment ? `${payment.walletPayment.payableAmount} ${payment.walletPayment.asset}` : formatPrice(payment.amount)}</strong>
               {!payment.walletPayment ? (
                 <div className="wallet-pay-methods">
-                  {payment.cryptoPayAvailable ? <button type="button" onClick={chooseCryptoBot}>CryptoBot</button> : null}
+                  {payment.cryptoPayAvailable ? <button type="button" onClick={chooseCryptoBot}>{translations[language].cryptoBotMethod}</button> : null}
                   {payment.walletPayments?.map((walletOption) => (
                     <button key={walletOption.id} type="button" onClick={() => chooseWallet(walletOption.id)}>
                       {walletOption.label}
@@ -977,6 +990,7 @@ function StoreApp() {
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
   const [isTopUpPanelOpen, setIsTopUpPanelOpen] = useState(false)
   const [balance, setBalance] = useState(0)
+  const [orders, setOrders] = useState([])
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
@@ -1017,6 +1031,20 @@ function StoreApp() {
       .catch(() => {
         setBalance(0)
       })
+
+    fetch(`${apiBase}/api/orders?telegramId=${encodeURIComponent(telegramId)}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Orders request failed')
+        }
+        return response.json()
+      })
+      .then(({ orders: userOrders = [] }) => {
+        setOrders(Array.isArray(userOrders) ? userOrders : [])
+      })
+      .catch(() => {
+        setOrders([])
+      })
   }, [])
 
   const handleProductSelect = (product) => {
@@ -1051,8 +1079,11 @@ function StoreApp() {
         }
         return response.json()
       })
-      .then(({ balance: updatedBalance = 0 }) => {
+      .then(({ balance: updatedBalance = 0, order }) => {
         setBalance(Number(updatedBalance) || 0)
+        if (order) {
+          setOrders((current) => [order, ...current])
+        }
         setProductPaymentStatus(text.balancePaymentSuccess)
       })
       .catch(() => {
@@ -1202,7 +1233,21 @@ function StoreApp() {
         <section className="empty-panel">
           <p className="eyebrow">OmniKey</p>
           <h2>{text.ordersTitle}</h2>
-          <p>{text.ordersText}</p>
+          {orders.length ? (
+            <div className="orders-list">
+              {orders.map((order) => (
+                <article className="order-card" key={order.id}>
+                  <div>
+                    <strong>{order.productTitle}</strong>
+                    <span>{formatOrderDate(order.createdAt)}</span>
+                  </div>
+                  <span>{formatPrice(order.price)}</span>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p>{text.ordersText}</p>
+          )}
         </section>
       )}
 
