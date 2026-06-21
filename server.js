@@ -41,6 +41,9 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
 const accountDeliveryThreshold = Number(process.env.ACCOUNT_DELIVERY_THRESHOLD || 0.1)
 const activationSiteUrl = process.env.ACTIVATION_SITE_URL?.trim() || `${webAppUrl.replace(/\/$/, '')}/activate`
+const keepAliveUrl = process.env.KEEP_ALIVE_URL?.trim() || webAppUrl
+const keepAliveEnabled = process.env.KEEP_ALIVE_ENABLED !== 'false'
+const keepAliveIntervalMs = Number(process.env.KEEP_ALIVE_INTERVAL_MS || 5 * 60 * 1000)
 
 const products = {
   'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
@@ -303,6 +306,21 @@ function accountDeliveryMessage(accessKey) {
   ].join('\n')
 }
 
+function startKeepAlive() {
+  if (!keepAliveEnabled || !keepAliveUrl || keepAliveUrl.includes('localhost')) {
+    return
+  }
+
+  const healthUrl = `${keepAliveUrl.replace(/\/$/, '')}/health`
+
+  setInterval(() => {
+    fetch(healthUrl)
+      .catch((error) => {
+        console.error('Keep-alive ping failed', error.message)
+      })
+  }, keepAliveIntervalMs).unref?.()
+}
+
 function userFromInitData(initData) {
   const encodedUser = new URLSearchParams(initData || '').get('user')
 
@@ -471,6 +489,10 @@ app.get('/api/config', (request, response) => {
     products,
     walletPayments: walletPayOptions,
   })
+})
+
+app.get('/health', (request, response) => {
+  response.json({ ok: true, service: 'omini-key-miniapp' })
 })
 
 app.get('/api/orders', (request, response) => {
@@ -1349,4 +1371,5 @@ if (botToken) {
 
 app.listen(port, () => {
   console.log(`Server started on http://localhost:${port}`)
+  startKeepAlive()
 })
