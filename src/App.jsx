@@ -707,6 +707,15 @@ function WalletPaymentPage() {
       })
   }
 
+  const returnToMethods = () => {
+    setPayment((currentPayment) => currentPayment ? {
+      ...currentPayment,
+      walletPayment: null,
+      status: 'payment_method_pending',
+    } : currentPayment)
+    setStatus('')
+  }
+
   const markPaid = () => {
     if (!topupId) {
       return
@@ -774,6 +783,7 @@ function WalletPaymentPage() {
             </div>
             {payment.walletPayment ? (
               <>
+                <button type="button" className="wallet-pay-back-button" onClick={returnToMethods}>Назад к выбору способа оплаты</button>
                 <button type="button" onClick={copyAddress}>Скопировать адрес</button>
                 <button type="button" className="wallet-pay-paid-button" onClick={markPaid}>Я оплатил</button>
                 <p className="activation-copy">Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил".</p>

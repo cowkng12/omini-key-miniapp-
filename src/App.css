@@ -223,6 +223,13 @@
   cursor: pointer;
 }
 
+.wallet-pay-card .wallet-pay-back-button {
+  margin-bottom: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.34);
+  background: rgba(15, 23, 42, 0.82);
+  color: #bae6fd;
+}
+
 .wallet-pay-card .wallet-pay-paid-button {
   margin-top: 10px;
   background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
