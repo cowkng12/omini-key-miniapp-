@@ -39,7 +39,7 @@ const storeFilePath = process.env.STORE_FILE_PATH?.trim() || path.join(__dirname
 const supabaseUrl = process.env.SUPABASE_URL?.trim()
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
 const supabaseStoreKey = process.env.SUPABASE_STORE_KEY?.trim() || 'omnikey'
-const accountDeliveryThreshold = Number(process.env.ACCOUNT_DELIVERY_THRESHOLD || 0.1)
+const accountDeliveryThreshold = Number(process.env.ACCOUNT_DELIVERY_THRESHOLD || 1)
 const activationSiteUrl = process.env.ACTIVATION_SITE_URL?.trim() || `${webAppUrl.replace(/\/$/, '')}/activate`
 const keepAliveUrl = process.env.KEEP_ALIVE_URL?.trim() || webAppUrl
 const keepAliveEnabled = process.env.KEEP_ALIVE_ENABLED !== 'false'
@@ -85,7 +85,7 @@ const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
 const activations = store.activations
 const refbotUsers = new Set(store.refbotUsers)
-const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const issuedAccessKeys = new Set(Object.keys(activations))
 
 function normalizeStore(rawStore = {}) {

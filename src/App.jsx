@@ -225,7 +225,7 @@ const sellerUsername = 'metifrysell'
 const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
 const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
-const topupAmounts = [0.1, 1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
+const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const productAvatars = {
   ChatGPT: { src: 'https://www.google.com/s2/favicons?domain=chatgpt.com&sz=128', fallback: 'GPT' },
   Grok: { src: 'https://www.google.com/s2/favicons?domain=x.com&sz=128', fallback: 'X' },
@@ -266,7 +266,7 @@ const translations = {
     success: 'Заявка отправлена. В течение 5 минут с вами свяжется менеджер, ожидайте.',
     error: 'Не удалось отправить заявку. Проверь backend и попробуй снова.',
     allGroup: 'Все',
-    tabs: { catalog: 'Каталог', orders: 'Заказы', balance: 'Баланс' },
+    tabs: { catalog: 'Каталог', orders: 'Заказы' },
     ordersTitle: 'Мои покупки',
     ordersText: 'Пока вы не совершили ни одной покупки.',
     balanceTitle: 'Баланс',
@@ -346,7 +346,7 @@ const translations = {
     success: 'Request sent. A manager will contact you within 5 minutes, please wait.',
     error: 'Could not send the request. Check backend and try again.',
     allGroup: 'All',
-    tabs: { catalog: 'Catalog', orders: 'Orders', balance: 'Balance' },
+    tabs: { catalog: 'Catalog', orders: 'Orders' },
     ordersTitle: 'My purchases',
     ordersText: 'You have not made any purchases yet.',
     balanceTitle: 'Balance',
@@ -426,7 +426,7 @@ const translations = {
     success: '申请已提交。经理将在 5 分钟内联系你，请稍候。',
     error: '请求发送失败。请检查后端并重试。',
     allGroup: '全部',
-    tabs: { catalog: '目录', orders: '订单', balance: '余额' },
+    tabs: { catalog: '目录', orders: '订单' },
     ordersTitle: '我的购买',
     ordersText: '你还没有任何购买记录。',
     balanceTitle: '余额',
@@ -1201,14 +1201,8 @@ function StoreApp() {
       ) : (
         <section className="empty-panel">
           <p className="eyebrow">OmniKey</p>
-          <h2>{activeTab === 'orders' ? text.ordersTitle : text.balanceTitle}</h2>
-          {activeTab === 'balance' ? <strong className="balance-amount">{formatPrice(balance)}</strong> : null}
-          <p>{activeTab === 'orders' ? text.ordersText : text.balanceText}</p>
-          {activeTab === 'balance' ? (
-            <button type="button" className="topup-pay-button balance-tab-topup" onClick={() => setIsTopUpPanelOpen(true)}>
-              {text.topUpButton} ${selectedTopUpAmount}
-            </button>
-          ) : null}
+          <h2>{text.ordersTitle}</h2>
+          <p>{text.ordersText}</p>
         </section>
       )}
 
