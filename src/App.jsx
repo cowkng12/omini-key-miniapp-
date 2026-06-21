@@ -488,6 +488,111 @@ const translations = {
   },
 }
 
+const activationTranslations = {
+  ru: {
+    eyebrow: 'Активация доступа',
+    title: 'Введите ключ из Telegram',
+    copy: 'После оплаты бот отправляет уникальный ключ. Активируйте его здесь, чтобы получить данные аккаунта.',
+    label: 'Ключ активации',
+    empty: 'Введите ключ активации.',
+    failed: 'Не удалось активировать ключ.',
+    success: 'Ключ активирован. Данные аккаунта готовы.',
+    missing: 'Ключ не найден. Проверьте ввод и попробуйте снова.',
+    loading: 'Проверяем...',
+    submit: 'Активировать',
+    email: 'Почта',
+    password: 'Пароль',
+  },
+  en: {
+    eyebrow: 'Access activation',
+    title: 'Enter your Telegram key',
+    copy: 'After payment, the bot sends a unique key. Activate it here to receive your account details.',
+    label: 'Activation key',
+    empty: 'Enter your activation key.',
+    failed: 'Could not activate the key.',
+    success: 'Key activated. Account details are ready.',
+    missing: 'Key not found. Check the code and try again.',
+    loading: 'Checking...',
+    submit: 'Activate',
+    email: 'Email',
+    password: 'Password',
+  },
+  zh: {
+    eyebrow: '访问激活',
+    title: '输入 Telegram 密钥',
+    copy: '付款后，机器人会发送唯一密钥。请在此激活以获取账号信息。',
+    label: '激活密钥',
+    empty: '请输入激活密钥。',
+    failed: '无法激活密钥。',
+    success: '密钥已激活。账号信息已准备好。',
+    missing: '未找到密钥。请检查后重试。',
+    loading: '检查中...',
+    submit: '激活',
+    email: '邮箱',
+    password: '密码',
+  },
+}
+
+const paymentTranslations = {
+  ru: {
+    eyebrow: 'Страница оплаты',
+    title: 'Оплата заявки',
+    missing: 'Платеж не найден.',
+    unavailable: 'Платеж не найден или уже недоступен.',
+    amount: 'К оплате',
+    cryptoError: 'Не удалось создать оплату CryptoBot.',
+    walletError: 'Не удалось выбрать кошелек.',
+    copied: 'Адрес скопирован.',
+    review: 'Заявка отправлена. Мы проверим транзакцию и зачислим баланс.',
+    reviewError: 'Не удалось отправить заявку. Попробуйте позже.',
+    network: 'Сеть',
+    address: 'Адрес кошелька',
+    back: 'Назад к выбору способа оплаты',
+    copy: 'Скопировать адрес',
+    paid: 'Я оплатил',
+    warning: 'Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил".',
+    qrAlt: 'QR-код адреса кошелька',
+  },
+  en: {
+    eyebrow: 'Payment page',
+    title: 'Payment request',
+    missing: 'Payment not found.',
+    unavailable: 'Payment not found or no longer available.',
+    amount: 'Amount due',
+    cryptoError: 'Could not create CryptoBot payment.',
+    walletError: 'Could not select wallet.',
+    copied: 'Address copied.',
+    review: 'Request sent. We will verify the transaction and credit your balance.',
+    reviewError: 'Could not send the request. Try again later.',
+    network: 'Network',
+    address: 'Wallet address',
+    back: 'Back to payment methods',
+    copy: 'Copy address',
+    paid: 'I paid',
+    warning: 'Send funds only through the selected network. After the transfer, press "I paid".',
+    qrAlt: 'Wallet address QR code',
+  },
+  zh: {
+    eyebrow: '付款页面',
+    title: '付款请求',
+    missing: '未找到付款。',
+    unavailable: '未找到付款或已不可用。',
+    amount: '应付金额',
+    cryptoError: '无法创建 CryptoBot 付款。',
+    walletError: '无法选择钱包。',
+    copied: '地址已复制。',
+    review: '请求已发送。我们会检查交易并充值余额。',
+    reviewError: '无法发送请求。请稍后重试。',
+    network: '网络',
+    address: '钱包地址',
+    back: '返回付款方式',
+    copy: '复制地址',
+    paid: '我已付款',
+    warning: '请仅通过所选网络转账。转账后点击“我已付款”。',
+    qrAlt: '钱包地址二维码',
+  },
+}
+
 function formatPrice(price) {
   return `$${price}`
 }
@@ -518,10 +623,12 @@ function currentTelegramInitData() {
 }
 
 function ActivationPage() {
+  const [language, setLanguage] = useState('en')
   const [key, setKey] = useState('')
   const [credentials, setCredentials] = useState(null)
   const [status, setStatus] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const text = activationTranslations[language]
 
   const handleActivate = (event) => {
     event.preventDefault()
@@ -529,7 +636,7 @@ function ActivationPage() {
     const normalizedKey = key.trim().toUpperCase()
 
     if (!normalizedKey) {
-      setStatus('Введите ключ активации.')
+      setStatus(text.empty)
       return
     }
 
@@ -548,17 +655,17 @@ function ActivationPage() {
         const data = await response.json().catch(() => ({}))
 
         if (!response.ok) {
-          throw new Error(data.error || 'Не удалось активировать ключ.')
+          throw new Error(data.error || text.failed)
         }
 
         return data
       })
       .then((data) => {
         setCredentials(data)
-        setStatus('Ключ активирован. Данные аккаунта готовы.')
+        setStatus(text.success)
       })
       .catch(() => {
-        setStatus('Ключ не найден. Проверьте ввод и попробуйте снова.')
+        setStatus(text.missing)
       })
       .finally(() => {
         setIsLoading(false)
@@ -567,16 +674,23 @@ function ActivationPage() {
 
   return (
     <main className="activation-page">
+      <button
+        type="button"
+        className="language-toggle page-language-toggle"
+        onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
+      >
+        {translations[language].languageLabel}
+      </button>
       <section className="activation-card">
         <div className="activation-logo">OmniKey</div>
-        <p className="activation-eyebrow">Активация доступа</p>
-        <h1>Введите ключ из Telegram</h1>
+        <p className="activation-eyebrow">{text.eyebrow}</p>
+        <h1>{text.title}</h1>
         <p className="activation-copy">
-          После оплаты бот отправляет уникальный ключ. Активируйте его здесь, чтобы получить данные аккаунта.
+          {text.copy}
         </p>
 
         <form className="activation-form" onSubmit={handleActivate}>
-          <label htmlFor="activation-key">Ключ активации</label>
+          <label htmlFor="activation-key">{text.label}</label>
           <input
             id="activation-key"
             value={key}
@@ -584,16 +698,16 @@ function ActivationPage() {
             placeholder="XXXX-XXXX-XXXX-XXXX"
             autoComplete="off"
           />
-          <button type="submit" disabled={isLoading}>{isLoading ? 'Проверяем...' : 'Активировать'}</button>
+          <button type="submit" disabled={isLoading}>{isLoading ? text.loading : text.submit}</button>
         </form>
 
         {status ? <p className="activation-status">{status}</p> : null}
 
         {credentials ? (
           <div className="activation-result">
-            <span>Почта</span>
+            <span>{text.email}</span>
             <strong>{credentials.email}</strong>
-            <span>Пароль</span>
+            <span>{text.password}</span>
             <strong>{credentials.password}</strong>
           </div>
         ) : null}
@@ -603,11 +717,13 @@ function ActivationPage() {
 }
 
 function WalletPaymentPage() {
+  const [language, setLanguage] = useState('en')
   const [payment, setPayment] = useState(null)
   const [status, setStatus] = useState('')
   const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || ''
   const topupId = window.location.pathname.split('/').filter(Boolean)[1]
-  const visibleStatus = status || (!topupId ? 'Платеж не найден.' : '')
+  const text = paymentTranslations[language]
+  const visibleStatus = status || (!topupId ? text.missing : '')
 
   useEffect(() => {
     if (!topupId) {
@@ -629,9 +745,9 @@ function WalletPaymentPage() {
         setStatus('')
       })
       .catch(() => {
-        setStatus('Платеж не найден или уже недоступен.')
+        setStatus(text.unavailable)
       })
-  }, [apiBase, topupId])
+  }, [apiBase, text.unavailable, topupId])
 
   const copyAddress = () => {
     if (!payment?.walletPayment?.address) {
@@ -639,7 +755,7 @@ function WalletPaymentPage() {
     }
 
     navigator.clipboard?.writeText(payment.walletPayment.address)
-    setStatus('Адрес скопирован.')
+    setStatus(text.copied)
   }
 
   const chooseCryptoBot = () => {
@@ -659,7 +775,7 @@ function WalletPaymentPage() {
         const data = await response.json().catch(() => ({}))
 
         if (!response.ok) {
-          throw new Error(data.error || 'Не удалось создать оплату CryptoBot.')
+          throw new Error(data.error || text.cryptoError)
         }
 
         return data
@@ -694,7 +810,7 @@ function WalletPaymentPage() {
         const data = await response.json().catch(() => ({}))
 
         if (!response.ok) {
-          throw new Error(data.error || 'Не удалось выбрать кошелек.')
+          throw new Error(data.error || text.walletError)
         }
 
         return data
@@ -735,10 +851,10 @@ function WalletPaymentPage() {
       })
       .then(({ topup }) => {
         setPayment(topup)
-        setStatus('Заявка отправлена. Мы проверим транзакцию и зачислим баланс.')
+        setStatus(text.review)
       })
       .catch(() => {
-        setStatus('Не удалось отправить заявку. Попробуйте позже.')
+        setStatus(text.reviewError)
       })
   }
 
@@ -746,14 +862,21 @@ function WalletPaymentPage() {
 
   return (
     <main className="wallet-pay-page">
+      <button
+        type="button"
+        className="language-toggle page-language-toggle"
+        onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
+      >
+        {translations[language].languageLabel}
+      </button>
       <section className="wallet-pay-card">
         <div className="activation-logo">OmniKey</div>
-        <p className="activation-eyebrow">Страница оплаты</p>
-        <h1>Оплата заявки</h1>
+        <p className="activation-eyebrow">{text.eyebrow}</p>
+        <h1>{text.title}</h1>
         {payment ? (
           <>
             <div className="wallet-pay-details">
-              <span>К оплате</span>
+              <span>{text.amount}</span>
               <strong>{payment.walletPayment ? `${payment.walletPayment.payableAmount} ${payment.walletPayment.asset}` : formatPrice(payment.amount)}</strong>
               {!payment.walletPayment ? (
                 <div className="wallet-pay-methods">
@@ -769,24 +892,24 @@ function WalletPaymentPage() {
                 <img
                   className="wallet-pay-qr"
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${qrData}`}
-                  alt="QR-код адреса кошелька"
+                  alt={text.qrAlt}
                 />
               ) : null}
               {payment.walletPayment ? (
                 <>
-                  <span>Сеть</span>
+                  <span>{text.network}</span>
                   <strong>{payment.walletPayment.network}</strong>
-                  <span>Адрес кошелька</span>
+                  <span>{text.address}</span>
                   <code>{payment.walletPayment.address}</code>
                 </>
               ) : null}
             </div>
             {payment.walletPayment ? (
               <>
-                <button type="button" className="wallet-pay-back-button" onClick={returnToMethods}>Назад к выбору способа оплаты</button>
-                <button type="button" onClick={copyAddress}>Скопировать адрес</button>
-                <button type="button" className="wallet-pay-paid-button" onClick={markPaid}>Я оплатил</button>
-                <p className="activation-copy">Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил".</p>
+                <button type="button" className="wallet-pay-back-button" onClick={returnToMethods}>{text.back}</button>
+                <button type="button" onClick={copyAddress}>{text.copy}</button>
+                <button type="button" className="wallet-pay-paid-button" onClick={markPaid}>{text.paid}</button>
+                <p className="activation-copy">{text.warning}</p>
               </>
             ) : null}
           </>
@@ -830,7 +953,7 @@ function ProductCard({ product, onSelect, active, text }) {
 
 function StoreApp() {
   const [selectedProduct, setSelectedProduct] = useState(products[0])
-  const [language, setLanguage] = useState('ru')
+  const [language, setLanguage] = useState('en')
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
