@@ -257,7 +257,8 @@
 }
 
 .store-language-toggle {
-  right: 118px;
+  position: static;
+  box-shadow: none;
 }
 
 body.modal-open {
@@ -265,10 +266,6 @@ body.modal-open {
 }
 
 .balance-pill {
-  position: fixed;
-  top: 86px;
-  right: 18px;
-  z-index: 10;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -296,10 +293,17 @@ body.modal-open {
 
 .hero-block {
   display: flex;
-  align-items: end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 28px;
   padding: 8px 0 22px;
+}
+
+.hero-controls {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
 }
 
 .eyebrow {
@@ -737,7 +741,7 @@ body.modal-open {
 
 @media (max-width: 900px) {
   .hero-block {
-    display: block;
+    align-items: flex-start;
   }
 
   .hero-copy {
@@ -761,15 +765,6 @@ body.modal-open {
     padding: 7px 9px;
   }
 
-  .balance-pill {
-    top: 70px;
-    right: 10px;
-  }
-
-  .store-language-toggle {
-    right: 112px;
-  }
-
   .page-shell {
     padding: 14px 12px 84px;
   }
@@ -780,7 +775,22 @@ body.modal-open {
   }
 
   .hero-block {
+    gap: 10px;
     padding: 4px 0 14px;
+  }
+
+  .hero-controls {
+    gap: 6px;
+  }
+
+  .balance-pill {
+    padding: 7px 8px 7px 10px;
+    font-size: 12px;
+  }
+
+  .balance-pill strong {
+    width: 20px;
+    height: 20px;
   }
 
   .hero-block h1 {

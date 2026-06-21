@@ -1102,26 +1102,29 @@ function StoreApp() {
 
   return (
     <main className="page-shell">
-      <button
-        type="button"
-        className="language-toggle store-language-toggle"
-        onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
-      >
-        {text.languageLabel}
-      </button>
-      <button
-        type="button"
-        className="balance-pill"
-        onClick={() => setIsTopUpPanelOpen(true)}
-      >
-        <span>{formatPrice(balance)}</span>
-        <strong>+</strong>
-      </button>
-
       <section className="hero-block">
-        <p className="eyebrow">{text.eyebrow}</p>
-        <h1>{text.title}</h1>
-        <p className="hero-copy">{text.hero}</p>
+        <div>
+          <p className="eyebrow">{text.eyebrow}</p>
+          <h1>{text.title}</h1>
+          <p className="hero-copy">{text.hero}</p>
+        </div>
+        <div className="hero-controls">
+          <button
+            type="button"
+            className="language-toggle store-language-toggle"
+            onClick={() => setLanguage((current) => languages[(languages.indexOf(current) + 1) % languages.length])}
+          >
+            {text.languageLabel}
+          </button>
+          <button
+            type="button"
+            className="balance-pill"
+            onClick={() => setIsTopUpPanelOpen(true)}
+          >
+            <span>{formatPrice(balance)}</span>
+            <strong>+</strong>
+          </button>
+        </div>
       </section>
 
       {activeTab === 'catalog' ? (
