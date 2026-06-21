@@ -275,7 +275,6 @@ const translations = {
     topUpHint: 'Выберите сумму пополнения через CryptoBot.',
     topUpButton: 'Оплатить',
     walletTopUpButton: 'Оплата на кошелек',
-    walletOpenPaymentPage: 'Открыть страницу оплаты',
     walletMethod: 'Криптокошелек',
     walletPaidButton: 'Я оплатил',
     walletPayReview: 'Заявка отправлена. Мы проверим транзакцию и зачислим баланс.',
@@ -356,7 +355,6 @@ const translations = {
     topUpHint: 'Choose a CryptoBot top-up amount.',
     topUpButton: 'Pay',
     walletTopUpButton: 'Wallet payment',
-    walletOpenPaymentPage: 'Open payment page',
     walletMethod: 'Crypto wallet',
     walletPaidButton: 'I paid',
     walletPayReview: 'Request sent. We will verify the transaction and credit your balance.',
@@ -437,7 +435,6 @@ const translations = {
     topUpHint: '选择通过 CryptoBot 充值的金额。',
     topUpButton: '支付',
     walletTopUpButton: '钱包支付',
-    walletOpenPaymentPage: '打开付款页面',
     walletMethod: '加密钱包',
     walletPaidButton: '我已付款',
     walletPayReview: '请求已发送。我们会检查交易并充值余额。',
@@ -671,6 +668,34 @@ function WalletPaymentPage() {
     setStatus('Адрес скопирован.')
   }
 
+  const markPaid = () => {
+    if (!topupId) {
+      return
+    }
+
+    fetch(`${apiBase}/api/topups/${topupId}/paid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Wallet paid request failed')
+        }
+        return response.json()
+      })
+      .then(({ topup }) => {
+        setPayment(topup)
+        setStatus('Заявка отправлена. Мы проверим транзакцию и зачислим баланс.')
+      })
+      .catch(() => {
+        setStatus('Не удалось отправить заявку. Попробуйте позже.')
+      })
+  }
+
+  const qrData = payment?.walletPayment?.address ? encodeURIComponent(payment.walletPayment.address) : ''
+
   return (
     <main className="wallet-pay-page">
       <section className="wallet-pay-card">
@@ -682,13 +707,21 @@ function WalletPaymentPage() {
             <div className="wallet-pay-details">
               <span>К оплате</span>
               <strong>{payment.walletPayment.payableAmount} {payment.walletPayment.asset}</strong>
+              {qrData ? (
+                <img
+                  className="wallet-pay-qr"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${qrData}`}
+                  alt="QR-код адреса кошелька"
+                />
+              ) : null}
               <span>Сеть</span>
               <strong>{payment.walletPayment.network}</strong>
               <span>Адрес кошелька</span>
               <code>{payment.walletPayment.address}</code>
             </div>
             <button type="button" onClick={copyAddress}>Скопировать адрес</button>
-            <p className="activation-copy">Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил" в приложении.</p>
+            <button type="button" className="wallet-pay-paid-button" onClick={markPaid}>Я оплатил</button>
+            <p className="activation-copy">Отправляйте средства только в указанной сети. После перевода нажмите "Я оплатил".</p>
           </>
         ) : null}
         {visibleStatus ? <p className="activation-status">{visibleStatus}</p> : null}
@@ -741,7 +774,6 @@ function StoreApp() {
   const [balance, setBalance] = useState(0)
   const [walletPayments, setWalletPayments] = useState([])
   const [selectedWalletNetwork, setSelectedWalletNetwork] = useState('ton')
-  const [walletTopUp, setWalletTopUp] = useState(null)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
@@ -907,7 +939,6 @@ function StoreApp() {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
 
     setTopUpStatus('')
-    setWalletTopUp(null)
 
     fetch(`${apiBase}/api/topups/wallet`, {
       method: 'POST',
@@ -931,38 +962,10 @@ function StoreApp() {
         return data
       })
       .then(({ topup }) => {
-        setWalletTopUp(topup)
+        window.location.href = `/pay/${topup.id}`
       })
       .catch((error) => {
         setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : error.message)
-      })
-  }
-
-  const handleWalletPaid = () => {
-    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
-
-    if (!walletTopUp?.id) {
-      return
-    }
-
-    fetch(`${apiBase}/api/topups/${walletTopUp.id}/paid`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Wallet paid request failed')
-        }
-        return response.json()
-      })
-      .then(({ topup }) => {
-        setWalletTopUp(topup)
-        setTopUpStatus(text.walletPayReview)
-      })
-      .catch(() => {
-        setTopUpStatus(text.topUpError)
       })
   }
 
@@ -1072,7 +1075,6 @@ function StoreApp() {
                     onClick={() => {
                       setSelectedTopUpAmount(amount)
                       setTopUpStatus('')
-                      setWalletTopUp(null)
                     }}
                   >
                     ${amount}
@@ -1123,7 +1125,6 @@ function StoreApp() {
                             className={selectedWalletNetwork === walletOption.id ? 'active' : ''}
                             onClick={() => {
                               setSelectedWalletNetwork(walletOption.id)
-                              setWalletTopUp(null)
                               setTopUpStatus('')
                             }}
                           >
@@ -1132,16 +1133,7 @@ function StoreApp() {
                         ))}
                       </div>
                     ) : null}
-                    {walletTopUp ? (
-                      <div className="wallet-payment-card">
-                        <span>{text.walletMethod}</span>
-                        <strong>{walletTopUp.walletPayment.payableAmount} {walletTopUp.walletPayment.asset}</strong>
-                        <code>{walletTopUp.walletPayment.address}</code>
-                        <small>{walletTopUp.walletPayment.network}</small>
-                        <a href={`/pay/${walletTopUp.id}`} target="_blank" rel="noreferrer">{text.walletOpenPaymentPage}</a>
-                        <button type="button" onClick={handleWalletPaid}>{text.walletPaidButton}</button>
-                      </div>
-                    ) : selectedWalletPayment ? (
+                    {selectedWalletPayment ? (
                       <p className="wallet-payment-note">{selectedWalletPayment.network}: {selectedWalletPayment.asset}</p>
                     ) : (
                       <p className="wallet-payment-note">{text.walletNotConfigured}</p>
