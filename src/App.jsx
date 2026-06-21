@@ -7,7 +7,7 @@ const products = [
     group: 'ChatGPT',
     brand: 'ChatGPT',
     plan: 'Plus Ready Account',
-    price: 0.1,
+    price: 1.5,
   },
   {
     id: 'chatgpt-go',

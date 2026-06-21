@@ -46,7 +46,7 @@ const keepAliveEnabled = process.env.KEEP_ALIVE_ENABLED !== 'false'
 const keepAliveIntervalMs = Number(process.env.KEEP_ALIVE_INTERVAL_MS || 5 * 60 * 1000)
 
 const products = {
-  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 0.1 },
+  'chatgpt-plus-ready': { title: 'ChatGPT Plus Ready Account', price: 1.5 },
   'chatgpt-go': { title: 'ChatGPT Go', price: 2.5 },
   'chatgpt-pro-ready': { title: 'ChatGPT Pro Ready Account', price: 60 },
   'chatgpt-business-seat': { title: 'ChatGPT Business Seat', price: 15 },
