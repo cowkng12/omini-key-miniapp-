@@ -1081,6 +1081,10 @@ function StoreApp() {
 }
 
 function App() {
+  useEffect(() => {
+    document.title = 'OminiKey'
+  }, [])
+
   if (window.location.pathname === '/activate') {
     return <ActivationPage />
   }
