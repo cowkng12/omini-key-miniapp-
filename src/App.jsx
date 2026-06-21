@@ -274,6 +274,13 @@ const translations = {
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения через CryptoBot.',
     topUpButton: 'Оплатить',
+    walletTopUpButton: 'Оплатить криптой на кошелек',
+    walletMethod: 'Криптокошелек',
+    walletPaidButton: 'Я оплатил',
+    walletPayReview: 'Заявка отправлена. Мы проверим транзакцию и зачислим баланс.',
+    walletNotConfigured: 'Оплата на кошелек пока не настроена.',
+    walletNetwork: 'Сеть оплаты',
+    confirmPurchase: ({ product, price }) => `Подтвердить покупку ${product} за $${price}?`,
     topUpSuccess: 'Успешно, в течении 10-и минут вам напишет менеджер, чтобы выдать товар. Ожидайте.',
     topUpError: 'Не удалось создать ссылку на оплату. Попробуйте позже.',
     telegramUserRequired: 'Откройте приложение через кнопку бота в Telegram и попробуйте снова.',
@@ -347,6 +354,13 @@ const translations = {
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a CryptoBot top-up amount.',
     topUpButton: 'Pay',
+    walletTopUpButton: 'Pay crypto to wallet',
+    walletMethod: 'Crypto wallet',
+    walletPaidButton: 'I paid',
+    walletPayReview: 'Request sent. We will verify the transaction and credit your balance.',
+    walletNotConfigured: 'Wallet payments are not configured yet.',
+    walletNetwork: 'Payment network',
+    confirmPurchase: ({ product, price }) => `Confirm purchase of ${product} for $${price}?`,
     topUpSuccess: 'Success. A manager will message you within 10 minutes to deliver the product. Please wait.',
     topUpError: 'Could not create a payment link. Try again later.',
     telegramUserRequired: 'Open the app through the bot button in Telegram and try again.',
@@ -420,6 +434,13 @@ const translations = {
     topUpTitle: '充值余额',
     topUpHint: '选择通过 CryptoBot 充值的金额。',
     topUpButton: '支付',
+    walletTopUpButton: '用加密钱包支付',
+    walletMethod: '加密钱包',
+    walletPaidButton: '我已付款',
+    walletPayReview: '请求已发送。我们会检查交易并充值余额。',
+    walletNotConfigured: '钱包支付尚未配置。',
+    walletNetwork: '支付网络',
+    confirmPurchase: ({ product, price }) => `确认以 $${price} 购买 ${product}？`,
     topUpSuccess: '支付成功。经理会在 10 分钟内联系你并发放商品，请稍候。',
     topUpError: '无法创建付款链接。请稍后再试。',
     telegramUserRequired: '请通过 Telegram 机器人的按钮打开应用后重试。',
@@ -648,14 +669,37 @@ function StoreApp() {
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
   const [balance, setBalance] = useState(0)
+  const [walletPayments, setWalletPayments] = useState([])
+  const [selectedWalletNetwork, setSelectedWalletNetwork] = useState('ton')
+  const [walletTopUp, setWalletTopUp] = useState(null)
   const text = translations[language]
   const visibleProducts = activeGroup === 'Все'
     ? products
     : products.filter((product) => product.group === activeGroup)
+  const selectedWalletPayment = walletPayments.find((walletOption) => walletOption.id === selectedWalletNetwork)
 
   useEffect(() => {
     window.Telegram?.WebApp?.ready?.()
     window.Telegram?.WebApp?.expand?.()
+  }, [])
+
+  useEffect(() => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    fetch(`${apiBase}/api/config`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Config request failed')
+        }
+        return response.json()
+      })
+      .then(({ walletPayments: nextWalletPayments = [] }) => {
+        setWalletPayments(Array.isArray(nextWalletPayments) ? nextWalletPayments : [])
+        setSelectedWalletNetwork(nextWalletPayments[0]?.id || 'ton')
+      })
+      .catch(() => {
+        setWalletPayments([])
+      })
   }, [])
 
   useEffect(() => {
@@ -690,6 +734,10 @@ function StoreApp() {
 
   const handleBalancePayment = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    if (!window.confirm(text.confirmPurchase({ product: selectedProduct.brand, price: selectedProduct.price }))) {
+      return
+    }
 
     setProductPaymentStatus('')
 
@@ -782,6 +830,69 @@ function StoreApp() {
       })
       .catch((error) => {
         setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : error.message)
+      })
+  }
+
+  const handleWalletTopUp = () => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    setTopUpStatus('')
+    setWalletTopUp(null)
+
+    fetch(`${apiBase}/api/topups/wallet`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: selectedTopUpAmount,
+        networkId: selectedWalletNetwork,
+        telegramUser: currentTelegramUser(),
+        telegramInitData: currentTelegramInitData(),
+      }),
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Wallet top-up request failed')
+        }
+
+        return data
+      })
+      .then(({ topup }) => {
+        setWalletTopUp(topup)
+      })
+      .catch((error) => {
+        setTopUpStatus(error.message === 'Open the app through Telegram to top up balance' ? text.telegramUserRequired : error.message)
+      })
+  }
+
+  const handleWalletPaid = () => {
+    const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+
+    if (!walletTopUp?.id) {
+      return
+    }
+
+    fetch(`${apiBase}/api/topups/${walletTopUp.id}/paid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Wallet paid request failed')
+        }
+        return response.json()
+      })
+      .then(({ topup }) => {
+        setWalletTopUp(topup)
+        setTopUpStatus(text.walletPayReview)
+      })
+      .catch(() => {
+        setTopUpStatus(text.topUpError)
       })
   }
 
@@ -898,8 +1009,42 @@ function StoreApp() {
                 ))}
               </div>
               <button type="button" className="topup-pay-button" onClick={handleTopUp}>
-                {text.topUpButton} ${selectedTopUpAmount}
+                CryptoBot: {text.topUpButton} ${selectedTopUpAmount}
               </button>
+              <button type="button" className="topup-wallet-button" onClick={handleWalletTopUp}>
+                {text.walletTopUpButton}
+              </button>
+              {walletPayments.length > 0 ? (
+                <div className="wallet-network-tabs" aria-label={text.walletNetwork}>
+                  {walletPayments.map((walletOption) => (
+                    <button
+                      key={walletOption.id}
+                      type="button"
+                      className={selectedWalletNetwork === walletOption.id ? 'active' : ''}
+                      onClick={() => {
+                        setSelectedWalletNetwork(walletOption.id)
+                        setWalletTopUp(null)
+                        setTopUpStatus('')
+                      }}
+                    >
+                      {walletOption.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {walletTopUp ? (
+                <div className="wallet-payment-card">
+                  <span>{text.walletMethod}</span>
+                  <strong>{walletTopUp.walletPayment.payableAmount} {walletTopUp.walletPayment.asset}</strong>
+                  <code>{walletTopUp.walletPayment.address}</code>
+                  <small>{walletTopUp.walletPayment.network}</small>
+                  <button type="button" onClick={handleWalletPaid}>{text.walletPaidButton}</button>
+                </div>
+              ) : selectedWalletPayment ? (
+                <p className="wallet-payment-note">{selectedWalletPayment.network}: {selectedWalletPayment.asset}</p>
+              ) : (
+                <p className="wallet-payment-note">{text.walletNotConfigured}</p>
+              )}
               {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
             </div>
           ) : null}

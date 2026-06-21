@@ -529,6 +529,85 @@
   cursor: pointer;
 }
 
+.topup-wallet-button {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid rgba(248, 113, 113, 0.36);
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fee2e2;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wallet-network-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.wallet-network-tabs button {
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  border-radius: 14px;
+  padding: 11px 10px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wallet-network-tabs button.active {
+  border-color: rgba(56, 189, 248, 0.86);
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  color: #ffffff;
+}
+
+.wallet-payment-card {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.54);
+}
+
+.wallet-payment-card span,
+.wallet-payment-card small,
+.wallet-payment-note {
+  color: #b7c0d4;
+}
+
+.wallet-payment-card strong {
+  color: #fff7ed;
+  font-size: 22px;
+}
+
+.wallet-payment-card code {
+  overflow-wrap: anywhere;
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.24);
+  color: #fecaca;
+}
+
+.wallet-payment-card button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wallet-payment-note {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
 .topup-status {
   margin-top: 12px;
   color: #fca5a5;

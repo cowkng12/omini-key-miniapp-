@@ -19,6 +19,22 @@ const requiredChannelUrl = process.env.REQUIRED_CHANNEL_URL?.trim() || 'https://
 const cryptoPayToken = process.env.CRYPTO_PAY_TOKEN?.trim()
 const cryptoPayApiUrl = process.env.CRYPTO_PAY_API_URL?.trim() || 'https://pay.crypt.bot/api'
 const cryptoPayAsset = process.env.CRYPTO_PAY_ASSET?.trim() || 'USDT'
+const walletPayOptions = [
+  {
+    id: 'ton',
+    label: 'TON',
+    network: 'TON',
+    asset: 'USDT TON / GRAM',
+    address: process.env.WALLET_PAY_TON_ADDRESS?.trim() || 'UQDpGKcwWkYJmRuamTSZhb70QgnqWiCzZ-LD1mihIGE34L3f',
+  },
+  {
+    id: 'trc20',
+    label: 'TRC20',
+    network: 'TRC20',
+    asset: 'USDT',
+    address: process.env.WALLET_PAY_TRC20_ADDRESS?.trim() || 'TJKWXgisQTVtyPXy6Ns8BfbBCnFSQKmoPt',
+  },
+].filter((option) => option.address)
 const storeFilePath = process.env.STORE_FILE_PATH?.trim() || path.join(__dirname, 'data', 'store.json')
 const supabaseUrl = process.env.SUPABASE_URL?.trim()
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
@@ -450,7 +466,11 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/api/config', (request, response) => {
-  response.json({ sellerUrl, products })
+  response.json({
+    sellerUrl,
+    products,
+    walletPayments: walletPayOptions,
+  })
 })
 
 app.get('/api/orders', (request, response) => {
@@ -558,6 +578,105 @@ app.post('/api/topups', async (request, response) => {
   response.status(201).json({ topup, paymentUrl: topup.cryptoInvoice?.payUrl || null })
 })
 
+app.post('/api/topups/wallet', async (request, response) => {
+  const { amount, networkId = 'ton' } = request.body ?? {}
+  const telegramUser = resolveTelegramUser(request.body)
+  const normalizedAmount = Number(amount)
+  const telegramId = String(telegramUser?.id || '').trim()
+  const walletPayOption = walletPayOptions.find((option) => option.id === networkId)
+
+  if (!topupAmounts.includes(normalizedAmount)) {
+    response.status(400).json({ error: 'Unsupported top-up amount' })
+    return
+  }
+
+  if (!telegramId) {
+    response.status(400).json({ error: 'Open the app through Telegram to top up balance' })
+    return
+  }
+
+  if (!walletPayOption) {
+    response.status(400).json({ error: 'Unsupported wallet payment network' })
+    return
+  }
+
+  const uniquePart = (topups.filter((topup) => topup.status !== 'paid').length % 90) + 10
+  const payableAmount = Number((normalizedAmount + uniquePart / 10000).toFixed(4))
+  const topup = {
+    id: `top_${Date.now()}`,
+    amount: normalizedAmount,
+    status: 'wallet_pending',
+    paymentMethod: 'wallet',
+    telegramUser,
+    walletPayment: {
+      id: walletPayOption.id,
+      label: walletPayOption.label,
+      address: walletPayOption.address,
+      network: walletPayOption.network,
+      asset: walletPayOption.asset,
+      payableAmount,
+    },
+    createdAt: new Date().toISOString(),
+  }
+
+  topups.unshift(topup)
+  await saveStore()
+
+  if (bot && adminChatId) {
+    await bot.telegram.sendMessage(
+      adminChatId,
+      [
+        'Новое crypto-пополнение ожидает оплаты',
+        `ID: ${topup.id}`,
+        `Баланс к зачислению: $${topup.amount}`,
+        `К оплате: ${payableAmount} ${walletPayOption.asset}`,
+        `Сеть: ${walletPayOption.network}`,
+        `Адрес: ${walletPayOption.address}`,
+        `Пользователь Telegram: ${telegramUser?.username ? `@${telegramUser.username}` : telegramId}`,
+        `Подтвердить после проверки: /confirmtopup ${topup.id}`,
+      ].join('\n'),
+    )
+  }
+
+  response.status(201).json({ topup })
+})
+
+app.post('/api/topups/:topupId/paid', async (request, response) => {
+  const topupId = request.params.topupId?.trim()
+  const topup = topups.find((item) => item.id === topupId)
+
+  if (!topup) {
+    response.status(404).json({ error: 'Top-up not found' })
+    return
+  }
+
+  if (topup.paymentMethod !== 'wallet') {
+    response.status(400).json({ error: 'Top-up is not a wallet payment' })
+    return
+  }
+
+  if (topup.status !== 'paid') {
+    topup.status = 'wallet_review'
+    topup.markedPaidAt = new Date().toISOString()
+    await saveStore()
+  }
+
+  if (bot && adminChatId) {
+    await bot.telegram.sendMessage(
+      adminChatId,
+      [
+        'Пользователь нажал "Я оплатил"',
+        `ID: ${topup.id}`,
+        `К оплате: ${topup.walletPayment?.payableAmount} ${topup.walletPayment?.asset}`,
+        `Сеть: ${topup.walletPayment?.network}`,
+        `Проверьте кошелек и подтвердите: /confirmtopup ${topup.id}`,
+      ].join('\n'),
+    )
+  }
+
+  response.json({ topup })
+})
+
 app.post('/api/activate', async (request, response) => {
   const activation = activateKey(request.body?.key)
 
@@ -590,7 +709,9 @@ app.get('/api/topups/:topupId/status', async (request, response) => {
   }
 
   try {
-    await refreshTopupStatus(topup)
+    if (topup.paymentMethod !== 'wallet') {
+      await refreshTopupStatus(topup)
+    }
   } catch (error) {
     console.error('CryptoBot top-up status check failed', error)
     response.status(502).json({ error: 'Payment status check failed' })
@@ -959,6 +1080,29 @@ if (botToken) {
     balances.set(telegramId, balance)
     await saveStore()
     await context.reply(`Баланс пользователя ${telegramId} установлен: $${balance}`)
+  })
+
+  bot.command('confirmtopup', async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await context.reply('Команда доступна только администратору.')
+      return
+    }
+
+    const [, topupId] = context.message.text.trim().split(/\s+/)
+    const topup = topups.find((item) => item.id === topupId)
+
+    if (!topup) {
+      await context.reply('Пополнение не найдено. Использование: /confirmtopup <topup_id>')
+      return
+    }
+
+    if (topup.status === 'paid') {
+      await context.reply(`Пополнение ${topup.id} уже подтверждено.`)
+      return
+    }
+
+    await creditTopup(topup)
+    await context.reply(`Пополнение ${topup.id} подтверждено. Баланс зачислен.`)
   })
 
   bot.action('support', async (context) => {
