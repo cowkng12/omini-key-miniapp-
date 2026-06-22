@@ -25,7 +25,7 @@ const walletPayOptions = [
     label: 'TON',
     network: 'TON',
     asset: 'USDT TON / GRAM',
-    address: process.env.WALLET_PAY_TON_ADDRESS?.trim() || 'UQDpGKcwWkYJmRuamTSZhb70QgnqWiCzZ-LD1mihIGE34L3f',
+    address: process.env.WALLET_PAY_TON_ADDRESS?.trim() || 'UQDpGKcwWkYJmRuamTSZhb7Q0gnqWiCzZ-LDlmihIGE34L3f',
   },
   {
     id: 'trc20',
