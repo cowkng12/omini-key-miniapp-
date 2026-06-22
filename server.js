@@ -1000,6 +1000,7 @@ let bot = null
 if (botToken) {
   bot = new Telegraf(botToken)
   const userLanguages = new Map()
+  const pendingSupportUsers = new Set()
 
   async function safeAnswerCbQuery(context, text) {
     try {
@@ -1095,7 +1096,8 @@ if (botToken) {
         '',
         'Акция уже отмечена в карточках Claude Pro Duo и Cursor Pro Duo в каталоге.',
       ].join('\n'),
-      support: `🛠 Поддержка\n\nЕсли у вас остались вопросы или появилась проблема, советуем обратиться в поддержку: ${supportUsername}`,
+      support: '🛠 Поддержка\n\nНапишите ваш вопрос или проблему следующим сообщением. Мы передадим обращение оператору.',
+      supportReceived: 'Спасибо. Ваше обращение отправлено в поддержку.',
       about: '💠 О проекте\n\nOmniKey Store помогает быстро покупать подписки на популярные AI-сервисы.',
       balance: (amount) => `💰 Баланс\n\nВаш текущий баланс: $${amount}`,
       subscribeRequired: [
@@ -1151,7 +1153,8 @@ if (botToken) {
         '',
         'The deal is already marked on Claude Pro Duo and Cursor Pro Duo in the catalog.',
       ].join('\n'),
-      support: `🛠 Support\n\nIf you still have questions or something went wrong, we recommend contacting support: ${supportUsername}`,
+      support: '🛠 Support\n\nSend your question or problem in the next message. We will forward it to an operator.',
+      supportReceived: 'Thank you. Your request has been sent to support.',
       about: '💠 About\n\nOmniKey Store helps you buy subscriptions for popular AI services quickly.',
       balance: (amount) => `💰 Balance\n\nYour current balance: $${amount}`,
       subscribeRequired: [
@@ -1207,7 +1210,8 @@ if (botToken) {
         '',
         '该优惠已在目录中的 Claude Pro Duo 和 Cursor Pro Duo 商品卡片中标注。',
       ].join('\n'),
-      support: `🛠 支持\n\n如果你还有问题，或遇到了故障，建议联系支持：${supportUsername}`,
+      support: '🛠 支持\n\n请在下一条消息中发送你的问题。我们会转交给客服。',
+      supportReceived: '谢谢。你的请求已发送给支持团队。',
       about: '💠 关于项目\n\nOmniKey Store 帮助你快速购买热门 AI 服务订阅。',
       balance: (amount) => `💰 余额\n\n当前余额：$${amount}`,
       subscribeRequired: [
@@ -1355,7 +1359,32 @@ if (botToken) {
 
   bot.action('support', async (context) => {
     await safeAnswerCbQuery(context)
+    pendingSupportUsers.add(context.from.id)
     await context.reply(botText[currentLanguage(context)].support)
+  })
+
+  bot.on('text', async (context, next) => {
+    if (context.message.text.startsWith('/') || !pendingSupportUsers.has(context.from.id)) {
+      return next()
+    }
+
+    pendingSupportUsers.delete(context.from.id)
+
+    if (bot && adminChatId) {
+      const from = context.from
+      await bot.telegram.sendMessage(
+        adminChatId,
+        [
+          'Новое обращение в поддержку OmniKey Store',
+          `Пользователь: ${from.username ? `@${from.username}` : `${from.first_name || ''} ${from.last_name || ''}`.trim() || from.id}`,
+          `ID: ${from.id}`,
+          '',
+          context.message.text,
+        ].join('\n'),
+      )
+    }
+
+    await context.reply(botText[currentLanguage(context)].supportReceived)
   })
 
   bot.action('guide', async (context) => {
