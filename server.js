@@ -188,6 +188,33 @@ async function saveStore() {
   )
 }
 
+async function refreshStore() {
+  const freshStore = await loadStore()
+
+  orders.splice(0, orders.length, ...freshStore.orders)
+  topups.splice(0, topups.length, ...freshStore.topups)
+
+  balances.clear()
+  Object.entries(freshStore.balances).forEach(([telegramId, balance]) => {
+    balances.set(telegramId, balance)
+  })
+
+  Object.keys(activations).forEach((key) => {
+    delete activations[key]
+  })
+  Object.assign(activations, freshStore.activations)
+
+  refbotUsers.clear()
+  freshStore.refbotUsers.forEach((telegramId) => {
+    refbotUsers.add(telegramId)
+  })
+
+  issuedAccessKeys.clear()
+  Object.keys(activations).forEach((key) => {
+    issuedAccessKeys.add(key)
+  })
+}
+
 function generateAccessKey() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let accessKey
@@ -1307,6 +1334,9 @@ if (botToken) {
     }
 
     const [, topupId] = context.message.text.trim().split(/\s+/)
+
+    await refreshStore()
+
     const topup = topups.find((item) => item.id === topupId)
 
     if (!topup) {
