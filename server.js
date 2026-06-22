@@ -437,18 +437,20 @@ async function creditTopup(topup) {
   }
 
   const currentBalance = balances.get(telegramId) || 0
-  const updatedBalance = Number((currentBalance + topup.amount).toFixed(2))
+  const creditedAmount = refbotUsers.has(telegramId) && topup.amount === 1 ? 2 : topup.amount
+  const updatedBalance = Number((currentBalance + creditedAmount).toFixed(2))
 
   balances.set(telegramId, updatedBalance)
   topup.status = 'paid'
   topup.paidAt = new Date().toISOString()
+  topup.creditedAmount = creditedAmount
   topup.balanceAfter = updatedBalance
 
   await saveStore()
 
   await bot?.telegram.sendMessage(
     telegramId,
-    [`Баланс пополнен на $${topup.amount}.`, `Текущий баланс: $${updatedBalance}.`].join('\n'),
+    [`Баланс пополнен на $${creditedAmount}.`, `Текущий баланс: $${updatedBalance}.`].join('\n'),
   )
 
   if (bot && topup.amount >= accountDeliveryThreshold && refbotUsers.has(telegramId) && !topup.accountDataDelivered) {
@@ -465,7 +467,8 @@ async function creditTopup(topup) {
       [
         'Баланс пополнен',
         `ID: ${topup.id}`,
-        `Сумма: $${topup.amount}`,
+        `Оплачено: $${topup.amount}`,
+        `Зачислено: $${creditedAmount}`,
         `Баланс после: $${updatedBalance}`,
         `Пользователь Telegram: ${topup.telegramUser?.username ? `@${topup.telegramUser.username}` : telegramId}`,
       ].join('\n'),
