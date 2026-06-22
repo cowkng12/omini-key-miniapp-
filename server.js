@@ -986,6 +986,52 @@ if (botToken) {
     }
   }
 
+  function formatBotOrderDate(value, locale) {
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+      return ''
+    }
+
+    return new Intl.DateTimeFormat(locale, {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date)
+  }
+
+  function formatBotOrderPrice(price) {
+    return `$${Number(price || 0).toFixed(2).replace(/\.00$/, '')}`
+  }
+
+  function formatBotOrders(userOrders, { locale, title, emptyText, dateLabel, priceLabel, codeLabel }) {
+    if (!userOrders.length) {
+      return `${title}\n\n${emptyText}`
+    }
+
+    const orderLines = userOrders.slice(0, 10).map((order, index) => {
+      const lines = [
+        `${index + 1}. ${order.productTitle || order.productId || 'Order'}`,
+        `${priceLabel}: ${formatBotOrderPrice(order.price)}`,
+      ]
+      const orderDate = formatBotOrderDate(order.createdAt, locale)
+
+      if (orderDate) {
+        lines.push(`${dateLabel}: ${orderDate}`)
+      }
+
+      if (order.accessKey) {
+        lines.push(`${codeLabel}: ${order.accessKey}`)
+      }
+
+      return lines.join('\n')
+    })
+
+    return [title, '', ...orderLines].join('\n\n')
+  }
+
   const botText = {
     ru: {
       languageSelected: 'Язык выбран: Русский.',
@@ -1007,7 +1053,14 @@ if (botToken) {
         '4. Оплатите товар.',
         '5. В бота придут данные от товара.',
       ].join('\n'),
-      orders: '🧾 Мои покупки\n\nПока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
+      orders: (userOrders) => formatBotOrders(userOrders, {
+        locale: 'ru-RU',
+        title: '🧾 Мои покупки',
+        emptyText: 'Пока что у вас нет заказов. Откройте каталог, чтобы его сделать.',
+        dateLabel: 'Дата',
+        priceLabel: 'Сумма',
+        codeLabel: 'Код получения',
+      }),
       promotions: [
         '🎁 Акции',
         '',
@@ -1056,7 +1109,14 @@ if (botToken) {
         '4. Pay for the product.',
         '5. Product access details will arrive in the bot.',
       ].join('\n'),
-      orders: '🧾 My purchases\n\nYou do not have any orders yet. Open the catalog to place one.',
+      orders: (userOrders) => formatBotOrders(userOrders, {
+        locale: 'en-US',
+        title: '🧾 My purchases',
+        emptyText: 'You do not have any orders yet. Open the catalog to place one.',
+        dateLabel: 'Date',
+        priceLabel: 'Amount',
+        codeLabel: 'Access code',
+      }),
       promotions: [
         '🎁 Promotions',
         '',
@@ -1105,7 +1165,14 @@ if (botToken) {
         '4. 支付商品。',
         '5. 商品数据会发送到机器人。',
       ].join('\n'),
-      orders: '🧾 我的购买\n\n你目前还没有订单。打开目录即可下单。',
+      orders: (userOrders) => formatBotOrders(userOrders, {
+        locale: 'zh-CN',
+        title: '🧾 我的购买',
+        emptyText: '你目前还没有订单。打开目录即可下单。',
+        dateLabel: '日期',
+        priceLabel: '金额',
+        codeLabel: '领取码',
+      }),
       promotions: [
         '🎁 优惠活动',
         '',
@@ -1268,7 +1335,11 @@ if (botToken) {
 
   bot.action('orders', async (context) => {
     await safeAnswerCbQuery(context)
-    await context.reply(botText[currentLanguage(context)].orders)
+
+    const telegramId = String(context.from?.id || '').trim()
+    const userOrders = orders.filter((order) => String(order.telegramUser?.id || '').trim() === telegramId)
+
+    await context.reply(botText[currentLanguage(context)].orders(userOrders))
   })
 
   bot.action('balance', async (context) => {
