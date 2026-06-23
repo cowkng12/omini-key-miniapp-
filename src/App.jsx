@@ -1081,6 +1081,7 @@ function StoreApp() {
   const [orders, setOrders] = useState([])
   const text = translations[language]
   const promoBonus = promoBonuses[promoCode.trim().toUpperCase()] || 0
+  const topUpPayableAmount = Number((selectedTopUpAmount * (1 - promoBonus / 100)).toFixed(2))
   const visibleProducts = activeGroup === 'Все'
     ? products
     : products.filter((product) => product.group === activeGroup)
@@ -1374,7 +1375,7 @@ function StoreApp() {
                 placeholder={text.promoCodePlaceholder}
                 autoComplete="off"
               />
-              {promoBonus ? <strong>+{promoBonus}% к пополнению</strong> : null}
+              {promoBonus ? <strong>-{promoBonus}%: {formatPrice(topUpPayableAmount)} вместо {formatPrice(selectedTopUpAmount)}</strong> : null}
               <small>{text.promoCodeHint}</small>
             </label>
             <div className="topup-grid">
@@ -1393,7 +1394,7 @@ function StoreApp() {
               ))}
             </div>
             <button type="button" className="topup-pay-button" onClick={handleWalletTopUp}>
-              {text.topUpButton} ${selectedTopUpAmount}
+              {text.topUpButton} {formatPrice(promoBonus ? topUpPayableAmount : selectedTopUpAmount)}
             </button>
             {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
           </section>
