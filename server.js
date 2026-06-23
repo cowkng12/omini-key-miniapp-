@@ -583,7 +583,7 @@ async function creditTopup(topup) {
   }
 
   const currentBalance = balances.get(telegramId) || 0
-  const creditedAmount = refbotUsers.has(telegramId) && topup.amount === 1 ? 2 : topup.amount
+  const creditedAmount = topup.amount
   const updatedBalance = Number((currentBalance + creditedAmount).toFixed(2))
 
   balances.set(telegramId, updatedBalance)
