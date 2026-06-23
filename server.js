@@ -95,6 +95,7 @@ const balances = new Map(Object.entries(store.balances))
 const activations = store.activations
 const refbotUsers = new Set(store.refbotUsers)
 const promoRedemptions = store.promoRedemptions
+const botUsers = store.botUsers
 const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const issuedAccessKeys = new Set(Object.keys(activations))
 
@@ -106,6 +107,7 @@ function normalizeStore(rawStore = {}) {
     activations: rawStore.activations && typeof rawStore.activations === 'object' ? rawStore.activations : {},
     refbotUsers: Array.isArray(rawStore.refbotUsers) ? rawStore.refbotUsers : [],
     promoRedemptions: rawStore.promoRedemptions && typeof rawStore.promoRedemptions === 'object' ? rawStore.promoRedemptions : {},
+    botUsers: rawStore.botUsers && typeof rawStore.botUsers === 'object' ? rawStore.botUsers : {},
   }
 }
 
@@ -177,12 +179,12 @@ async function loadStore() {
       console.error('Store load failed', error)
     }
 
-    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [], promoRedemptions: {} }
+    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [], promoRedemptions: {}, botUsers: {} }
   }
 }
 
 async function saveStore() {
-  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers), promoRedemptions }
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers), promoRedemptions, botUsers }
 
   try {
     if (await saveSupabaseStore(snapshot)) {
@@ -224,6 +226,11 @@ async function refreshStore() {
     delete promoRedemptions[telegramId]
   })
   Object.assign(promoRedemptions, freshStore.promoRedemptions)
+
+  Object.keys(botUsers).forEach((telegramId) => {
+    delete botUsers[telegramId]
+  })
+  Object.assign(botUsers, freshStore.botUsers)
 
   issuedAccessKeys.clear()
   Object.keys(activations).forEach((key) => {
@@ -1207,7 +1214,7 @@ if (botToken) {
       welcome: (name) => [
         `Добро пожаловать, ${name}. Это OmniKey ⚡`,
         '',
-        'Здесь можно купить подписки и готовые AI-товары для работы, кода, учебы, видео, голоса и ресерча.',
+        'Здесь можно купить подписки и готовые AI-товары для работы, кода, учебы, видео, голоса и ресерча, включая Kimi.',
         '',
         'Открой каталог, выбери нужный сервис и тариф, затем оформи заказ прямо в Mini App.',
         '',
@@ -1217,7 +1224,7 @@ if (botToken) {
         '📘 Как купить',
         '',
         '1. Нажмите "🛍 Открыть каталог".',
-        '2. Пополните баланс на нужную вам сумму.',
+        '2. Пополните баланс на нужную вам сумму. Если есть промокод, введите его в окне пополнения.',
         '3. Выберите товар.',
         '4. Оплатите товар.',
         '5. В бота придут данные от товара.',
@@ -1235,7 +1242,12 @@ if (botToken) {
         '',
         'В честь открытия OmniKey Store 2 аккаунта Pro стоят $18 вместо двух по $20.',
         '',
-        'Акция уже отмечена в карточках Claude Pro Duo и Cursor Pro Duo в каталоге.',
+        'Промокоды на пополнение:',
+        'OMNI20 - скидка 20% на оплату пополнения.',
+        'KIMI15 - скидка 15% на оплату пополнения.',
+        'START10 - скидка 10% на оплату пополнения.',
+        '',
+        'Kimi уже добавлен в каталог: Kimi K2, Kimi Pro и Kimi API Pack.',
       ].join('\n'),
       support: '🛠 Поддержка\n\nНапишите ваш вопрос или проблему следующим сообщением. Мы передадим обращение оператору.',
       supportReceived: 'Спасибо. Ваше обращение отправлено в поддержку.',
@@ -1264,7 +1276,7 @@ if (botToken) {
       welcome: (name) => [
         `Welcome, ${name}. This is OmniKey ⚡`,
         '',
-        'Here you can buy AI subscriptions and ready AI products for work, coding, study, video, voice and research.',
+        'Here you can buy AI subscriptions and ready AI products for work, coding, study, video, voice and research, including Kimi.',
         '',
         'Open the catalog, choose the service and plan, then place your order inside the Mini App.',
         '',
@@ -1274,7 +1286,7 @@ if (botToken) {
         '📘 How to buy',
         '',
         '1. Press "🛍 Open catalog".',
-        '2. Top up your balance with the required amount.',
+        '2. Top up your balance with the required amount. If you have a promo code, enter it in the top-up window.',
         '3. Choose a product.',
         '4. Pay for the product.',
         '5. Product access details will arrive in the bot.',
@@ -1292,7 +1304,12 @@ if (botToken) {
         '',
         'Opening offer: 2 Pro accounts cost $18 instead of two at $20 each.',
         '',
-        'The deal is already marked on Claude Pro Duo and Cursor Pro Duo in the catalog.',
+        'Top-up promo codes:',
+        'OMNI20 - 20% discount on top-up payment.',
+        'KIMI15 - 15% discount on top-up payment.',
+        'START10 - 10% discount on top-up payment.',
+        '',
+        'Kimi is now in the catalog: Kimi K2, Kimi Pro and Kimi API Pack.',
       ].join('\n'),
       support: '🛠 Support\n\nSend your question or problem in the next message. We will forward it to an operator.',
       supportReceived: 'Thank you. Your request has been sent to support.',
@@ -1321,7 +1338,7 @@ if (botToken) {
       welcome: (name) => [
         `欢迎，${name}。这里是 OmniKey ⚡`,
         '',
-        '这里可以购买适合工作、编程、学习、视频、语音和研究的 AI 订阅和现成 AI 商品。',
+        '这里可以购买适合工作、编程、学习、视频、语音和研究的 AI 订阅和现成 AI 商品，包括 Kimi。',
         '',
         '打开目录，选择需要的服务和套餐，然后直接在 Mini App 内下单。',
         '',
@@ -1331,7 +1348,7 @@ if (botToken) {
         '📘 如何购买',
         '',
         '1. 点击“🛍 打开目录”。',
-        '2. 按所需金额充值余额。',
+        '2. 按所需金额充值余额。如果有优惠码，请在充值窗口输入。',
         '3. 选择商品。',
         '4. 支付商品。',
         '5. 商品数据会发送到机器人。',
@@ -1349,7 +1366,12 @@ if (botToken) {
         '',
         '开业优惠：2 个 Pro 账号只需 $18，而不是两个各 $20。',
         '',
-        '该优惠已在目录中的 Claude Pro Duo 和 Cursor Pro Duo 商品卡片中标注。',
+        '充值优惠码：',
+        'OMNI20 - 充值支付享 20% 折扣。',
+        'KIMI15 - 充值支付享 15% 折扣。',
+        'START10 - 充值支付享 10% 折扣。',
+        '',
+        'Kimi 已加入目录：Kimi K2、Kimi Pro 和 Kimi API Pack。',
       ].join('\n'),
       support: '🛠 支持\n\n请在下一条消息中发送你的问题。我们会转交给客服。',
       supportReceived: '谢谢。你的请求已发送给支持团队。',
@@ -1408,6 +1430,60 @@ if (botToken) {
     return userLanguages.get(context.from?.id) || 'ru'
   }
 
+  function rememberBotUser(context, language = currentLanguage(context)) {
+    if (!context.from?.id) {
+      return
+    }
+
+    botUsers[String(context.from.id)] = {
+      id: context.from.id,
+      username: context.from.username || '',
+      firstName: context.from.first_name || '',
+      language,
+      updatedAt: new Date().toISOString(),
+    }
+  }
+
+  function promoBroadcastMessage(language) {
+    const messages = {
+      ru: [
+        '🎁 Новые промокоды OmniKey',
+        '',
+        'OMNI20 - скидка 20% на оплату пополнения.',
+        'KIMI15 - скидка 15% на оплату пополнения.',
+        'START10 - скидка 10% на оплату пополнения.',
+        '',
+        'Открой каталог, нажми пополнение баланса и введи промокод в поле скидки.',
+        '',
+        'Также в каталоге появились Kimi K2, Kimi Pro и Kimi API Pack.',
+      ],
+      en: [
+        '🎁 New OmniKey promo codes',
+        '',
+        'OMNI20 - 20% discount on top-up payment.',
+        'KIMI15 - 15% discount on top-up payment.',
+        'START10 - 10% discount on top-up payment.',
+        '',
+        'Open the catalog, top up your balance and enter the promo code in the discount field.',
+        '',
+        'Kimi K2, Kimi Pro and Kimi API Pack are now in the catalog.',
+      ],
+      zh: [
+        '🎁 OmniKey 新优惠码',
+        '',
+        'OMNI20 - 充值支付享 20% 折扣。',
+        'KIMI15 - 充值支付享 15% 折扣。',
+        'START10 - 充值支付享 10% 折扣。',
+        '',
+        '打开目录，充值余额，并在折扣输入框中输入优惠码。',
+        '',
+        'Kimi K2、Kimi Pro 和 Kimi API Pack 已加入目录。',
+      ],
+    }
+
+    return (messages[language] || messages.ru).join('\n')
+  }
+
   async function sendMainMenu(context, language) {
     const name = context.from?.first_name || 'friend'
     await context.reply(botText[language].welcome(name), mainKeyboard(language))
@@ -1434,6 +1510,8 @@ if (botToken) {
   }
 
   bot.start(async (context) => {
+    rememberBotUser(context)
+
     if (context.startPayload?.startsWith('refbot_') && context.from?.id) {
       refbotUsers.add(String(context.from.id))
       await saveStore()
@@ -1446,6 +1524,8 @@ if (botToken) {
   })
 
   bot.command('shop', async (context) => {
+    rememberBotUser(context)
+    await saveStore()
     await sendMainMenuIfSubscribed(context, currentLanguage(context))
   })
 
@@ -1498,6 +1578,31 @@ if (botToken) {
 
     await creditTopup(topup)
     await context.reply(`Пополнение ${topup.id} подтверждено. Баланс зачислен.`)
+  })
+
+  bot.command('broadcastpromos', async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await context.reply('Команда доступна только администратору.')
+      return
+    }
+
+    await refreshStore()
+
+    const recipients = Object.values(botUsers)
+    let sentCount = 0
+    let failedCount = 0
+
+    for (const recipient of recipients) {
+      try {
+        await bot.telegram.sendMessage(recipient.id, promoBroadcastMessage(recipient.language), mainKeyboard(recipient.language || 'ru'))
+        sentCount += 1
+      } catch (error) {
+        failedCount += 1
+        console.error('Promo broadcast failed', { telegramId: recipient.id, error: error?.message })
+      }
+    }
+
+    await context.reply(`Рассылка промокодов завершена. Отправлено: ${sentCount}. Ошибок: ${failedCount}.`)
   })
 
   bot.action('support', async (context) => {
@@ -1589,6 +1694,8 @@ if (botToken) {
     const language = context.match[1]
 
     userLanguages.set(context.from.id, language)
+    rememberBotUser(context, language)
+    await saveStore()
     await safeAnswerCbQuery(context, botText[language].languageSelected)
     await context.reply(botText[language].languageSelected)
     await sendMainMenuIfSubscribed(context, language)
