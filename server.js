@@ -83,6 +83,9 @@ const products = {
 }
 
 const promoCodes = {
+  OMNI50: { code: 'OMNI50', discountPercent: 50 },
+  REF50: { code: 'REF50', discountPercent: 50 },
+  KIMI50: { code: 'KIMI50', discountPercent: 50 },
   OMNI20: { code: 'OMNI20', discountPercent: 20 },
   KIMI15: { code: 'KIMI15', discountPercent: 15 },
   START10: { code: 'START10', discountPercent: 10 },
@@ -1221,7 +1224,7 @@ if (botToken) {
       welcome: (name) => [
         `Добро пожаловать, ${name}. Это OmniKey ⚡`,
         '',
-        'Здесь можно купить подписки и готовые AI-товары для работы, кода, учебы, видео, голоса и ресерча, включая Kimi.',
+        'Здесь можно купить подписки и готовые AI-товары для работы, кода, учебы, видео, голоса и ресерча.',
         '',
         'Открой каталог, выбери нужный сервис и тариф, затем оформи заказ прямо в Mini App.',
         '',
@@ -1278,7 +1281,7 @@ if (botToken) {
       welcome: (name) => [
         `Welcome, ${name}. This is OmniKey ⚡`,
         '',
-        'Here you can buy AI subscriptions and ready AI products for work, coding, study, video, voice and research, including Kimi.',
+        'Here you can buy AI subscriptions and ready AI products for work, coding, study, video, voice and research.',
         '',
         'Open the catalog, choose the service and plan, then place your order inside the Mini App.',
         '',
@@ -1335,7 +1338,7 @@ if (botToken) {
       welcome: (name) => [
         `欢迎，${name}。这里是 OmniKey ⚡`,
         '',
-        '这里可以购买适合工作、编程、学习、视频、语音和研究的 AI 订阅和现成 AI 商品，包括 Kimi。',
+        '这里可以购买适合工作、编程、学习、视频、语音和研究的 AI 订阅和现成 AI 商品。',
         '',
         '打开目录，选择需要的服务和套餐，然后直接在 Mini App 内下单。',
         '',
@@ -1441,6 +1444,9 @@ if (botToken) {
       ru: [
         '🎁 Новые промокоды OmniKey',
         '',
+        'OMNI50 - скидка 50% на оплату пополнения.',
+        'REF50 - скидка 50% на оплату пополнения.',
+        'KIMI50 - скидка 50% на оплату пополнения.',
         'OMNI20 - скидка 20% на оплату пополнения.',
         'KIMI15 - скидка 15% на оплату пополнения.',
         'START10 - скидка 10% на оплату пополнения.',
@@ -1452,6 +1458,9 @@ if (botToken) {
       en: [
         '🎁 New OmniKey promo codes',
         '',
+        'OMNI50 - 50% discount on top-up payment.',
+        'REF50 - 50% discount on top-up payment.',
+        'KIMI50 - 50% discount on top-up payment.',
         'OMNI20 - 20% discount on top-up payment.',
         'KIMI15 - 15% discount on top-up payment.',
         'START10 - 10% discount on top-up payment.',
@@ -1463,6 +1472,9 @@ if (botToken) {
       zh: [
         '🎁 OmniKey 新优惠码',
         '',
+        'OMNI50 - 充值支付享 50% 折扣。',
+        'REF50 - 充值支付享 50% 折扣。',
+        'KIMI50 - 充值支付享 50% 折扣。',
         'OMNI20 - 充值支付享 20% 折扣。',
         'KIMI15 - 充值支付享 15% 折扣。',
         'START10 - 充值支付享 10% 折扣。',

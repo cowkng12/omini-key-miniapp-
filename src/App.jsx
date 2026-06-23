@@ -268,6 +268,9 @@ const productAvatars = {
 }
 
 const promoBonuses = {
+  OMNI50: 50,
+  REF50: 50,
+  KIMI50: 50,
   OMNI20: 20,
   KIMI15: 15,
   START10: 10,
@@ -302,8 +305,6 @@ const translations = {
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения баланса.',
     promoCodeLabel: 'Промокод на скидку',
-    promoCodePlaceholder: 'Например OMNI20',
-    promoCodeHint: 'Если код активен, вы заплатите меньше, а на баланс придет выбранная сумма.',
     topUpButton: 'Оплатить',
     walletTopUpButton: 'Оплата на кошелек',
     walletMethod: 'Криптокошелек',
@@ -388,8 +389,6 @@ const translations = {
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a balance top-up amount.',
     promoCodeLabel: 'Discount promo code',
-    promoCodePlaceholder: 'Example OMNI20',
-    promoCodeHint: 'If the code is active, you pay less and receive the selected balance amount.',
     topUpButton: 'Pay',
     walletTopUpButton: 'Wallet payment',
     walletMethod: 'Crypto wallet',
@@ -474,8 +473,6 @@ const translations = {
     topUpTitle: '充值余额',
     topUpHint: '选择余额充值金额。',
     promoCodeLabel: '折扣优惠码',
-    promoCodePlaceholder: '例如 OMNI20',
-    promoCodeHint: '如果优惠码有效，你将少付款，并收到所选余额金额。',
     topUpButton: '支付',
     walletTopUpButton: '钱包支付',
     walletMethod: '加密钱包',
@@ -1400,11 +1397,9 @@ function StoreApp() {
                   setIsPromoApplied(false)
                   setTopUpStatus('')
                 }}
-                placeholder={text.promoCodePlaceholder}
                 autoComplete="off"
               />
               {isPromoApplied && promoBonus ? <strong>-{promoBonus}% скидка. К оплате: {formatPrice(topUpPayableAmount)}</strong> : null}
-              <small>{text.promoCodeHint}</small>
             </label>
             <button type="button" className="topup-pay-button" onClick={handleWalletTopUp}>
               {text.topUpButton} {formatPrice(isPromoApplied && promoBonus ? topUpPayableAmount : selectedTopUpAmount)}
