@@ -521,7 +521,7 @@ const activationTranslations = {
     email: 'Email',
     password: 'Password',
     loginCode: 'Login code',
-    loginCodeHint: 'If ChatGPT asks for a verification code, use this random 6-digit code.',
+    loginCodeHint: 'If ChatGPT asks for a verification code, use this 6-digit code.',
   },
   zh: {
     eyebrow: '访问激活',
@@ -650,6 +650,7 @@ function ActivationPage() {
   const [credentials, setCredentials] = useState(null)
   const [status, setStatus] = useState('')
   const [activeStep, setActiveStep] = useState(1)
+  const [showSteps, setShowSteps] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const text = activationTranslations[language]
 
@@ -667,6 +668,7 @@ function ActivationPage() {
     setStatus('')
     setCredentials(null)
     setActiveStep(1)
+    setShowSteps(true)
 
     fetch(`${apiBase}/api/activate`, {
       method: 'POST',
@@ -685,31 +687,24 @@ function ActivationPage() {
         return data
       })
       .then((data) => {
-        setActiveStep(3)
-        setCredentials(data)
-        setStatus(text.success)
+        setActiveStep(2)
+
+        setTimeout(() => {
+          setActiveStep(3)
+
+          setTimeout(() => {
+            setCredentials(data)
+            setStatus(text.success)
+            setIsLoading(false)
+          }, 650)
+        }, 650)
       })
       .catch(() => {
         setActiveStep(1)
         setStatus(text.missing)
-      })
-      .finally(() => {
         setIsLoading(false)
       })
   }
-
-  useEffect(() => {
-    if (!isLoading) {
-      return undefined
-    }
-
-    setActiveStep(1)
-    const timer = setTimeout(() => {
-      setActiveStep(2)
-    }, 450)
-
-    return () => clearTimeout(timer)
-  }, [isLoading])
 
   return (
     <main className="activation-page">
@@ -728,20 +723,22 @@ function ActivationPage() {
           {text.copy}
         </p>
 
-        <div className="activation-steps" aria-label="Activation steps">
-          {text.steps.map((step, index) => {
-            const stepNumber = index + 1
-            const isComplete = credentials && stepNumber < 3
-            const isActive = activeStep === stepNumber || (credentials && stepNumber === 3)
+        {showSteps ? (
+          <div className="activation-steps" aria-label="Activation steps">
+            {text.steps.map((step, index) => {
+              const stepNumber = index + 1
+              const isComplete = credentials && stepNumber < 3
+              const isActive = activeStep === stepNumber || (credentials && stepNumber === 3)
 
-            return (
-              <div className={`activation-step${isActive ? ' active' : ''}${isComplete ? ' complete' : ''}`} key={step}>
-                <span>{stepNumber}</span>
-                <strong>{step}</strong>
-              </div>
-            )
-          })}
-        </div>
+              return (
+                <div className={`activation-step${isActive ? ' active' : ''}${isComplete ? ' complete' : ''}`} key={step}>
+                  <span>{stepNumber}</span>
+                  <strong>{step}</strong>
+                </div>
+              )
+            })}
+          </div>
+        ) : null}
 
         <form className="activation-form" onSubmit={handleActivate}>
           <label htmlFor="activation-key">{text.label}</label>
