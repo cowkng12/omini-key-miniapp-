@@ -267,6 +267,12 @@ const productAvatars = {
   Kimi: { src: 'https://www.google.com/s2/favicons?domain=kimi.moonshot.cn&sz=128', fallback: 'KM' },
 }
 
+const promoBonuses = {
+  OMNI20: 20,
+  KIMI15: 15,
+  START10: 10,
+}
+
 const translations = {
   ru: {
     languageLabel: 'RU',
@@ -1074,6 +1080,7 @@ function StoreApp() {
   const [balance, setBalance] = useState(0)
   const [orders, setOrders] = useState([])
   const text = translations[language]
+  const promoBonus = promoBonuses[promoCode.trim().toUpperCase()] || 0
   const visibleProducts = activeGroup === 'Все'
     ? products
     : products.filter((product) => product.group === activeGroup)
@@ -1367,6 +1374,7 @@ function StoreApp() {
                 placeholder={text.promoCodePlaceholder}
                 autoComplete="off"
               />
+              {promoBonus ? <strong>+{promoBonus}% к пополнению</strong> : null}
               <small>{text.promoCodeHint}</small>
             </label>
             <div className="topup-grid">
