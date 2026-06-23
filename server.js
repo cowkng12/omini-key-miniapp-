@@ -96,6 +96,7 @@ const activations = store.activations
 const refbotUsers = new Set(store.refbotUsers)
 const promoRedemptions = store.promoRedemptions
 const botUsers = store.botUsers
+const referrals = store.referrals
 const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const issuedAccessKeys = new Set(Object.keys(activations))
 
@@ -108,6 +109,7 @@ function normalizeStore(rawStore = {}) {
     refbotUsers: Array.isArray(rawStore.refbotUsers) ? rawStore.refbotUsers : [],
     promoRedemptions: rawStore.promoRedemptions && typeof rawStore.promoRedemptions === 'object' ? rawStore.promoRedemptions : {},
     botUsers: rawStore.botUsers && typeof rawStore.botUsers === 'object' ? rawStore.botUsers : {},
+    referrals: rawStore.referrals && typeof rawStore.referrals === 'object' ? rawStore.referrals : {},
   }
 }
 
@@ -179,12 +181,12 @@ async function loadStore() {
       console.error('Store load failed', error)
     }
 
-    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [], promoRedemptions: {}, botUsers: {} }
+    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [], promoRedemptions: {}, botUsers: {}, referrals: {} }
   }
 }
 
 async function saveStore() {
-  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers), promoRedemptions, botUsers }
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers), promoRedemptions, botUsers, referrals }
 
   try {
     if (await saveSupabaseStore(snapshot)) {
@@ -231,6 +233,11 @@ async function refreshStore() {
     delete botUsers[telegramId]
   })
   Object.assign(botUsers, freshStore.botUsers)
+
+  Object.keys(referrals).forEach((telegramId) => {
+    delete referrals[telegramId]
+  })
+  Object.assign(referrals, freshStore.referrals)
 
   issuedAccessKeys.clear()
   Object.keys(activations).forEach((key) => {
@@ -1484,6 +1491,55 @@ if (botToken) {
     return (messages[language] || messages.ru).join('\n')
   }
 
+  function trackReferral(referrerId, referredUser) {
+    const inviterId = String(referrerId || '').trim()
+    const invitedId = String(referredUser?.id || '').trim()
+
+    if (!inviterId || !invitedId || inviterId === invitedId) {
+      return false
+    }
+
+    const alreadyInvited = Object.values(referrals).some((referral) => referral.invitedId === invitedId)
+
+    if (alreadyInvited) {
+      return false
+    }
+
+    referrals[`${inviterId}:${invitedId}`] = {
+      referrerId: inviterId,
+      invitedId,
+      invitedUsername: referredUser.username || '',
+      invitedFirstName: referredUser.first_name || '',
+      createdAt: new Date().toISOString(),
+    }
+
+    return true
+  }
+
+  function referralStatsMessage() {
+    const counts = Object.values(referrals).reduce((result, referral) => {
+      result[referral.referrerId] = (result[referral.referrerId] || 0) + 1
+      return result
+    }, {})
+    const leaders = Object.entries(counts)
+      .sort((first, second) => second[1] - first[1])
+      .slice(0, 20)
+
+    if (!leaders.length) {
+      return 'Рефералов в магазине пока нет.'
+    }
+
+    return [
+      '📊 Рефералы магазина',
+      '',
+      ...leaders.map(([telegramId, count], index) => {
+        const user = botUsers[telegramId]
+        const name = user?.username ? `@${user.username}` : user?.firstName || telegramId
+        return `${index + 1}. ${name} (${telegramId}) - ${count}`
+      }),
+    ].join('\n')
+  }
+
   async function sendMainMenu(context, language) {
     const name = context.from?.first_name || 'friend'
     await context.reply(botText[language].welcome(name), mainKeyboard(language))
@@ -1513,7 +1569,10 @@ if (botToken) {
     rememberBotUser(context)
 
     if (context.startPayload?.startsWith('refbot_') && context.from?.id) {
+      const referrerId = context.startPayload.slice('refbot_'.length)
+
       refbotUsers.add(String(context.from.id))
+      trackReferral(referrerId, context.from)
       await saveStore()
     }
 
@@ -1603,6 +1662,16 @@ if (botToken) {
     }
 
     await context.reply(`Рассылка промокодов завершена. Отправлено: ${sentCount}. Ошибок: ${failedCount}.`)
+  })
+
+  bot.command('refstats', async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await context.reply('Команда доступна только администратору.')
+      return
+    }
+
+    await refreshStore()
+    await context.reply(referralStatsMessage())
   })
 
   bot.action('support', async (context) => {
