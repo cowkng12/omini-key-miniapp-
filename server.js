@@ -108,7 +108,7 @@ const products = {
 
 const promoCodes = {
   OMNI50: { code: 'OMNI50', discountPercent: 50 },
-  REF50: { code: 'REF50', discountPercent: 50 },
+  REF50: { code: 'REF50', discountPercent: 50, maxRedemptions: 50 },
   KIMI50: { code: 'KIMI50', discountPercent: 50 },
   OMNI20: { code: 'OMNI20', discountPercent: 20 },
   KIMI15: { code: 'KIMI15', discountPercent: 15 },
@@ -483,6 +483,10 @@ function resolveTopupPromo({ promoCode, telegramId, amount }) {
     throw new Error('Promo code has already been used')
   }
 
+  if (promo.maxRedemptions && getPromoRedemptionCount(normalizedCode) >= promo.maxRedemptions) {
+    throw new Error('Promo code activation limit reached')
+  }
+
   const discountAmount = Number((amount * promo.discountPercent / 100).toFixed(2))
   const payableAmount = Number(Math.max(0.1, amount - discountAmount).toFixed(2))
 
@@ -492,6 +496,10 @@ function resolveTopupPromo({ promoCode, telegramId, amount }) {
     discountAmount,
     payableAmount,
   }
+}
+
+function getPromoRedemptionCount(promoCode) {
+  return Object.values(promoRedemptions).filter((codes) => Array.isArray(codes) && codes.includes(promoCode)).length
 }
 
 function markPromoRedeemed(telegramId, promoCode) {
