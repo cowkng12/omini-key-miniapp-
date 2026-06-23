@@ -1112,6 +1112,7 @@ function StoreApp() {
         productId: selectedProduct.id,
         telegramUser: currentTelegramUser(),
         telegramInitData: currentTelegramInitData(),
+        language,
       }),
     })
       .then(async (response) => {
@@ -1146,6 +1147,7 @@ function StoreApp() {
         amount: selectedTopUpAmount,
         telegramUser: currentTelegramUser(),
         telegramInitData: currentTelegramInitData(),
+        language,
       }),
     })
       .then(async (response) => {

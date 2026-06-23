@@ -321,22 +321,54 @@ function activateKey(accessKey) {
   return activation
 }
 
-function purchaseDeliveryMessage(accessKey) {
+const deliveryTexts = {
+  ru: {
+    purchaseTitle: 'Поздравляем с покупкой. Ваши данные для получения:',
+    openSite: 'Зайдите на сайт',
+    enterCode: 'Введите этот код',
+    topupTitle: 'Оплата подтверждена. Ваш ключ для получения аккаунта:',
+    activateOnSite: 'Активируйте ключ на сайте',
+  },
+  en: {
+    purchaseTitle: 'Congratulations on your purchase. Your access details:',
+    openSite: 'Open this website',
+    enterCode: 'Enter this code',
+    topupTitle: 'Payment confirmed. Your account access key:',
+    activateOnSite: 'Activate the key on this website',
+  },
+  zh: {
+    purchaseTitle: '恭喜购买成功。你的领取信息：',
+    openSite: '打开网站',
+    enterCode: '输入此代码',
+    topupTitle: '付款已确认。你的账号领取密钥：',
+    activateOnSite: '请在此网站激活密钥',
+  },
+}
+
+function deliveryLanguage(language) {
+  return deliveryTexts[language] ? language : 'ru'
+}
+
+function purchaseDeliveryMessage(accessKey, language = 'ru') {
+  const text = deliveryTexts[deliveryLanguage(language)]
+
   return [
-    'Поздравляем с покупкой. Ваши данные для получения:',
+    text.purchaseTitle,
     '',
-    `1. Зайдите на сайт: ${activationSiteUrl}`,
-    `2. Введите этот код: ${accessKey}`,
+    `1. ${text.openSite}: ${activationSiteUrl}`,
+    `2. ${text.enterCode}: ${accessKey}`,
   ].join('\n')
 }
 
-function accountDeliveryMessage(accessKey) {
+function accountDeliveryMessage(accessKey, language = 'ru') {
+  const text = deliveryTexts[deliveryLanguage(language)]
+
   return [
-    'Оплата подтверждена. Ваш ключ для получения аккаунта:',
+    text.topupTitle,
     '',
     accessKey,
     '',
-    `Активируйте ключ на сайте: ${activationSiteUrl}`,
+    `${text.activateOnSite}: ${activationSiteUrl}`,
   ].join('\n')
 }
 
@@ -465,7 +497,7 @@ async function creditTopup(topup) {
   if (bot && topup.amount >= accountDeliveryThreshold && refbotUsers.has(telegramId) && !topup.accountDataDelivered) {
     const activation = createActivation(telegramId, topup.amount)
     topup.activationKey = activation.key
-    await bot.telegram.sendMessage(telegramId, accountDeliveryMessage(activation.key))
+    await bot.telegram.sendMessage(telegramId, accountDeliveryMessage(activation.key, topup.language))
     topup.accountDataDelivered = true
     await saveStore()
   }
@@ -568,7 +600,7 @@ app.post('/api/subscription/check', async (request, response) => {
 })
 
 app.post('/api/topups', async (request, response) => {
-  const { amount } = request.body ?? {}
+  const { amount, language } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -593,6 +625,7 @@ app.post('/api/topups', async (request, response) => {
     amount: normalizedAmount,
     status: cryptoPayToken ? 'payment_pending' : 'new',
     telegramUser,
+    language: deliveryLanguage(language),
     createdAt: new Date().toISOString(),
   }
 
@@ -643,7 +676,7 @@ app.post('/api/topups', async (request, response) => {
 })
 
 app.post('/api/topups/wallet', async (request, response) => {
-  const { amount, networkId = 'ton' } = request.body ?? {}
+  const { amount, networkId = 'ton', language } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -672,6 +705,7 @@ app.post('/api/topups/wallet', async (request, response) => {
     status: 'wallet_pending',
     paymentMethod: 'wallet',
     telegramUser,
+    language: deliveryLanguage(language),
     walletPayment: {
       id: walletPayOption.id,
       label: walletPayOption.label,
@@ -706,7 +740,7 @@ app.post('/api/topups/wallet', async (request, response) => {
 })
 
 app.post('/api/topups/paypage', async (request, response) => {
-  const { amount } = request.body ?? {}
+  const { amount, language } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -727,6 +761,7 @@ app.post('/api/topups/paypage', async (request, response) => {
     status: 'payment_method_pending',
     paymentMethod: 'paypage',
     telegramUser,
+    language: deliveryLanguage(language),
     createdAt: new Date().toISOString(),
   }
 
@@ -936,7 +971,7 @@ app.get('/api/topups/:topupId/payment', (request, response) => {
 })
 
 app.post('/api/orders/balance', async (request, response) => {
-  const { productId, customer = {} } = request.body ?? {}
+  const { productId, customer = {}, language } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const product = products[productId]
   const telegramId = String(telegramUser?.id || '').trim()
@@ -969,6 +1004,7 @@ app.post('/api/orders/balance', async (request, response) => {
     status: 'paid_from_balance',
     paymentMethod: 'balance',
     accessKey: generateAccessKey(),
+    language: deliveryLanguage(language),
     customer: {
       name: (customer.name || '').trim(),
       telegram: (customer.telegram || '').trim(),
@@ -981,7 +1017,7 @@ app.post('/api/orders/balance', async (request, response) => {
   registerActivationKey(order.accessKey, telegramId, order.price, 'balance_order')
   await saveStore()
 
-  await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey))
+  await bot?.telegram.sendMessage(telegramId, purchaseDeliveryMessage(order.accessKey, order.language))
 
   if (bot && adminChatId) {
     const adminLines = [
