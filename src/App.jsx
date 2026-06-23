@@ -219,12 +219,33 @@ const products = [
     plan: 'Subscription',
     price: 10,
   },
+  {
+    id: 'kimi-k2',
+    group: 'Kimi',
+    brand: 'Kimi',
+    plan: 'K2 Access',
+    price: 5,
+  },
+  {
+    id: 'kimi-pro',
+    group: 'Kimi',
+    brand: 'Kimi',
+    plan: 'Pro Account',
+    price: 8,
+  },
+  {
+    id: 'kimi-api-pack',
+    group: 'Kimi',
+    brand: 'Kimi',
+    plan: 'API Pack',
+    price: 5,
+  },
 ]
 
 const sellerUsername = 'metifrysell'
 const defaultApiBase = 'http://localhost:3001'
 const languages = ['ru', 'en', 'zh']
-const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
+const productGroups = ['Все', 'ChatGPT', 'Grok', 'Claude', 'Cursor', 'Kimi', 'Perplexity', 'Gemini', 'Copilot', 'Midjourney', 'Runway', 'Suno', 'Kling', 'Leonardo AI', 'ElevenLabs', 'Canva', 'Notion AI', 'Poe']
 const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const productAvatars = {
   ChatGPT: { src: 'https://www.google.com/s2/favicons?domain=chatgpt.com&sz=128', fallback: 'GPT' },
@@ -243,6 +264,7 @@ const productAvatars = {
   Canva: { src: 'https://www.google.com/s2/favicons?domain=canva.com&sz=128', fallback: 'CV' },
   'Notion AI': { src: 'https://www.google.com/s2/favicons?domain=notion.so&sz=128', fallback: 'NT' },
   Poe: { src: 'https://www.google.com/s2/favicons?domain=poe.com&sz=128', fallback: 'PO' },
+  Kimi: { src: 'https://www.google.com/s2/favicons?domain=kimi.moonshot.cn&sz=128', fallback: 'KM' },
 }
 
 const translations = {
@@ -273,6 +295,9 @@ const translations = {
     balanceText: 'Пока что вы не пополняли баланс.',
     topUpTitle: 'Пополнить баланс',
     topUpHint: 'Выберите сумму пополнения баланса.',
+    promoCodeLabel: 'Промокод на скидку',
+    promoCodePlaceholder: 'Например OMNI20',
+    promoCodeHint: 'Если код активен, вы заплатите меньше, а на баланс придет выбранная сумма.',
     topUpButton: 'Оплатить',
     walletTopUpButton: 'Оплата на кошелек',
     walletMethod: 'Криптокошелек',
@@ -324,6 +349,9 @@ const translations = {
       'canva-pro': ['Готовый аккаунт', 'Готовый аккаунт Canva Pro для шаблонов, презентаций и дизайна.'],
       'notion-ai': ['Готовый аккаунт', 'Готовый аккаунт Notion AI для заметок, документов и рабочих баз.'],
       'poe-subscription': ['Готовый аккаунт', 'Готовый аккаунт Poe для доступа к разным AI-моделям.'],
+      'kimi-k2': ['Готовый доступ', 'Готовый доступ Kimi K2 для длинного контекста, текста и ресерча.'],
+      'kimi-pro': ['Готовый аккаунт', 'Готовый аккаунт Kimi Pro для ежедневной работы и анализа.'],
+      'kimi-api-pack': ['Готовый доступ', 'Готовый доступ Kimi API для тестов, ботов и интеграций.'],
     },
   },
   en: {
@@ -353,6 +381,9 @@ const translations = {
     balanceText: 'You have not topped up your balance yet.',
     topUpTitle: 'Top up balance',
     topUpHint: 'Choose a balance top-up amount.',
+    promoCodeLabel: 'Discount promo code',
+    promoCodePlaceholder: 'Example OMNI20',
+    promoCodeHint: 'If the code is active, you pay less and receive the selected balance amount.',
     topUpButton: 'Pay',
     walletTopUpButton: 'Wallet payment',
     walletMethod: 'Crypto wallet',
@@ -404,6 +435,9 @@ const translations = {
       'canva-pro': ['Ready account', 'Ready Canva Pro account for templates, presentations and design.'],
       'notion-ai': ['Ready account', 'Ready Notion AI account for notes, docs and workspaces.'],
       'poe-subscription': ['Ready account', 'Ready Poe account for access to multiple AI models.'],
+      'kimi-k2': ['Ready access', 'Ready Kimi K2 access for long context, writing and research.'],
+      'kimi-pro': ['Ready account', 'Ready Kimi Pro account for daily work and analysis.'],
+      'kimi-api-pack': ['Ready access', 'Ready Kimi API access for tests, bots and integrations.'],
     },
   },
   zh: {
@@ -433,6 +467,9 @@ const translations = {
     balanceText: '你还没有充值余额。',
     topUpTitle: '充值余额',
     topUpHint: '选择余额充值金额。',
+    promoCodeLabel: '折扣优惠码',
+    promoCodePlaceholder: '例如 OMNI20',
+    promoCodeHint: '如果优惠码有效，你将少付款，并收到所选余额金额。',
     topUpButton: '支付',
     walletTopUpButton: '钱包支付',
     walletMethod: '加密钱包',
@@ -484,6 +521,9 @@ const translations = {
       'canva-pro': ['现成账号', '现成 Canva Pro 账号，适合模板、演示和设计。'],
       'notion-ai': ['现成账号', '现成 Notion AI 账号，适合笔记、文档和工作区。'],
       'poe-subscription': ['现成账号', '现成 Poe 账号，可访问多种 AI 模型。'],
+      'kimi-k2': ['现成访问', '现成 Kimi K2 访问，适合长上下文、写作和研究。'],
+      'kimi-pro': ['现成账号', '现成 Kimi Pro 账号，适合日常工作和分析。'],
+      'kimi-api-pack': ['现成访问', '现成 Kimi API 访问，适合测试、机器人和集成。'],
     },
   },
 }
@@ -946,7 +986,7 @@ function WalletPaymentPage() {
           <>
             <div className="wallet-pay-details">
               <span>{text.amount}</span>
-              <strong>{payment.walletPayment ? `${payment.walletPayment.payableAmount} ${payment.walletPayment.asset}` : formatPrice(payment.amount)}</strong>
+              <strong>{payment.walletPayment ? `${payment.walletPayment.payableAmount} ${payment.walletPayment.asset}` : formatPrice(payment.payableAmount || payment.amount)}</strong>
               {!payment.walletPayment ? (
                 <div className="wallet-pay-methods">
                   {payment.cryptoPayAvailable ? <button type="button" onClick={chooseCryptoBot}>{translations[language].cryptoBotMethod}</button> : null}
@@ -1026,6 +1066,7 @@ function StoreApp() {
   const [activeTab, setActiveTab] = useState('catalog')
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
+  const [promoCode, setPromoCode] = useState('')
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
@@ -1113,6 +1154,7 @@ function StoreApp() {
         telegramUser: currentTelegramUser(),
         telegramInitData: currentTelegramInitData(),
         language,
+        promoCode: promoCode.trim(),
       }),
     })
       .then(async (response) => {
@@ -1317,6 +1359,16 @@ function StoreApp() {
             </button>
             <h3>{text.topUpTitle}</h3>
             <p>{text.topUpHint}</p>
+            <label className="promo-code-field">
+              <span>{text.promoCodeLabel}</span>
+              <input
+                value={promoCode}
+                onChange={(event) => setPromoCode(event.target.value.toUpperCase())}
+                placeholder={text.promoCodePlaceholder}
+                autoComplete="off"
+              />
+              <small>{text.promoCodeHint}</small>
+            </label>
             <div className="topup-grid">
               {topupAmounts.map((amount) => (
                 <button

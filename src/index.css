@@ -4,9 +4,10 @@
   font-weight: 400;
   color: #f7f9fc;
   background:
-    radial-gradient(circle at 12% 0%, rgba(185, 28, 28, 0.34), transparent 32%),
-    radial-gradient(circle at 90% 18%, rgba(127, 29, 29, 0.22), transparent 30%),
-    linear-gradient(180deg, #17090b 0%, #0d090b 55%, #060406 100%);
+    radial-gradient(circle at 10% 0%, rgba(248, 113, 113, 0.38), transparent 30%),
+    radial-gradient(circle at 86% 14%, rgba(251, 146, 60, 0.24), transparent 34%),
+    radial-gradient(circle at 46% 100%, rgba(56, 189, 248, 0.12), transparent 32%),
+    linear-gradient(180deg, #18090b 0%, #0f080b 48%, #050407 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -26,7 +27,7 @@ body,
 
 body {
   min-height: 100svh;
-  background: #0d090b;
+  background: #0f080b;
 }
 
 button,

@@ -77,6 +77,15 @@ const products = {
   'canva-pro': { title: 'Canva Pro', price: 7.5 },
   'notion-ai': { title: 'Notion AI Plus', price: 5 },
   'poe-subscription': { title: 'Poe Subscription', price: 10 },
+  'kimi-k2': { title: 'Kimi K2 Access', price: 5 },
+  'kimi-pro': { title: 'Kimi Pro Account', price: 8 },
+  'kimi-api-pack': { title: 'Kimi API Pack', price: 5 },
+}
+
+const promoCodes = {
+  OMNI20: { code: 'OMNI20', discountPercent: 20 },
+  KIMI15: { code: 'KIMI15', discountPercent: 15 },
+  START10: { code: 'START10', discountPercent: 10 },
 }
 
 const store = await loadStore()
@@ -85,6 +94,7 @@ const topups = store.topups
 const balances = new Map(Object.entries(store.balances))
 const activations = store.activations
 const refbotUsers = new Set(store.refbotUsers)
+const promoRedemptions = store.promoRedemptions
 const topupAmounts = [1, 1.5, ...Array.from({ length: 20 }, (_, index) => (index + 1) * 5)]
 const issuedAccessKeys = new Set(Object.keys(activations))
 
@@ -95,6 +105,7 @@ function normalizeStore(rawStore = {}) {
     balances: rawStore.balances && typeof rawStore.balances === 'object' ? rawStore.balances : {},
     activations: rawStore.activations && typeof rawStore.activations === 'object' ? rawStore.activations : {},
     refbotUsers: Array.isArray(rawStore.refbotUsers) ? rawStore.refbotUsers : [],
+    promoRedemptions: rawStore.promoRedemptions && typeof rawStore.promoRedemptions === 'object' ? rawStore.promoRedemptions : {},
   }
 }
 
@@ -166,12 +177,12 @@ async function loadStore() {
       console.error('Store load failed', error)
     }
 
-    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [] }
+    return { orders: [], topups: [], balances: {}, activations: {}, refbotUsers: [], promoRedemptions: {} }
   }
 }
 
 async function saveStore() {
-  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers) }
+  const snapshot = { orders, topups, balances: Object.fromEntries(balances), activations, refbotUsers: Array.from(refbotUsers), promoRedemptions }
 
   try {
     if (await saveSupabaseStore(snapshot)) {
@@ -208,6 +219,11 @@ async function refreshStore() {
   freshStore.refbotUsers.forEach((telegramId) => {
     refbotUsers.add(telegramId)
   })
+
+  Object.keys(promoRedemptions).forEach((telegramId) => {
+    delete promoRedemptions[telegramId]
+  })
+  Object.assign(promoRedemptions, freshStore.promoRedemptions)
 
   issuedAccessKeys.clear()
   Object.keys(activations).forEach((key) => {
@@ -409,6 +425,46 @@ function resolveTelegramUser({ telegramUser = null, telegramInitData = '' } = {}
   return userFromInitData(telegramInitData)
 }
 
+function resolveTopupPromo({ promoCode, telegramId, amount }) {
+  const normalizedCode = String(promoCode || '').trim().toUpperCase()
+
+  if (!normalizedCode) {
+    return null
+  }
+
+  const promo = promoCodes[normalizedCode]
+
+  if (!promo) {
+    throw new Error('Invalid promo code')
+  }
+
+  if (promoRedemptions[telegramId]?.includes(normalizedCode)) {
+    throw new Error('Promo code has already been used')
+  }
+
+  const discountAmount = Number((amount * promo.discountPercent / 100).toFixed(2))
+  const payableAmount = Number(Math.max(0.1, amount - discountAmount).toFixed(2))
+
+  return {
+    code: promo.code,
+    discountPercent: promo.discountPercent,
+    discountAmount,
+    payableAmount,
+  }
+}
+
+function markPromoRedeemed(telegramId, promoCode) {
+  if (!promoCode) {
+    return
+  }
+
+  promoRedemptions[telegramId] = promoRedemptions[telegramId] || []
+
+  if (!promoRedemptions[telegramId].includes(promoCode)) {
+    promoRedemptions[telegramId].push(promoCode)
+  }
+}
+
 async function createCryptoInvoice({ id, amount, description }) {
   if (!cryptoPayToken) {
     return null
@@ -486,6 +542,7 @@ async function creditTopup(topup) {
   topup.paidAt = new Date().toISOString()
   topup.creditedAmount = creditedAmount
   topup.balanceAfter = updatedBalance
+  markPromoRedeemed(telegramId, topup.promo?.code)
 
   await saveStore()
 
@@ -600,7 +657,7 @@ app.post('/api/subscription/check', async (request, response) => {
 })
 
 app.post('/api/topups', async (request, response) => {
-  const { amount, language } = request.body ?? {}
+  const { amount, language, promoCode } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -620,9 +677,20 @@ app.post('/api/topups', async (request, response) => {
     return
   }
 
+  let promo = null
+
+  try {
+    promo = resolveTopupPromo({ promoCode, telegramId, amount: normalizedAmount })
+  } catch (error) {
+    response.status(400).json({ error: error.message })
+    return
+  }
+
   const topup = {
     id: `top_${Date.now()}`,
     amount: normalizedAmount,
+    payableAmount: promo?.payableAmount || normalizedAmount,
+    promo,
     status: cryptoPayToken ? 'payment_pending' : 'new',
     telegramUser,
     language: deliveryLanguage(language),
@@ -632,7 +700,7 @@ app.post('/api/topups', async (request, response) => {
   try {
     const invoice = await createCryptoInvoice({
       id: topup.id,
-      amount: topup.amount,
+      amount: topup.payableAmount,
       description: `OmniKey balance top-up: $${topup.amount}`,
     })
 
@@ -676,7 +744,7 @@ app.post('/api/topups', async (request, response) => {
 })
 
 app.post('/api/topups/wallet', async (request, response) => {
-  const { amount, networkId = 'ton', language } = request.body ?? {}
+  const { amount, networkId = 'ton', language, promoCode } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -697,11 +765,22 @@ app.post('/api/topups/wallet', async (request, response) => {
     return
   }
 
+  let promo = null
+
+  try {
+    promo = resolveTopupPromo({ promoCode, telegramId, amount: normalizedAmount })
+  } catch (error) {
+    response.status(400).json({ error: error.message })
+    return
+  }
+
   const uniquePart = (topups.filter((topup) => topup.status !== 'paid').length % 90) + 10
-  const payableAmount = Number((normalizedAmount + uniquePart / 10000).toFixed(4))
+  const payableAmount = Number(((promo?.payableAmount || normalizedAmount) + uniquePart / 10000).toFixed(4))
   const topup = {
     id: `top_${Date.now()}`,
     amount: normalizedAmount,
+    payableAmount,
+    promo,
     status: 'wallet_pending',
     paymentMethod: 'wallet',
     telegramUser,
@@ -740,7 +819,7 @@ app.post('/api/topups/wallet', async (request, response) => {
 })
 
 app.post('/api/topups/paypage', async (request, response) => {
-  const { amount, language } = request.body ?? {}
+  const { amount, language, promoCode } = request.body ?? {}
   const telegramUser = resolveTelegramUser(request.body)
   const normalizedAmount = Number(amount)
   const telegramId = String(telegramUser?.id || '').trim()
@@ -755,9 +834,20 @@ app.post('/api/topups/paypage', async (request, response) => {
     return
   }
 
+  let promo = null
+
+  try {
+    promo = resolveTopupPromo({ promoCode, telegramId, amount: normalizedAmount })
+  } catch (error) {
+    response.status(400).json({ error: error.message })
+    return
+  }
+
   const topup = {
     id: `top_${Date.now()}`,
     amount: normalizedAmount,
+    payableAmount: promo?.payableAmount || normalizedAmount,
+    promo,
     status: 'payment_method_pending',
     paymentMethod: 'paypage',
     telegramUser,
@@ -793,7 +883,7 @@ app.post('/api/topups/:topupId/crypto', async (request, response) => {
   try {
     const invoice = await createCryptoInvoice({
       id: topup.id,
-      amount: topup.amount,
+      amount: topup.payableAmount || topup.amount,
       description: `OmniKey balance top-up: $${topup.amount}`,
     })
 
@@ -837,7 +927,7 @@ app.post('/api/topups/:topupId/wallet', async (request, response) => {
   }
 
   const uniquePart = (topups.filter((item) => item.status !== 'paid').length % 90) + 10
-  const payableAmount = Number((topup.amount + uniquePart / 10000).toFixed(4))
+  const payableAmount = Number(((topup.promo?.payableAmount || topup.amount) + uniquePart / 10000).toFixed(4))
   topup.status = 'wallet_pending'
   topup.paymentMethod = 'wallet'
   topup.walletPayment = {
@@ -919,6 +1009,7 @@ app.post('/api/activate', async (request, response) => {
   response.json({
     email: activation.credentials.email,
     password: activation.credentials.password,
+    loginCode: activation.credentials.loginCode,
   })
 })
 
@@ -963,6 +1054,8 @@ app.get('/api/topups/:topupId/payment', (request, response) => {
     id: topup.id,
     status: topup.status,
     amount: topup.amount,
+    payableAmount: topup.payableAmount || topup.amount,
+    promo: topup.promo || null,
     walletPayment: topup.walletPayment,
     walletPayments: walletPayOptions,
     cryptoPayAvailable: Boolean(cryptoPayToken),
