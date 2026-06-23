@@ -1613,6 +1613,24 @@ if (botToken) {
     await context.reply(`Ваш Telegram ID: ${context.from.id}`)
   })
 
+  bot.command('admin', async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await context.reply('Команда доступна только администратору.')
+      return
+    }
+
+    await context.reply([
+      'Админ-команды OmniKey Store:',
+      '',
+      '/broadcastpromos - разослать промокоды всем пользователям бота',
+      '/refstats - статистика, кто сколько людей пригласил',
+      '/confirmtopup - подтвердить последнее неоплаченное пополнение',
+      '/confirmtopup <topup_id> - подтвердить конкретное пополнение',
+      '/setbalance <telegram_id> <amount> - установить баланс пользователю',
+      '/myid - показать ваш Telegram ID',
+    ].join('\n'))
+  })
+
   bot.command('setbalance', async (context) => {
     if (String(context.from.id) !== adminChatId) {
       await context.reply('Команда доступна только администратору.')
