@@ -776,10 +776,10 @@ body.modal-open {
 .promo-code-field strong {
   width: fit-content;
   border-radius: 999px;
-  padding: 7px 10px;
-  background: rgba(251, 146, 60, 0.16);
-  color: #fed7aa;
-  font-size: 13px;
+  padding: 4px 0;
+  background: transparent;
+  color: #86efac;
+  font-size: 12px;
 }
 
 .promo-code-field small {

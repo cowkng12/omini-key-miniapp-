@@ -1073,6 +1073,7 @@ function StoreApp() {
   const [activeGroup, setActiveGroup] = useState('Все')
   const [selectedTopUpAmount, setSelectedTopUpAmount] = useState(topupAmounts[0])
   const [promoCode, setPromoCode] = useState('')
+  const [isPromoApplied, setIsPromoApplied] = useState(false)
   const [topUpStatus, setTopUpStatus] = useState('')
   const [productPaymentStatus, setProductPaymentStatus] = useState('')
   const [isProductPaymentOpen, setIsProductPaymentOpen] = useState(false)
@@ -1162,7 +1163,6 @@ function StoreApp() {
         telegramUser: currentTelegramUser(),
         telegramInitData: currentTelegramInitData(),
         language,
-        promoCode: promoCode.trim(),
       }),
     })
       .then(async (response) => {
@@ -1185,6 +1185,13 @@ function StoreApp() {
 
   const handleWalletTopUp = () => {
     const apiBase = import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBase
+    const normalizedPromoCode = promoCode.trim().toUpperCase()
+
+    if (normalizedPromoCode && !isPromoApplied) {
+      setIsPromoApplied(true)
+      setTopUpStatus('')
+      return
+    }
 
     setTopUpStatus('')
 
@@ -1198,6 +1205,7 @@ function StoreApp() {
         telegramUser: currentTelegramUser(),
         telegramInitData: currentTelegramInitData(),
         language,
+        promoCode: isPromoApplied ? normalizedPromoCode : '',
       }),
     })
       .then(async (response) => {
@@ -1367,17 +1375,6 @@ function StoreApp() {
             </button>
             <h3>{text.topUpTitle}</h3>
             <p>{text.topUpHint}</p>
-            <label className="promo-code-field">
-              <span>{text.promoCodeLabel}</span>
-              <input
-                value={promoCode}
-                onChange={(event) => setPromoCode(event.target.value.toUpperCase())}
-                placeholder={text.promoCodePlaceholder}
-                autoComplete="off"
-              />
-              {promoBonus ? <strong>-{promoBonus}%: {formatPrice(topUpPayableAmount)} вместо {formatPrice(selectedTopUpAmount)}</strong> : null}
-              <small>{text.promoCodeHint}</small>
-            </label>
             <div className="topup-grid">
               {topupAmounts.map((amount) => (
                 <button
@@ -1386,6 +1383,7 @@ function StoreApp() {
                   className={selectedTopUpAmount === amount ? 'active' : ''}
                   onClick={() => {
                     setSelectedTopUpAmount(amount)
+                    setIsPromoApplied(false)
                     setTopUpStatus('')
                   }}
                 >
@@ -1393,8 +1391,23 @@ function StoreApp() {
                 </button>
               ))}
             </div>
+            <label className="promo-code-field">
+              <span>{text.promoCodeLabel}</span>
+              <input
+                value={promoCode}
+                onChange={(event) => {
+                  setPromoCode(event.target.value.toUpperCase())
+                  setIsPromoApplied(false)
+                  setTopUpStatus('')
+                }}
+                placeholder={text.promoCodePlaceholder}
+                autoComplete="off"
+              />
+              {isPromoApplied && promoBonus ? <strong>-{promoBonus}% скидка. К оплате: {formatPrice(topUpPayableAmount)}</strong> : null}
+              <small>{text.promoCodeHint}</small>
+            </label>
             <button type="button" className="topup-pay-button" onClick={handleWalletTopUp}>
-              {text.topUpButton} {formatPrice(promoBonus ? topUpPayableAmount : selectedTopUpAmount)}
+              {text.topUpButton} {formatPrice(isPromoApplied && promoBonus ? topUpPayableAmount : selectedTopUpAmount)}
             </button>
             {topUpStatus ? <p className="topup-status">{topUpStatus}</p> : null}
           </section>
