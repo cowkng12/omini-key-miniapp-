@@ -775,15 +775,21 @@ function currentTelegramUser() {
   const initData = window.Telegram?.WebApp?.initData || ''
   const encodedUser = new URLSearchParams(initData).get('user')
 
-  if (!encodedUser) {
-    return null
+  if (encodedUser) {
+    try {
+      return JSON.parse(encodedUser)
+    } catch {
+      return null
+    }
   }
 
-  try {
-    return JSON.parse(encodedUser)
-  } catch {
-    return null
+  const fallbackTelegramId = new URLSearchParams(window.location.search).get('tgid')
+
+  if (/^\d+$/.test(fallbackTelegramId || '')) {
+    return { id: Number(fallbackTelegramId) }
   }
+
+  return null
 }
 
 function currentTelegramInitData() {

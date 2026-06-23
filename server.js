@@ -1430,11 +1430,20 @@ if (botToken) {
     [Markup.button.callback('中文 🇨🇳', 'set_lang_zh')],
   ])
 
-  function mainKeyboard(language) {
+  function userWebAppUrl(telegramId) {
+    if (!telegramId) {
+      return webAppUrl
+    }
+
+    const separator = webAppUrl.includes('?') ? '&' : '?'
+    return `${webAppUrl}${separator}tgid=${encodeURIComponent(telegramId)}`
+  }
+
+  function mainKeyboard(language, telegramId = '') {
     const text = botText[language]
 
     return Markup.inlineKeyboard([
-      [Markup.button.webApp(text.shop, webAppUrl)],
+      [Markup.button.webApp(text.shop, userWebAppUrl(telegramId))],
       [Markup.button.callback(text.guideButton, 'guide'), Markup.button.callback(text.promotionsButton, 'promotions')],
       [Markup.button.callback(text.ordersButton, 'orders'), Markup.button.callback(text.balanceButton, 'balance')],
       [Markup.button.callback(text.supportButton, 'support')],
@@ -1571,7 +1580,7 @@ if (botToken) {
 
   async function sendMainMenu(context, language) {
     const name = context.from?.first_name || 'friend'
-    await context.reply(botText[language].welcome(name), mainKeyboard(language))
+    await context.reply(botText[language].welcome(name), mainKeyboard(language, context.from?.id))
   }
 
   async function sendSubscriptionGate(context, language) {
@@ -1700,7 +1709,7 @@ if (botToken) {
 
     for (const recipient of recipients) {
       try {
-        await bot.telegram.sendMessage(recipient.id, promoBroadcastMessage(recipient.language), mainKeyboard(recipient.language || 'ru'))
+        await bot.telegram.sendMessage(recipient.id, promoBroadcastMessage(recipient.language), mainKeyboard(recipient.language || 'ru', recipient.id))
         sentCount += 1
       } catch (error) {
         failedCount += 1
