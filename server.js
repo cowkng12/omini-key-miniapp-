@@ -259,6 +259,10 @@ function generateCredentialPassword() {
   return password
 }
 
+function generateLoginCode() {
+  return String(Math.floor(100000 + Math.random() * 900000))
+}
+
 function createActivation(telegramId, amount) {
   const accessKey = generateAccessKey()
 
@@ -304,9 +308,14 @@ function activateKey(accessKey) {
     activation.credentials = {
       email: generateCredentialEmail(),
       password: generateCredentialPassword(),
+      loginCode: generateLoginCode(),
     }
     activation.status = 'activated'
     activation.activatedAt = new Date().toISOString()
+  }
+
+  if (!activation.credentials.loginCode) {
+    activation.credentials.loginCode = generateLoginCode()
   }
 
   return activation
@@ -1344,10 +1353,12 @@ if (botToken) {
 
     await refreshStore()
 
-    const topup = topups.find((item) => item.id === topupId)
+    const topup = topupId
+      ? topups.find((item) => item.id === topupId)
+      : topups.find((item) => item.status !== 'paid')
 
     if (!topup) {
-      await context.reply('Пополнение не найдено. Использование: /confirmtopup <topup_id>')
+      await context.reply('Пополнение не найдено. Использование: /confirmtopup или /confirmtopup <topup_id>')
       return
     }
 

@@ -500,8 +500,11 @@ const activationTranslations = {
     missing: 'Ключ не найден. Проверьте ввод и попробуйте снова.',
     loading: 'Проверяем...',
     submit: 'Активировать',
+    steps: ['Проверка ключа', 'Подготовка доступа', 'Данные аккаунта'],
     email: 'Почта',
     password: 'Пароль',
+    loginCode: 'Код входа',
+    loginCodeHint: 'Если ChatGPT попросит код подтверждения, используйте этот 6-значный код.',
   },
   en: {
     eyebrow: 'Access activation',
@@ -514,8 +517,11 @@ const activationTranslations = {
     missing: 'Key not found. Check the code and try again.',
     loading: 'Checking...',
     submit: 'Activate',
+    steps: ['Key check', 'Access preparation', 'Account details'],
     email: 'Email',
     password: 'Password',
+    loginCode: 'Login code',
+    loginCodeHint: 'If ChatGPT asks for a verification code, use this random 6-digit code.',
   },
   zh: {
     eyebrow: '访问激活',
@@ -528,8 +534,11 @@ const activationTranslations = {
     missing: '未找到密钥。请检查后重试。',
     loading: '检查中...',
     submit: '激活',
+    steps: ['检查密钥', '准备访问', '账号信息'],
     email: '邮箱',
     password: '密码',
+    loginCode: '登录验证码',
+    loginCodeHint: '如果 ChatGPT 要求验证码，请使用此 6 位随机代码。',
   },
 }
 
@@ -640,6 +649,7 @@ function ActivationPage() {
   const [key, setKey] = useState('')
   const [credentials, setCredentials] = useState(null)
   const [status, setStatus] = useState('')
+  const [activeStep, setActiveStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const text = activationTranslations[language]
 
@@ -656,6 +666,7 @@ function ActivationPage() {
     setIsLoading(true)
     setStatus('')
     setCredentials(null)
+    setActiveStep(1)
 
     fetch(`${apiBase}/api/activate`, {
       method: 'POST',
@@ -674,16 +685,31 @@ function ActivationPage() {
         return data
       })
       .then((data) => {
+        setActiveStep(3)
         setCredentials(data)
         setStatus(text.success)
       })
       .catch(() => {
+        setActiveStep(1)
         setStatus(text.missing)
       })
       .finally(() => {
         setIsLoading(false)
       })
   }
+
+  useEffect(() => {
+    if (!isLoading) {
+      return undefined
+    }
+
+    setActiveStep(1)
+    const timer = setTimeout(() => {
+      setActiveStep(2)
+    }, 450)
+
+    return () => clearTimeout(timer)
+  }, [isLoading])
 
   return (
     <main className="activation-page">
@@ -701,6 +727,21 @@ function ActivationPage() {
         <p className="activation-copy">
           {text.copy}
         </p>
+
+        <div className="activation-steps" aria-label="Activation steps">
+          {text.steps.map((step, index) => {
+            const stepNumber = index + 1
+            const isComplete = credentials && stepNumber < 3
+            const isActive = activeStep === stepNumber || (credentials && stepNumber === 3)
+
+            return (
+              <div className={`activation-step${isActive ? ' active' : ''}${isComplete ? ' complete' : ''}`} key={step}>
+                <span>{stepNumber}</span>
+                <strong>{step}</strong>
+              </div>
+            )
+          })}
+        </div>
 
         <form className="activation-form" onSubmit={handleActivate}>
           <label htmlFor="activation-key">{text.label}</label>
@@ -722,6 +763,9 @@ function ActivationPage() {
             <strong>{credentials.email}</strong>
             <span>{text.password}</span>
             <strong>{credentials.password}</strong>
+            <span>{text.loginCode}</span>
+            <strong className="login-code">{credentials.loginCode}</strong>
+            <p>{text.loginCodeHint}</p>
           </div>
         ) : null}
       </section>
