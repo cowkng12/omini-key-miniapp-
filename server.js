@@ -110,7 +110,7 @@ const promoCodes = {
   OMNI50: { code: 'OMNI50', discountPercent: 50, disabled: true },
   REF50: { code: 'REF50', discountPercent: 50, maxRedemptions: 50, disabled: true },
   KIMI50: { code: 'KIMI50', discountPercent: 50, disabled: true },
-  SUBS200: { code: 'SUBS200', discountPercent: 25 },
+  SUBS200: { code: 'SUBS200', discountPercent: 25, maxRedemptions: 75 },
   OMNI20: { code: 'OMNI20', discountPercent: 20 },
   KIMI15: { code: 'KIMI15', discountPercent: 15 },
   START10: { code: 'START10', discountPercent: 10 },
@@ -1196,6 +1196,7 @@ if (botToken) {
   bot = new Telegraf(botToken)
   const userLanguages = new Map()
   const pendingSupportUsers = new Set()
+  const pendingAdminReplies = new Map()
 
   async function safeAnswerCbQuery(context, text) {
     try {
@@ -1653,6 +1654,7 @@ if (botToken) {
       '/confirmtopup <topup_id> - подтвердить конкретное пополнение',
       '/setbalance <telegram_id> <amount> - установить баланс пользователю',
       '/myid - показать ваш Telegram ID',
+      'Кнопка Ответить под обращением - ответить пользователю через бота',
     ].join('\n'))
   })
 
@@ -1744,7 +1746,27 @@ if (botToken) {
     await context.reply(botText[currentLanguage(context)].support)
   })
 
+  bot.action(/support_reply:(\d+)/, async (context) => {
+    if (String(context.from.id) !== adminChatId) {
+      await safeAnswerCbQuery(context, 'Команда доступна только администратору.')
+      return
+    }
+
+    pendingAdminReplies.set(context.from.id, context.match[1])
+    await safeAnswerCbQuery(context, 'Напишите ответ следующим сообщением.')
+    await context.reply(`Напишите ответ пользователю ${context.match[1]} следующим сообщением.`)
+  })
+
   bot.on('text', async (context, next) => {
+    const replyToUserId = pendingAdminReplies.get(context.from.id)
+
+    if (replyToUserId && String(context.from.id) === adminChatId && !context.message.text.startsWith('/')) {
+      pendingAdminReplies.delete(context.from.id)
+      await bot.telegram.sendMessage(replyToUserId, `Ответ поддержки:\n\n${context.message.text}`)
+      await context.reply('Ответ отправлен пользователю.')
+      return
+    }
+
     if (context.message.text.startsWith('/') || !pendingSupportUsers.has(context.from.id)) {
       return next()
     }
@@ -1762,6 +1784,7 @@ if (botToken) {
           '',
           context.message.text,
         ].join('\n'),
+        Markup.inlineKeyboard([[Markup.button.callback('Ответить', `support_reply:${from.id}`)]]),
       )
     }
 
