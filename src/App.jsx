@@ -299,9 +299,6 @@ const productAvatars = {
 }
 
 const promoBonuses = {
-  OMNI50: 50,
-  REF50: 50,
-  KIMI50: 50,
   OMNI20: 20,
   KIMI15: 15,
   START10: 10,

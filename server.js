@@ -107,9 +107,9 @@ const products = {
 }
 
 const promoCodes = {
-  OMNI50: { code: 'OMNI50', discountPercent: 50 },
-  REF50: { code: 'REF50', discountPercent: 50, maxRedemptions: 50 },
-  KIMI50: { code: 'KIMI50', discountPercent: 50 },
+  OMNI50: { code: 'OMNI50', discountPercent: 50, disabled: true },
+  REF50: { code: 'REF50', discountPercent: 50, maxRedemptions: 50, disabled: true },
+  KIMI50: { code: 'KIMI50', discountPercent: 50, disabled: true },
   OMNI20: { code: 'OMNI20', discountPercent: 20 },
   KIMI15: { code: 'KIMI15', discountPercent: 15 },
   START10: { code: 'START10', discountPercent: 10 },
@@ -477,6 +477,10 @@ function resolveTopupPromo({ promoCode, telegramId, amount }) {
 
   if (!promo) {
     throw new Error('Invalid promo code')
+  }
+
+  if (promo.disabled) {
+    throw new Error('Promo code is inactive')
   }
 
   if (promoRedemptions[telegramId]?.includes(normalizedCode)) {
