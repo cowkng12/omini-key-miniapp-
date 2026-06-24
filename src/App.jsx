@@ -299,6 +299,7 @@ const productAvatars = {
 }
 
 const promoBonuses = {
+  SUB200: 25,
   SUBS200: 25,
   OMNI20: 20,
   KIMI15: 15,
